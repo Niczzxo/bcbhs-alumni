@@ -18,7 +18,7 @@ export default function RequireRole({
   title,
 }: {
   children: ReactNode;
-  role: "admin" | "super_admin";
+  role: "admin" | "editor" | "super_admin";
   eyebrow: string;
   title: ReactNode;
 }) {

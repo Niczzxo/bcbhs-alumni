@@ -21,6 +21,7 @@ import {
 } from "react";
 import { isFirebaseConfigured, auth, db } from "./firebase";
 import { DEMO_USERS } from "./demo-data";
+import { EDITOR_PERMISSIONS } from "./types";
 import type { UserProfile } from "./types";
 
 export interface RegisterInput {
@@ -321,7 +322,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (perm: string) => {
       if (!user) return false;
       if (user.role === "super_admin") return true;
-      return user.role === "admin" && user.permissions.includes(perm);
+      if (user.role === "admin") return user.permissions.includes(perm);
+      if (user.role === "editor")
+        return (EDITOR_PERMISSIONS as readonly string[]).includes(perm);
+      return false;
     },
     [user],
   );
@@ -340,7 +344,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPermissions,
       setRole,
       hasPermission,
-      isAdmin: !!user && (user.role === "admin" || user.role === "super_admin"),
+      isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
     [user, members, loading, login, logout, register, approveMember, rejectMember, setPermissions, setRole, hasPermission],

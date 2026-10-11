@@ -3,7 +3,42 @@
 /* ------------------------------------------------------------------ */
 
 export type MemberStatus = "pending" | "approved" | "rejected";
-export type MemberRole = "member" | "admin" | "super_admin";
+export type MemberRole = "member" | "editor" | "admin" | "super_admin";
+
+/** Fixed permission bundle for the editor role (content staff). */
+export const EDITOR_PERMISSIONS = [
+  "manage_events",
+  "manage_gallery",
+  "post_announcements",
+  "manage_committee",
+] as const;
+
+/** Display metadata per role for admin UIs. */
+export const ROLE_META: Record<
+  MemberRole,
+  { label: string; badge: string; blurb: string }
+> = {
+  member: {
+    label: "Member",
+    badge: "bg-emerald-500/15 text-emerald-300",
+    blurb: "Standard alumni member.",
+  },
+  editor: {
+    label: "Editor",
+    badge: "bg-sky-400/15 text-sky-300",
+    blurb: "Content staff — manages events, gallery, announcements & committee. No member approvals.",
+  },
+  admin: {
+    label: "Admin",
+    badge: "bg-ivory/10 text-ivory",
+    blurb: "Administrator — only what the super admin explicitly grants.",
+  },
+  super_admin: {
+    label: "Super Admin",
+    badge: "bg-gold/20 text-gold-2",
+    blurb: "Full access to everything.",
+  },
+};
 
 export interface UserProfile {
   id: string;

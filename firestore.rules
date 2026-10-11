@@ -8,9 +8,13 @@ rules_version = '2';
 /*    approved profiles; private fields (phone) are enforced by only   */
 /*    exposing approved profiles and letting the client hide phone     */
 /*    from non-admins (see note below).                                */
-/*  - Only admins with the `approve_members` permission (or the super  */
+/*  - Only staff with the `approve_members` permission (or the super   */
 /*    admin) may change status / role / permissions / memberId.        */
-/*  - The super admin (role == "super_admin") has full write access.   */
+/*  - The super admin (role == "super_admin") has full write access    */
+/*    and may assign any role (member / editor / admin / super_admin). */
+/*  - Editors (role == "editor") carry a fixed content bundle:         */
+/*    manage_events, manage_gallery, post_announcements,               */
+/*    manage_committee.                                                */
 /*                                                                     */
 /*  NOTE: field-level redaction isn't expressible here, so the client  */
 /*  hides `phone` unless the viewer is the owner or has the            */
@@ -38,8 +42,18 @@ service cloud.firestore {
       return signedIn() && (me().role == 'admin' || me().role == 'super_admin');
     }
 
+    function isEditor() {
+      return signedIn() && me().role == 'editor';
+    }
+
+    function editorPerms() {
+      return ['manage_events', 'manage_gallery', 'post_announcements', 'manage_committee'];
+    }
+
     function can(perm) {
-      return isSuperAdmin() || (signedIn() && me().role == 'admin' && perm in me().permissions);
+      return isSuperAdmin()
+        || (signedIn() && me().role == 'admin' && perm in me().permissions)
+        || (isEditor() && perm in editorPerms());
     }
 
     function onlyStatusFieldsChanged() {

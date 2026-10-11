@@ -4,17 +4,17 @@ import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import { useAuth } from "@/lib/auth-context";
-import { PERMISSIONS } from "@/lib/types";
-import type { UserProfile } from "@/lib/types";
+import { PERMISSIONS, EDITOR_PERMISSIONS, ROLE_META } from "@/lib/types";
+import type { MemberRole, UserProfile } from "@/lib/types";
 
 /** Super admin — full control: roles, granular permissions, stats. */
 export default function SuperAdminPage() {
-  const { members, setPermissions, setRole, approveMember, rejectMember } = useAuth();
+  const { user, members, setPermissions, setRole, approveMember, rejectMember } = useAuth();
 
   const approved = members.filter((m) => m.status === "approved");
   const pending = members.filter((m) => m.status === "pending");
-  const abroad = approved.filter((m) => m.isAbroad);
   const admins = members.filter((m) => m.role === "admin" || m.role === "super_admin");
+  const editors = members.filter((m) => m.role === "editor");
 
   const togglePerm = (m: UserProfile, key: string) => {
     const next = m.permissions.includes(key)
@@ -23,10 +23,9 @@ export default function SuperAdminPage() {
     setPermissions(m.id, next);
   };
 
-  const cycleRole = (m: UserProfile) => {
-    if (m.role === "member") setRole(m.id, "admin");
-    else if (m.role === "admin") setRole(m.id, "member");
-    /* super_admin is never demoted from the UI */
+  const changeRole = (m: UserProfile, role: MemberRole) => {
+    if (m.id === user?.id) return; /* never change your own role from here */
+    setRole(m.id, role);
   };
 
   return (
@@ -36,8 +35,8 @@ export default function SuperAdminPage() {
         {[
           ["Approved members", approved.length],
           ["Pending approvals", pending.length],
-          ["Living abroad", abroad.length],
           ["Admins", admins.length],
+          ["Editors", editors.length],
         ].map(([label, value], i) => (
           <Reveal key={label as string} delay={i * 0.07} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6 text-center">
             <p className="font-display text-gold-gradient text-4xl font-extrabold">{value}</p>
@@ -48,9 +47,10 @@ export default function SuperAdminPage() {
 
       {/* Admin access management */}
       <section className="mt-14">
-        <h2 className="font-display text-2xl font-bold text-ivory">Admin access control</h2>
+        <h2 className="font-display text-2xl font-bold text-ivory">Role & access control</h2>
         <p className="mt-2 text-sm text-muted">
-          Promote members to admin, then toggle exactly what each admin may do. Super admin always has full access.
+          Give anyone any role — member, editor, admin or super admin. Editors always carry the
+          content permissions below; admins get exactly what you toggle. Super admin always has full access.
         </p>
         <div className="gold-rule mt-4 w-32" />
         <div className="mt-8 space-y-5">
@@ -65,18 +65,44 @@ export default function SuperAdminPage() {
                       {m.name} <span className="text-xs text-muted">· Batch {m.batch} · {m.email}</span>
                     </p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${m.role === "super_admin" ? "bg-gold/20 text-gold-2" : m.role === "admin" ? "bg-ivory/10 text-ivory" : "bg-emerald-500/15 text-emerald-300"}`}>
-                    {m.role.replace("_", " ")}
+                  <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
+                    {ROLE_META[m.role].label}
                   </span>
-                  {m.role !== "super_admin" && (
-                    <button
-                      onClick={() => cycleRole(m)}
-                      className="rounded-full border border-gold/40 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10"
+                  {m.id === user?.id ? (
+                    <span className="rounded-full border border-ivory/10 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-muted">
+                      You
+                    </span>
+                  ) : (
+                    <select
+                      value={m.role}
+                      onChange={(e) => changeRole(m, e.target.value as MemberRole)}
+                      aria-label={`Change role for ${m.name}`}
+                      className="cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
                     >
-                      {m.role === "admin" ? "Demote to member" : "Make admin"}
-                    </button>
+                      {(Object.keys(ROLE_META) as MemberRole[]).map((r) => (
+                        <option key={r} value={r} className="bg-ink text-ivory">
+                          {ROLE_META[r].label}
+                        </option>
+                      ))}
+                    </select>
                   )}
                 </div>
+                <p className="mt-2 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
+                {m.role === "editor" && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {PERMISSIONS.filter((p) =>
+                      (EDITOR_PERMISSIONS as readonly string[]).includes(p.key),
+                    ).map((p) => (
+                      <span
+                        key={p.key}
+                        title={p.hint}
+                        className="rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold text-sky-300"
+                      >
+                        ✓ {p.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 {m.role === "admin" && (
                   <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {PERMISSIONS.map((p) => {

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, useScroll } from "framer-motion";
 import { useEffect, useState } from "react";
 import { NAV_LINKS } from "@/lib/site";
@@ -14,10 +15,19 @@ export default function Navbar() {
   const { scrollY } = useScroll();
   const { user, logout, isAdmin, isSuperAdmin } = useAuth();
   const { openAuthModal } = useAuthModal();
+  const pathname = usePathname();
 
   useEffect(() => scrollY.on("change", (v) => setScrolled(v > 40)), [scrollY]);
 
   const dashboardHref = isSuperAdmin ? "/super-admin" : isAdmin ? "/admin" : "/id-card";
+
+  /** On the home page, clicking the logo smooth-scrolls back to the top. */
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   return (
     <motion.header
@@ -31,7 +41,7 @@ export default function Navbar() {
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-8">
-        <Link href="/" className="group flex items-center gap-3">
+        <Link href="/" onClick={handleLogoClick} className="group flex items-center gap-3">
           <span className="seal-ring relative block h-12 w-12 overflow-hidden rounded-full transition-transform duration-500 group-hover:rotate-[15deg]">
             <Image
               src="/images/logo.jpg"

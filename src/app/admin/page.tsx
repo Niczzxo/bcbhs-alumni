@@ -4,6 +4,7 @@ import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import { useAuth } from "@/lib/auth-context";
+import { ROLE_META } from "@/lib/types";
 
 /** Admin panel — approval queue + approved members. */
 export default function AdminPage() {
@@ -82,8 +83,8 @@ export default function AdminPage() {
                     {canSeeData && m.phone ? ` · ${m.phone}` : ""}
                   </p>
                 </div>
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${m.role === "super_admin" ? "bg-gold/20 text-gold-2" : m.role === "admin" ? "bg-ivory/10 text-ivory" : "bg-emerald-500/15 text-emerald-300"}`}>
-                  {m.role.replace("_", " ")}
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
+                  {ROLE_META[m.role].label}
                 </span>
               </div>
             ))}
