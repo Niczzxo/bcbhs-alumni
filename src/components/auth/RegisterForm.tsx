@@ -65,8 +65,8 @@ export default function RegisterForm({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    if (!form.name.trim() || !form.batch || !form.email.trim() || !form.password || !form.district) {
-      setError("Please fill in name, batch, email, password and district.");
+    if (!form.name.trim() || !form.batch || !form.email.trim() || !form.password || !form.district || !form.whatsapp.trim()) {
+      setError("Please fill in name, batch, email, password, district and WhatsApp number.");
       return;
     }
     setBusy(true);
