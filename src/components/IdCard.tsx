@@ -4,7 +4,6 @@ import { useState, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
 import type { UserProfile } from "@/lib/types";
-import { Avatar } from "./MemberCard";
 import { SITE_EMAIL } from "@/lib/site";
 
 /**
@@ -100,94 +99,89 @@ function FoilShell({ theme, children }: { theme: CardThemeId; children: ReactNod
   );
 }
 
-function CornerTicks() {
-  const base = "pointer-events-none absolute h-[4cqw] w-[4cqw] border-[var(--card-accent)]";
-  return (
-    <>
-      <span className={`${base} -left-[0.8cqw] -top-[0.8cqw] border-l-2 border-t-2`} />
-      <span className={`${base} -right-[0.8cqw] -top-[0.8cqw] border-r-2 border-t-2`} />
-      <span className={`${base} -bottom-[0.8cqw] -left-[0.8cqw] border-b-2 border-l-2`} />
-      <span className={`${base} -bottom-[0.8cqw] -right-[0.8cqw] border-b-2 border-r-2`} />
-    </>
-  );
-}
-
 function CardFront({ member, theme }: { member: UserProfile; theme: CardThemeId }) {
   return (
     <FoilShell theme={theme}>
-      <div className="relative flex h-full flex-col items-center p-[5cqw] text-center">
-        {/* header */}
-        <span
-          className="relative block h-[13cqw] w-[13cqw] shrink-0 overflow-hidden rounded-full ring-1 shadow-[0_0_22px_var(--seal-glow)]"
-          style={{ ["--tw-ring-color" as string]: "var(--card-accent)" }}
-        >
-          <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
-        </span>
-        <p className="mt-[2cqw] text-[2.1cqw] font-bold uppercase tracking-[0.3em] text-[var(--card-accent)] opacity-90">
-          Bogura Cantonment Board High School
-        </p>
-        <p className="font-display emboss-gold text-[6.5cqw] font-extrabold leading-none tracking-wide text-[var(--card-accent)]">
-          BCBHS ALUMNI
-        </p>
-
-        <div className="my-[2.5cqw] flex w-full items-center gap-[2cqw]">
-          <div className="gold-rule flex-1" />
-          <span className="text-[2.6cqw] text-[var(--card-accent)]">✦</span>
-          <div className="gold-rule flex-1" />
+      <div className="relative h-full w-full">
+        {/* full-bleed photo zone */}
+        <div className="absolute inset-x-0 top-0 h-[54%]">
+          {member.photoURL ? (
+            <Image src={member.photoURL} alt={member.name} fill className="object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(100%_100%_at_50%_0%,rgba(38,52,110,0.7),transparent_70%)]">
+              <span className="font-display text-[26cqw] font-extrabold text-[var(--card-accent)] opacity-25">
+                {member.name.charAt(0)}
+              </span>
+            </div>
+          )}
+          {/* legibility gradients */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-[var(--card-bg2)]" />
+          {/* top bar over photo */}
+          <div className="absolute inset-x-0 top-0 flex items-center gap-[2.5cqw] p-[4.5cqw]">
+            <span
+              className="relative block h-[11cqw] w-[11cqw] shrink-0 overflow-hidden rounded-full ring-1 shadow-[0_0_22px_var(--seal-glow)]"
+              style={{ ["--tw-ring-color" as string]: "var(--card-accent)" }}
+            >
+              <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[2cqw] font-bold uppercase tracking-[0.28em] text-white/85">
+                Bogura Cantonment Board High School
+              </p>
+              <p className="font-display emboss-gold text-[5.2cqw] font-extrabold leading-none tracking-wide text-[var(--card-accent)]">
+                BCBHS ALUMNI
+              </p>
+            </div>
+            <span className="holo-strip flex h-[7.5cqw] w-[7.5cqw] shrink-0 items-center justify-center rounded-full text-[3.4cqw] text-ink shadow">
+              ✦
+            </span>
+          </div>
         </div>
 
-        {/* photo */}
-        <div className="relative w-[38cqw] shrink-0">
-          <div className="foil-frame absolute inset-0 rounded-xl" />
-          <div className="absolute inset-[2px] aspect-[3/4] overflow-hidden rounded-[10px] bg-black/40">
-            {member.photoURL ? (
-              <Image src={member.photoURL} alt={member.name} width={120} height={160} className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <Avatar name={member.name} size="lg" />
+        {/* details zone */}
+        <div className="absolute inset-x-0 bottom-0 top-[50%] flex flex-col p-[5cqw]">
+          <p className="font-display emboss-gold text-[7.5cqw] font-bold leading-none text-[var(--card-ink)]">
+            {member.name}
+          </p>
+          <p className="mt-[1.5cqw] text-[2.2cqw] font-bold uppercase tracking-[0.35em] text-[var(--card-accent)]">
+            Alumnus · Batch {member.batch}
+          </p>
+
+          <div className="my-[2.5cqw] flex items-center gap-[2cqw]">
+            <div className="gold-rule flex-1" />
+            <span className="text-[2.4cqw] text-[var(--card-accent)]">✦</span>
+            <div className="gold-rule flex-1" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-[4cqw] gap-y-[2cqw] text-left text-[2.6cqw]">
+            <div>
+              <p className="text-[1.8cqw] uppercase tracking-[0.3em] text-[var(--card-muted)]">Member ID</p>
+              <p className="mt-[0.6cqw] font-mono font-bold tracking-wider text-[var(--card-ink)]">
+                {member.memberId ?? "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-[1.8cqw] uppercase tracking-[0.3em] text-[var(--card-muted)]">Blood</p>
+              <p className="mt-[0.6cqw] font-bold text-[var(--card-ink)]">
+                {member.bloodGroup ? `🩸 ${member.bloodGroup}` : "—"}
+              </p>
+            </div>
+            {member.profession && (
+              <div className="col-span-2">
+                <p className="text-[1.8cqw] uppercase tracking-[0.3em] text-[var(--card-muted)]">Profession</p>
+                <p className="mt-[0.6cqw] truncate font-semibold text-[var(--card-ink)]">{member.profession}</p>
               </div>
             )}
           </div>
-          <div className="aspect-[3/4] w-full" />
-          <CornerTicks />
-        </div>
 
-        {/* name + details */}
-        <p className="mt-[3cqw] text-[2cqw] font-bold uppercase tracking-[0.35em] text-[var(--card-accent)] opacity-80">
-          Alumnus · Batch {member.batch}
-        </p>
-        <p className="font-display emboss-gold mt-[1cqw] text-[6cqw] font-bold leading-tight text-[var(--card-ink)]">
-          {member.name}
-        </p>
+          <div className="flex-1" />
 
-        <div className="mt-[2.5cqw] w-full space-y-[1.8cqw] text-[2.6cqw]">
-          <div className="border-b border-[var(--card-accent)]/20 pb-[1.8cqw]">
-            <p className="text-[1.8cqw] uppercase tracking-[0.3em] text-[var(--card-muted)]">Member ID</p>
-            <p className="mt-[0.6cqw] font-mono font-bold tracking-wider text-[var(--card-ink)]">
-              {member.memberId ?? "—"}
-            </p>
+          <div className="holo-strip flex h-[7cqw] items-center justify-between rounded-md px-[3cqw]">
+            <span className="text-[2.2cqw] font-extrabold uppercase tracking-[0.28em] text-ink/90">
+              ✓ Verified Member
+            </span>
+            <span className="text-[2.2cqw] font-bold uppercase tracking-[0.2em] text-ink/70">Lifetime</span>
           </div>
-          {member.profession && (
-            <div className="border-b border-[var(--card-accent)]/20 pb-[1.8cqw]">
-              <p className="text-[1.8cqw] uppercase tracking-[0.3em] text-[var(--card-muted)]">Profession</p>
-              <p className="mt-[0.6cqw] font-semibold text-[var(--card-ink)]">{member.profession}</p>
-            </div>
-          )}
-          {member.isDonor && member.bloodGroup && (
-            <p className="inline-block rounded-full border border-red-400/40 bg-red-500/10 px-[3cqw] py-[1cqw] text-[2.4cqw] font-bold text-red-300">
-              🩸 {member.bloodGroup} blood donor
-            </p>
-          )}
-        </div>
-
-        <div className="flex-1" />
-
-        {/* holographic footer strip */}
-        <div className="holo-strip flex h-[7cqw] w-full items-center justify-between rounded-md px-[3cqw]">
-          <span className="text-[2.2cqw] font-extrabold uppercase tracking-[0.28em] text-ink/90">
-            ✓ Verified Member
-          </span>
-          <span className="text-[2.2cqw] font-bold uppercase tracking-[0.2em] text-ink/70">Lifetime</span>
         </div>
       </div>
     </FoilShell>
@@ -197,50 +191,44 @@ function CardFront({ member, theme }: { member: UserProfile; theme: CardThemeId 
 function CardBack({ member, verifyUrl, theme }: { member: UserProfile; verifyUrl: string; theme: CardThemeId }) {
   return (
     <FoilShell theme={theme}>
-      <div className="relative flex h-full flex-col items-center p-[5cqw] text-center">
-        <p className="text-[2.1cqw] font-bold uppercase tracking-[0.35em] text-[var(--card-accent)]">
-          BCBHS Alumni
-        </p>
-        <div className="my-[2.5cqw] flex w-full items-center gap-[2cqw]">
-          <div className="gold-rule flex-1" />
-          <span className="text-[2.6cqw] text-[var(--card-accent)]">✦</span>
-          <div className="gold-rule flex-1" />
+      <div className="relative h-full w-full">
+        {/* magnetic stripe */}
+        <div className="absolute inset-x-0 top-[7%] h-[11%] bg-black/85">
+          <div className="h-[18%] w-full bg-white/10" />
         </div>
 
-        {/* QR */}
-        <div className="foil-frame rounded-2xl p-[2px]">
-          <div className="rounded-[14px] bg-white p-[3cqw]">
-            <QRCodeSVG value={verifyUrl} size={160} level="M" className="h-[36cqw] w-[36cqw]" />
+        <div className="absolute inset-x-0 bottom-0 top-[24%] flex flex-col items-center px-[5cqw] pb-[5cqw] text-center">
+          {/* QR */}
+          <div className="foil-frame rounded-2xl p-[2px]">
+            <div className="rounded-[14px] bg-white p-[2.5cqw]">
+              <QRCodeSVG value={verifyUrl} size={150} level="M" className="h-[32cqw] w-[32cqw]" />
+            </div>
           </div>
-        </div>
-        <p className="mt-[2cqw] text-[2.2cqw] font-bold uppercase tracking-[0.3em] text-[var(--card-accent)]">
-          Scan to verify
-        </p>
-        <p className="mt-[1cqw] font-mono text-[2.2cqw] text-[var(--card-muted)]">
-          {verifyUrl.replace(/^https?:\/\//, "")}
-        </p>
-
-        {/* handwritten signature */}
-        <div className="mt-[3cqw] w-full">
-          <p className="font-signature -rotate-2 text-[8cqw] leading-none text-[var(--sig-ink)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-            {member.name}
+          <p className="mt-[1.8cqw] text-[2.2cqw] font-bold uppercase tracking-[0.3em] text-[var(--card-accent)]">
+            Scan to verify
           </p>
-          <div className="gold-rule mx-auto mt-[1cqw] w-4/5" />
-          <p className="mt-[1cqw] text-[1.8cqw] uppercase tracking-[0.35em] text-[var(--card-muted)]">
-            Signature
+          <p className="mt-[0.8cqw] font-mono text-[2cqw] text-[var(--card-muted)]">
+            {verifyUrl.replace(/^https?:\/\//, "")}
+          </p>
+
+          {/* signature strip — like a real bank card */}
+          <div className="mt-[2.5cqw] w-full rounded-lg bg-[#f4f1e6] px-[4cqw] py-[2cqw] shadow-inner">
+            <p className="font-signature -rotate-2 text-left text-[6.5cqw] leading-none text-[#1e3a8a]">
+              {member.name}
+            </p>
+          </div>
+          <p className="mt-[1cqw] self-start text-[1.7cqw] uppercase tracking-[0.3em] text-[var(--card-muted)]">
+            Authorized signature
+          </p>
+
+          <div className="flex-1" />
+
+          <p className="text-[2cqw] leading-relaxed text-[var(--card-muted)]">
+            Property of the BCBHS Alumni Association · Est. 2023
+            <br />
+            If found, please contact <span className="text-[var(--card-accent)]">{SITE_EMAIL}</span>
           </p>
         </div>
-
-        <div className="flex-1" />
-
-        <ul className="space-y-[1.2cqw] text-[2.2cqw] leading-relaxed text-[var(--card-ink)] opacity-80">
-          <li>✦ Reunions, events & batch programs</li>
-          <li>✦ Mentorship, referrals & career network</li>
-        </ul>
-        <p className="mt-[2.5cqw] text-[2cqw] leading-relaxed text-[var(--card-muted)]">
-          Property of the BCBHS Alumni Association. If found, please contact{" "}
-          <span className="text-[var(--card-accent)]">{SITE_EMAIL}</span>
-        </p>
       </div>
     </FoilShell>
   );
