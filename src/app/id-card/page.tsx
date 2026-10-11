@@ -8,10 +8,12 @@ import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import IdCard from "@/components/IdCard";
 import { useAuth } from "@/lib/auth-context";
+import { useAuthModal } from "@/components/AuthModal";
 
 /** Official digital ID card for the logged-in approved member. */
 export default function IdCardPage() {
   const { user, loading } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const [verifyUrl, setVerifyUrl] = useState("");
 
   useEffect(() => {
@@ -37,9 +39,9 @@ export default function IdCardPage() {
             <Reveal className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center">
               <p className="font-display text-2xl font-bold text-ivory">Please log in</p>
               <p className="mt-2 text-sm text-muted">Your ID card appears after login.</p>
-              <Link href="/login" className="btn-shimmer mt-6 inline-block rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-8 py-3 text-sm font-bold uppercase tracking-widest text-ink">
+              <button onClick={() => openAuthModal("login")} className="btn-shimmer mt-6 inline-block rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-8 py-3 text-sm font-bold uppercase tracking-widest text-ink">
                 Log In
-              </Link>
+              </button>
             </Reveal>
           ) : !approved ? (
             <Reveal className="rounded-3xl border border-gold/30 bg-ink-2 p-10 text-center">

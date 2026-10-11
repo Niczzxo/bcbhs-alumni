@@ -4,9 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { useAuthModal } from "@/components/AuthModal";
 
 /** Full-viewport hero — campus photo with parallax, seal-ring emblem, gold CTAs. */
 export default function Hero() {
+  const { openAuthModal } = useAuthModal();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -87,12 +89,12 @@ export default function Hero() {
           transition={{ delay: 0.78, duration: 0.7 }}
           className="mt-10 flex flex-wrap items-center gap-4"
         >
-          <Link
-            href="/register"
+          <button
+            onClick={() => openAuthModal("register")}
             className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105"
           >
             Join the Alumni
-          </Link>
+          </button>
           <Link
             href="/directory"
             className="rounded-full border border-gold/50 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:bg-gold/10"

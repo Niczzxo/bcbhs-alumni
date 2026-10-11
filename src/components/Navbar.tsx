@@ -6,12 +6,14 @@ import { motion, useScroll } from "framer-motion";
 import { useEffect, useState } from "react";
 import { NAV_LINKS } from "@/lib/site";
 import { useAuth } from "@/lib/auth-context";
+import { useAuthModal } from "@/components/AuthModal";
 
 /** Sticky top navigation — transparent over the hero, solid navy after scroll. */
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
   const { user, logout, isAdmin, isSuperAdmin } = useAuth();
+  const { openAuthModal } = useAuthModal();
 
   useEffect(() => scrollY.on("change", (v) => setScrolled(v > 40)), [scrollY]);
 
@@ -81,18 +83,18 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                href="/login"
+              <button
+                onClick={() => openAuthModal("login")}
                 className="hidden text-xs font-bold uppercase tracking-wider text-ivory/70 transition-colors hover:text-gold-2 sm:block"
               >
                 Login
-              </Link>
-              <Link
-                href="/register"
+              </button>
+              <button
+                onClick={() => openAuthModal("register")}
                 className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-6 py-2.5 text-sm font-bold uppercase tracking-wider text-ink shadow-[0_0_24px_rgba(212,169,78,0.35)] transition-transform duration-300 hover:scale-105"
               >
                 Register
-              </Link>
+              </button>
             </>
           )}
         </div>

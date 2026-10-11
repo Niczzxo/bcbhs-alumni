@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import Reveal from "./Reveal";
+import { useAuthModal } from "./AuthModal";
 
 /** Join CTA band — ID-card teaser with a QR motif. */
 export default function IdCardCta() {
+  const { openAuthModal } = useAuthModal();
   return (
     <section id="join" className="relative overflow-hidden py-24 sm:py-32">
       {/* giant watermark emblem */}
@@ -32,12 +33,12 @@ export default function IdCardCta() {
             Print it, carry it, show it with pride.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link
-              href="/register"
+            <button
+              onClick={() => openAuthModal("register")}
               className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105"
             >
               Register Now
-            </Link>
+            </button>
           </div>
           <ul className="mt-8 space-y-3 text-sm text-muted">
             {[
