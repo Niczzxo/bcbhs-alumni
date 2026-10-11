@@ -18,7 +18,7 @@ function MemberPhone({ userId }: { userId: string }) {
 
 /** Admin panel — approval queue + approved members. */
 export default function AdminPage() {
-  const { members, approveMember, rejectMember, hasPermission } = useAuth();
+  const { members, approveMember, rejectMember, setPosition, hasPermission } = useAuth();
   const canApprove = hasPermission("approve_members");
   const canSeeData = hasPermission("view_member_data");
 
@@ -93,20 +93,52 @@ export default function AdminPage() {
           <div className="gold-rule mt-3 w-28" />
           <div className="mt-6 max-h-[560px] space-y-3 overflow-y-auto pr-1">
             {approved.map((m) => (
-              <div key={m.id} className="flex items-center gap-3 rounded-2xl border border-ivory/10 bg-ink-2 px-4 py-3">
-                <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-ivory">{m.name}</p>
-                  <p className="text-xs text-muted">
-                    {m.memberId} · Batch {m.batch}
-                    {canSeeData && <MemberPhone userId={m.id} />}
-                  </p>
+              <div key={m.id} className="rounded-2xl border border-ivory/10 bg-ink-2 px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-ivory">{m.name}</p>
+                    <p className="text-xs text-muted">
+                      {m.memberId} · Batch {m.batch}
+                      {canSeeData && <MemberPhone userId={m.id} />}
+                    </p>
+                  </div>
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
+                    {ROLE_META[m.role].label}
+                  </span>
                 </div>
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
-                  {ROLE_META[m.role].label}
-                </span>
+                {canApprove && (
+                  <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-ivory/10 pt-2.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted">
+                      Position
+                    </label>
+                    <input
+                      key={`${m.id}-${m.position ?? "none"}`}
+                      defaultValue={m.position ?? ""}
+                      placeholder="e.g. President"
+                      aria-label={`Official position for ${m.name}`}
+                      onBlur={(e) => {
+                        if (e.target.value.trim() !== (m.position ?? "")) setPosition(m.id, e.target.value);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                      }}
+                      className="w-44 rounded-full border border-ivory/15 bg-ink px-3 py-1.5 text-xs text-ivory placeholder:text-muted/50 outline-none focus:border-gold/60"
+                    />
+                    {m.position && (
+                      <span className="rounded-full bg-gold/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-gold-2">
+                        ★ {m.position}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
+            {canApprove && approved.length > 0 && (
+              <p className="mt-3 text-[11px] text-muted/70">
+                Official positions are manually verified — allow up to 7 days.
+              </p>
+            )}
           </div>
         </section>
       </div>

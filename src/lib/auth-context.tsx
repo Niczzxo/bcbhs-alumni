@@ -36,6 +36,7 @@ export interface RegisterInput {
   isDonor: boolean;
   district: string;
   country: string;
+  department: string;
   profession: string;
   company: string;
   photoURL?: string;
@@ -53,6 +54,8 @@ interface AuthContextValue {
   rejectMember: (id: string) => Promise<void>;
   setPermissions: (id: string, permissions: string[]) => Promise<void>;
   setRole: (id: string, role: UserProfile["role"]) => Promise<void>;
+  /** Assign / clear a member's official position (admin only, manually verified). */
+  setPosition: (id: string, position: string) => Promise<void>;
   updateProfile: (input: ProfileUpdateInput) => Promise<{ ok: boolean; error?: string }>;
   hasPermission: (perm: string) => boolean;
   isAdmin: boolean;
@@ -66,6 +69,7 @@ export interface ProfileUpdateInput {
   roll: string;
   district: string;
   country: string;
+  department: string;
   profession: string;
   company: string;
   phone: string;
@@ -237,6 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           district: input.district,
           country: input.district === "Abroad" ? input.country.trim() || undefined : undefined,
           isAbroad: input.district === "Abroad",
+          department: input.department || undefined,
           profession: input.profession.trim() || undefined,
           company: input.company.trim() || undefined,
           photoURL: input.photoURL || undefined,
@@ -265,6 +270,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           district: input.district,
           country: input.district === "Abroad" ? input.country.trim() || null : null,
           isAbroad: input.district === "Abroad",
+          department: input.department || null,
           profession: input.profession.trim() || null,
           company: input.company.trim() || null,
           photoURL: input.photoURL || null,
@@ -342,6 +348,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await updateDoc(doc(db, "users", id), { role }).catch(() => undefined);
   }, []);
 
+  const setPosition = useCallback(async (id: string, position: string) => {
+    const clean = position.trim() || undefined;
+    if (!isFirebaseConfigured || !db) {
+      setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, position: clean } : m)));
+      setUser((u) => (u && u.id === id ? { ...u, position: clean } : u));
+      return;
+    }
+    const { doc, updateDoc } = await import("firebase/firestore");
+    await updateDoc(doc(db, "users", id), { position: clean ?? null }).catch(() => undefined);
+  }, []);
+
   const hasPermission = useCallback(
     (perm: string) => {
       if (!user) return false;
@@ -370,6 +387,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         district: input.district,
         country: isAbroad ? input.country.trim() || undefined : undefined,
         isAbroad,
+        department: input.department || undefined,
         profession: input.profession.trim() || undefined,
         company: input.company.trim() || undefined,
         whatsapp: input.whatsapp.trim() || undefined,
@@ -417,12 +435,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       rejectMember,
       setPermissions,
       setRole,
+      setPosition,
       updateProfile,
       hasPermission,
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, logout, register, approveMember, rejectMember, setPermissions, setRole, updateProfile, hasPermission],
+    [user, members, loading, login, logout, register, approveMember, rejectMember, setPermissions, setRole, setPosition, updateProfile, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

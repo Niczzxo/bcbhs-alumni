@@ -11,7 +11,7 @@ import type { MemberRole, UserProfile } from "@/lib/types";
 
 /** Super admin — full control: roles, granular permissions, stats. */
 export default function SuperAdminPage() {
-  const { user, members, setPermissions, setRole, approveMember, rejectMember } = useAuth();
+  const { user, members, setPermissions, setRole, setPosition, approveMember, rejectMember } = useAuth();
 
   const approved = members.filter((m) => m.status === "approved");
   const pending = members.filter((m) => m.status === "pending");
@@ -90,6 +90,33 @@ export default function SuperAdminPage() {
                   )}
                 </div>
                 <p className="mt-2 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
+                {/* Official position — admin-assigned after manual verification */}
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-muted">
+                    Position
+                  </label>
+                  <input
+                    key={`${m.id}-${m.position ?? "none"}`}
+                    defaultValue={m.position ?? ""}
+                    placeholder="e.g. President"
+                    aria-label={`Official position for ${m.name}`}
+                    onBlur={(e) => {
+                      if (e.target.value.trim() !== (m.position ?? "")) setPosition(m.id, e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                    }}
+                    className="w-56 rounded-full border border-ivory/15 bg-ink px-4 py-2 text-xs text-ivory placeholder:text-muted/50 outline-none focus:border-gold/60"
+                  />
+                  {m.position && (
+                    <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
+                      ★ {m.position}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1.5 text-[11px] text-muted/70">
+                  Official positions are manually verified — allow up to 7 days.
+                </p>
                 {m.role === "editor" && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {PERMISSIONS.filter((p) =>

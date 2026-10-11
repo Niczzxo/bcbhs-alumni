@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRef, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { compressImageToDataURL } from "@/lib/image";
-import { BLOOD_GROUPS, BD_DISTRICTS, BATCH_YEARS } from "@/lib/types";
+import { BLOOD_GROUPS, BD_DISTRICTS, BATCH_YEARS, DEPARTMENTS } from "@/lib/types";
 import { inputCls, labelCls } from "./ui";
 
 /** Shared registration form — used by the /register page and the auth modal. */
@@ -34,6 +34,7 @@ export default function RegisterForm({
     isDonor: false,
     district: "",
     country: "",
+    department: "",
     profession: "",
     company: "",
   });
@@ -65,8 +66,8 @@ export default function RegisterForm({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    if (!form.name.trim() || !form.batch || !form.email.trim() || !form.password || !form.district || !form.whatsapp.trim()) {
-      setError("Please fill in name, batch, email, password, district and WhatsApp number.");
+    if (!form.name.trim() || !form.batch || !form.email.trim() || !form.password || !form.district || !form.department || !form.whatsapp.trim()) {
+      setError("Please fill in name, batch, email, password, district, department and WhatsApp number.");
       return;
     }
     setBusy(true);
@@ -98,6 +99,13 @@ export default function RegisterForm({
         <div>
           <label className={labelCls}>Roll no.</label>
           <input className={inputCls} value={form.roll} onChange={set("roll")} placeholder="e.g. 22" />
+        </div>
+        <div>
+          <label className={labelCls}>Department *</label>
+          <select className={inputCls} value={form.department} onChange={set("department")}>
+            <option value="">Select department…</option>
+            {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
         </div>
         <div>
           <label className={labelCls}>Email *</label>

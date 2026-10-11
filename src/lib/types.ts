@@ -56,6 +56,8 @@ export interface UserProfile {
   isAbroad: boolean;
   profession?: string;
   company?: string;
+  department?: string; // Science | Arts | Commerce — shown on the ID card
+  position?: string; // e.g. "President" — set ONLY by admins after manual verification
   status: MemberStatus;
   role: MemberRole;
   permissions: string[]; // granular admin permissions
@@ -132,6 +134,9 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
 };
 
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
+
+/** HSC departments offered on the registration form. */
+export const DEPARTMENTS = ["Science", "Arts", "Commerce"] as const;
 
 /** Job types offered on the Job Board posting form. */
 export const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Remote"] as const;

@@ -9,7 +9,7 @@ import Reveal from "@/components/Reveal";
 import { useAuth, type ProfileUpdateInput } from "@/lib/auth-context";
 import { compressImageToDataURL } from "@/lib/image";
 import { inputCls, labelCls } from "@/components/auth/ui";
-import { BATCH_YEARS, BD_DISTRICTS, BLOOD_GROUPS } from "@/lib/types";
+import { BATCH_YEARS, BD_DISTRICTS, BLOOD_GROUPS, DEPARTMENTS } from "@/lib/types";
 
 /** Members edit their own profile — safe fields only. */
 export default function EditProfilePage() {
@@ -26,6 +26,7 @@ export default function EditProfilePage() {
     roll: "",
     district: "",
     country: "",
+    department: "",
     profession: "",
     company: "",
     phone: "",
@@ -48,6 +49,7 @@ export default function EditProfilePage() {
         roll: user.roll ?? "",
         district: user.district,
         country: user.country ?? "",
+        department: user.department ?? "",
         profession: user.profession ?? "",
         company: user.company ?? "",
         phone: user.phone ?? "",
@@ -152,6 +154,13 @@ export default function EditProfilePage() {
                 </select>
               </div>
               <div><label className={labelCls}>Roll no.</label><input className={inputCls} value={f.roll} onChange={set("roll")} /></div>
+              <div>
+                <label className={labelCls}>Department *</label>
+                <select className={inputCls} value={f.department} onChange={set("department")}>
+                  <option value="">Select…</option>
+                  {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
               <div>
                 <label className={labelCls}>Current district *</label>
                 <select className={inputCls} value={f.district} onChange={set("district")}>
