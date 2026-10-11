@@ -31,4 +31,5 @@ export { DEMO_EVENTS as EVENTS, DEMO_COMMITTEE as COMMITTEE } from "./demo-data"
 /* ------------------------- official contact --------------------------- */
 
 export const SITE_FACEBOOK = "https://www.facebook.com/share/1DYzEdVYQV/";
+export const SITE_INSTAGRAM = "https://instagram.com/bcbhsalumni";
 export const SITE_EMAIL = "bcbhs.alumni2023@gmail.com";
