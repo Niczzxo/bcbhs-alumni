@@ -1,10 +1,10 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import StatsBand from "@/components/StatsBand";
-import Features from "@/components/Features";
 import Committee from "@/components/Committee";
+import MemoriesSection from "@/components/MemoriesSection";
 import IdCardCta from "@/components/IdCardCta";
-import CommunityBanner from "@/components/CommunityBanner";
+import Features from "@/components/Features";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -14,10 +14,10 @@ export default function Home() {
       <main>
         <Hero />
         <StatsBand />
-        <Features />
         <Committee />
+        <MemoriesSection />
         <IdCardCta />
-        <CommunityBanner />
+        <Features />
       </main>
       <Footer />
     </>
