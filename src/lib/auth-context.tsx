@@ -27,7 +27,7 @@ import type { UserProfile } from "./types";
 export interface RegisterInput {
   name: string;
   batch: string;
-  roll: string;
+  roll?: string;
   email: string;
   password?: string;
   phone: string;
@@ -67,7 +67,7 @@ interface AuthContextValue {
 export interface ProfileUpdateInput {
   name: string;
   batch: string;
-  roll: string;
+  roll?: string;
   district: string;
   country: string;
   department: string;
@@ -235,7 +235,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: `u-${Date.now()}`,
           name: input.name.trim(),
           batch: input.batch,
-          roll: input.roll.trim(),
+          roll: input.roll?.trim(),
           email: clean,
           phone: input.phone.trim(),
           bloodGroup: input.bloodGroup || undefined,
@@ -266,7 +266,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await setDoc(doc(db, "users", cred.user.uid), {
           name: input.name.trim(),
           batch: input.batch,
-          roll: input.roll.trim(),
+          roll: input.roll?.trim(),
           email: clean,
           bloodGroup: input.bloodGroup || null,
           isDonor: input.isDonor,
@@ -387,7 +387,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const patch: Partial<UserProfile> = {
         name: input.name.trim(),
         batch: input.batch,
-        roll: input.roll.trim() || undefined,
+        roll: input.roll?.trim() || undefined,
         district: input.district,
         country: isAbroad ? input.country.trim() || undefined : undefined,
         isAbroad,

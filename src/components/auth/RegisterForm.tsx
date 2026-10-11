@@ -30,7 +30,6 @@ export default function RegisterForm({
   const [form, setForm] = useState({
     name: "",
     batch: "",
-    roll: "",
     email: "",
     password: "",
     phone: "",
@@ -101,10 +100,6 @@ export default function RegisterForm({
             <option value="">Select batch…</option>
             {BATCH_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
-        </div>
-        <div>
-          <label className={labelCls}>Roll no.</label>
-          <input className={inputCls} value={form.roll} onChange={set("roll")} placeholder="e.g. 22" />
         </div>
         <div>
           <label className={labelCls}>Department *</label>

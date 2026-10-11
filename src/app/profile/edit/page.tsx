@@ -28,7 +28,6 @@ export default function EditProfilePage() {
   const [f, setF] = useState<ProfileUpdateInput>({
     name: "",
     batch: "",
-    roll: "",
     district: "",
     country: "",
     department: "",
@@ -52,7 +51,6 @@ export default function EditProfilePage() {
       setF({
         name: user.name,
         batch: user.batch,
-        roll: user.roll ?? "",
         district: user.district,
         country: user.country ?? "",
         department: user.department ?? "",
@@ -160,7 +158,6 @@ export default function EditProfilePage() {
                   {BATCH_YEARS.map((b) => <option key={b} value={b}>{b}</option>)}
                 </select>
               </div>
-              <div><label className={labelCls}>Roll no.</label><input className={inputCls} value={f.roll} onChange={set("roll")} /></div>
               <div>
                 <label className={labelCls}>Department *</label>
                 <select className={inputCls} value={f.department} onChange={set("department")}>
