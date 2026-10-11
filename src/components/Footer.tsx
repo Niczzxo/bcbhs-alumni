@@ -1,9 +1,15 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { NAV_LINKS } from "@/lib/site";
 
 /** Footer — school crest, affiliation line, quick links. */
 export default function Footer() {
+  // Year is computed client-side so static prerendering stays deterministic.
+  const [year, setYear] = useState(2026);
+  useEffect(() => setYear(new Date().getFullYear()), []);
   return (
     <footer className="border-t border-gold/20 bg-[#070b1c]">
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
@@ -62,7 +68,7 @@ export default function Footer() {
 
         <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-ivory/10 pt-8 sm:flex-row">
           <p className="text-xs text-muted/70">
-            © {new Date().getFullYear()} BCBHS Alumni Portal. All rights reserved.
+            © {year} BCBHS Alumni Portal. All rights reserved.
           </p>
           <p className="text-xs uppercase tracking-[0.3em] text-gold/70">Est. 2023 · Bogura</p>
         </div>
