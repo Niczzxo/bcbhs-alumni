@@ -151,3 +151,57 @@ body {
     transform: translateX(-50%);
   }
 }
+
+/* ---------- Luxury ID card treatments ---------- */
+
+/* Metallic gold foil gradient (borders, frames) */
+.foil-gold {
+  background: linear-gradient(
+    135deg,
+    #8a6a1f 0%,
+    #d4a94e 18%,
+    #fbf5b7 38%,
+    #d4a94e 55%,
+    #8a6a1f 72%,
+    #caa64b 100%
+  );
+}
+
+/* Iridescent holographic strip */
+.holo-strip {
+  background: linear-gradient(
+    100deg,
+    #ff9a9e, #fecfef, #f6d365, #a8ff78, #78ffd6, #a8c8ff, #d8a8ff, #ff9a9e
+  );
+  background-size: 300% 100%;
+  animation: holo-shift 7s ease-in-out infinite;
+}
+@keyframes holo-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Light sweep across the card */
+.foil-shine {
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.14) 45%,
+    rgba(255, 246, 200, 0.28) 50%,
+    rgba(255, 255, 255, 0.14) 55%,
+    transparent 80%
+  );
+  animation: foil-sweep 5.5s ease-in-out infinite;
+}
+@keyframes foil-sweep {
+  0% { transform: translateX(-130%) skewX(-16deg); }
+  55%, 100% { transform: translateX(230%) skewX(-16deg); }
+}
+
+/* Embossed gold headline */
+.emboss-gold {
+  text-shadow:
+    0 1px 0 rgba(255, 240, 200, 0.35),
+    0 -1px 1px rgba(0, 0, 0, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+}
