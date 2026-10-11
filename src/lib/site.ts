@@ -27,3 +27,8 @@ export const NAV_LINKS = [
 /* Re-exported demo collections so pages share one placeholder source. */
 /* TODO: wire each to its Firestore collection once the backend is live. */
 export { DEMO_EVENTS as EVENTS, DEMO_COMMITTEE as COMMITTEE } from "./demo-data";
+
+/* ------------------------- official contact --------------------------- */
+
+export const SITE_FACEBOOK = "https://www.facebook.com/share/1DYzEdVYQV/";
+export const SITE_EMAIL = "bcbhs.alumni2023@gmail.com";
