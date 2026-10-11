@@ -12,6 +12,7 @@ import { useAuthModal } from "@/components/AuthModal";
 /** Sticky top navigation — transparent over the hero, solid navy after scroll. */
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { scrollY } = useScroll();
   const { user, logout, isAdmin, isSuperAdmin } = useAuth();
   const { openAuthModal } = useAuthModal();
@@ -40,9 +41,9 @@ export default function Navbar() {
           : "bg-transparent"
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-8">
-        <Link href="/" onClick={handleLogoClick} className="group flex items-center gap-3">
-          <span className="seal-ring relative block h-12 w-12 overflow-hidden rounded-full transition-transform duration-500 group-hover:rotate-[15deg]">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:px-8">
+        <Link href="/" onClick={handleLogoClick} className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
+          <span className="seal-ring relative block h-10 w-10 shrink-0 overflow-hidden rounded-full transition-transform duration-500 group-hover:rotate-[15deg] sm:h-12 sm:w-12">
             <Image
               src="/images/logo.jpg"
               alt="BCBHS Alumni logo"
@@ -51,11 +52,11 @@ export default function Navbar() {
               priority
             />
           </span>
-          <span className="leading-tight">
-            <span className="font-display block text-lg font-bold tracking-wide text-ivory">
+          <span className="min-w-0 leading-tight">
+            <span className="font-display block truncate text-base font-bold tracking-wide text-ivory sm:text-lg">
               BCBHS <span className="text-gold-gradient">Alumni</span>
             </span>
-            <span className="block text-[10px] uppercase tracking-[0.28em] text-muted">
+            <span className="hidden text-[10px] uppercase tracking-[0.28em] text-muted min-[400px]:block">
               Est. 2023 · Bogura
             </span>
           </span>
@@ -75,7 +76,7 @@ export default function Navbar() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {user ? (
             <>
               <Link
@@ -101,14 +102,69 @@ export default function Navbar() {
               </button>
               <button
                 onClick={() => openAuthModal("register")}
-                className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-6 py-2.5 text-sm font-bold uppercase tracking-wider text-ink shadow-[0_0_24px_rgba(212,169,78,0.35)] transition-transform duration-300 hover:scale-105"
+                className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-[0_0_24px_rgba(212,169,78,0.35)] transition-transform duration-300 hover:scale-105 sm:px-6 sm:py-2.5 sm:text-sm"
               >
                 Register
               </button>
             </>
           )}
+          {/* mobile hamburger */}
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-full border border-gold/30 text-gold-2 lg:hidden"
+          >
+            <span
+              className={`block h-0.5 w-5 bg-current transition-transform duration-300 ${menuOpen ? "translate-y-[4px] rotate-45" : ""}`}
+            />
+            <span
+              className={`block h-0.5 w-5 bg-current transition-opacity duration-300 ${menuOpen ? "opacity-0" : ""}`}
+            />
+            <span
+              className={`block h-0.5 w-5 bg-current transition-transform duration-300 ${menuOpen ? "-translate-y-[4px] -rotate-45" : ""}`}
+            />
+          </button>
         </div>
       </nav>
+
+      {/* mobile menu panel */}
+      <motion.div
+        initial={false}
+        animate={{ height: menuOpen ? "auto" : 0, opacity: menuOpen ? 1 : 0 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="overflow-hidden border-gold/20 bg-ink/95 backdrop-blur-xl lg:hidden"
+        style={{ borderBottomWidth: menuOpen ? 1 : 0 }}
+      >
+        <ul className="space-y-1 px-6 py-4">
+          {NAV_LINKS.map((link) => (
+            <li key={link.label}>
+              <Link
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className={`block rounded-xl px-4 py-3 text-sm font-medium tracking-wide transition-colors ${
+                  pathname === link.href
+                    ? "bg-gold/10 text-gold-2"
+                    : "text-ivory/80 hover:bg-ivory/5 hover:text-gold-2"
+                }`}
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+          {user && (
+            <li>
+              <Link
+                href={dashboardHref}
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-gold-2"
+              >
+                {isSuperAdmin ? "Super Admin" : isAdmin ? "Admin" : "My ID Card"}
+              </Link>
+            </li>
+          )}
+        </ul>
+      </motion.div>
     </motion.header>
   );
 }
