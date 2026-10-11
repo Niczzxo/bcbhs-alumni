@@ -69,6 +69,12 @@ export default function IdCardPage() {
                 >
                   Preview verification
                 </Link>
+                <Link
+                  href="/profile/edit"
+                  className="rounded-full border border-ivory/15 px-8 py-3 text-sm font-bold uppercase tracking-widest text-muted hover:text-ivory"
+                >
+                  ✎ Edit profile
+                </Link>
               </div>
               <p className="mt-6 max-w-md text-center text-xs text-muted print:hidden">
                 Anyone who scans the QR lands on your public verification page — proof you are a

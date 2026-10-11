@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { UserProfile } from "@/lib/types";
 import Reveal from "./Reveal";
+import WhatsAppButton from "./WhatsAppButton";
 
 /** Photo avatar — falls back to initials when a member has no photo. */
 export function Avatar({
@@ -43,10 +44,11 @@ export default function MemberCard({ member, delay = 0 }: { member: UserProfile;
   const href = `/member/${member.memberId ?? member.id}`;
   return (
     <Reveal delay={delay}>
-      <Link
-        href={href}
-        className="group block rounded-3xl border border-ivory/10 bg-ink-2 p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/40 hover:shadow-[0_18px_50px_rgba(212,169,78,0.12)]"
-      >
+      <div className="relative">
+        <Link
+          href={href}
+          className="group block rounded-3xl border border-ivory/10 bg-ink-2 p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/40 hover:shadow-[0_18px_50px_rgba(212,169,78,0.12)]"
+        >
         <div className="flex items-center gap-4">
           <Avatar name={member.name} photoURL={member.photoURL} />
           <div className="min-w-0">
@@ -72,7 +74,13 @@ export default function MemberCard({ member, delay = 0 }: { member: UserProfile;
             </p>
           )}
         </div>
-      </Link>
+        </Link>
+        {member.whatsapp && (
+          <div className="absolute right-4 top-4">
+            <WhatsAppButton whatsapp={member.whatsapp} />
+          </div>
+        )}
+      </div>
     </Reveal>
   );
 }

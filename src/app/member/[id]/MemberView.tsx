@@ -8,12 +8,16 @@ import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import IdCardView from "@/components/IdCard";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { useMember } from "@/lib/data";
+import { useAuth } from "@/lib/auth-context";
 
 /** Public alumni profile — consumes the route-params promise via `use()`. */
 export default function MemberView({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const member = useMember(decodeURIComponent(id));
+  const { user } = useAuth();
+  const isOwn = !!user && !!member && user.id === member.id;
 
   const verifyUrl =
     typeof window !== "undefined"
@@ -66,6 +70,12 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                   <Link href="/directory" className="rounded-full border border-gold/40 px-6 py-3 text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10">
                     Back to Directory
                   </Link>
+                  {member.whatsapp && <WhatsAppButton whatsapp={member.whatsapp} labeled />}
+                  {isOwn && (
+                    <Link href="/profile/edit" className="rounded-full border border-ivory/15 px-6 py-3 text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory">
+                      Edit profile
+                    </Link>
+                  )}
                   {member.memberId && (
                     <Link href={`/verify/${member.memberId}`} className="rounded-full border border-ivory/15 px-6 py-3 text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory">
                       Verify membership

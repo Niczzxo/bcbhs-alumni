@@ -29,6 +29,7 @@ export default function RegisterForm({
     email: "",
     password: "",
     phone: "",
+    whatsapp: "",
     bloodGroup: "",
     isDonor: false,
     district: "",
@@ -109,6 +110,10 @@ export default function RegisterForm({
         <div>
           <label className={labelCls}>Phone</label>
           <input className={inputCls} value={form.phone} onChange={set("phone")} placeholder="01XXXXXXXXX" />
+        </div>
+        <div>
+          <label className={labelCls}>WhatsApp number</label>
+          <input className={inputCls} value={form.whatsapp} onChange={set("whatsapp")} placeholder="01XXXXXXXXX" />
         </div>
         <div>
           <label className={labelCls}>Blood group</label>

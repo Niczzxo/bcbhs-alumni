@@ -31,6 +31,7 @@ export interface RegisterInput {
   email: string;
   password?: string;
   phone: string;
+  whatsapp: string;
   bloodGroup: string;
   isDonor: boolean;
   district: string;
@@ -52,9 +53,26 @@ interface AuthContextValue {
   rejectMember: (id: string) => Promise<void>;
   setPermissions: (id: string, permissions: string[]) => Promise<void>;
   setRole: (id: string, role: UserProfile["role"]) => Promise<void>;
+  updateProfile: (input: ProfileUpdateInput) => Promise<{ ok: boolean; error?: string }>;
   hasPermission: (perm: string) => boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+}
+
+/** Fields a member may edit on their own profile. */
+export interface ProfileUpdateInput {
+  name: string;
+  batch: string;
+  roll: string;
+  district: string;
+  country: string;
+  profession: string;
+  company: string;
+  phone: string;
+  whatsapp: string;
+  bloodGroup: string;
+  isDonor: boolean;
+  photoURL: string;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -222,6 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           profession: input.profession.trim() || undefined,
           company: input.company.trim() || undefined,
           photoURL: input.photoURL || undefined,
+          whatsapp: input.whatsapp.trim() || undefined,
           status: "pending",
           role: "member",
           permissions: [],
@@ -249,6 +268,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           profession: input.profession.trim() || null,
           company: input.company.trim() || null,
           photoURL: input.photoURL || null,
+          whatsapp: input.whatsapp.trim() || null,
           status: "pending",
           role: "member",
           permissions: [],
@@ -334,6 +354,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [user],
   );
 
+  /* A member edits their own profile. Only safe fields may change — never
+   * status / role / permissions / memberId / email. */
+  const updateProfile = useCallback(
+    async (input: ProfileUpdateInput): Promise<{ ok: boolean; error?: string }> => {
+      if (!user) return { ok: false, error: "Please log in first." };
+      if (!input.name.trim() || !input.batch || !input.district) {
+        return { ok: false, error: "Name, batch and district are required." };
+      }
+      const isAbroad = input.district === "Abroad";
+      const patch: Partial<UserProfile> = {
+        name: input.name.trim(),
+        batch: input.batch,
+        roll: input.roll.trim() || undefined,
+        district: input.district,
+        country: isAbroad ? input.country.trim() || undefined : undefined,
+        isAbroad,
+        profession: input.profession.trim() || undefined,
+        company: input.company.trim() || undefined,
+        whatsapp: input.whatsapp.trim() || undefined,
+        bloodGroup: input.bloodGroup || undefined,
+        isDonor: input.isDonor,
+        photoURL: input.photoURL || undefined,
+      };
+      const phone = input.phone.trim();
+
+      if (!isFirebaseConfigured || !db) {
+        const full: Partial<UserProfile> = { ...patch, phone: phone || undefined };
+        setMembers((prev) => prev.map((m) => (m.id === user.id ? { ...m, ...full } : m)));
+        setUser((u) => (u ? ({ ...u, ...full } as UserProfile) : u));
+        return { ok: true };
+      }
+      try {
+        const { doc, updateDoc, setDoc } = await import("firebase/firestore");
+        const clean: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(patch)) {
+          clean[k] = v === undefined ? null : v;
+        }
+        await updateDoc(doc(db, "users", user.id), clean);
+        if (phone) {
+          await setDoc(doc(db, "users_private", user.id), { phone });
+        }
+        setUser((u) => (u ? ({ ...u, ...patch, phone: phone || u.phone } as UserProfile) : u));
+        return { ok: true };
+      } catch {
+        return { ok: false, error: "Could not save your profile. Please try again." };
+      }
+    },
+    [user],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -347,11 +417,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       rejectMember,
       setPermissions,
       setRole,
+      updateProfile,
       hasPermission,
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, logout, register, approveMember, rejectMember, setPermissions, setRole, hasPermission],
+    [user, members, loading, login, logout, register, approveMember, rejectMember, setPermissions, setRole, updateProfile, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

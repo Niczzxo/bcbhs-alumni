@@ -53,6 +53,7 @@ export const DEMO_USERS: UserProfile[] = [
     roll: "22",
     email: "tanvir.ahmed@example.com",
     phone: "01XXXXXXXXX",
+    whatsapp: "01712345678",
     bloodGroup: "O+",
     isDonor: true,
     district: "Dhaka",

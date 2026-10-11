@@ -60,6 +60,22 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'memberId']);
     }
 
+    function profileEditableFields() {
+      return ['name', 'batch', 'roll', 'district', 'country', 'isAbroad',
+              'profession', 'company', 'photoURL', 'bloodGroup', 'isDonor', 'whatsapp'];
+    }
+
+    function onlyProfileFieldsChanged() {
+      // Members editing their own profile: safe fields only.
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(profileEditableFields());
+    }
+
+    function whatsappValid() {
+      return !('whatsapp' in request.resource.data)
+        || (request.resource.data.whatsapp is string
+            && request.resource.data.whatsapp.size() <= 20);
+    }
+
     match /users/{userId} {
       // Approved profiles are readable by any signed-in member; owners and
       // admins can always read their own / any profile.
@@ -77,10 +93,18 @@ service cloud.firestore {
         && request.resource.data.status == 'pending'
         && request.resource.data.role == 'member'
         && !('phone' in request.resource.data)
+        && whatsappValid()
         && request.resource.data.keys().hasAll(['name', 'batch', 'email', 'district', 'status', 'role', 'permissions', 'createdAt']);
 
       // Approvals: admins with the permission may flip status (+memberId).
       allow update: if can('approve_members') && onlyStatusFieldsChanged() && !('phone' in request.resource.data);
+
+      // Self-service: a member may edit their own profile fields only.
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && onlyProfileFieldsChanged()
+        && !('phone' in request.resource.data)
+        && whatsappValid();
 
       // Roles & permissions: super admin only.
       allow update: if isSuperAdmin() && !('phone' in request.resource.data);

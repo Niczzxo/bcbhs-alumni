@@ -46,7 +46,8 @@ export interface UserProfile {
   batch: string; // e.g. "2015"
   roll?: string;
   email: string;
-  phone?: string; // private — only visible to admins / self
+  phone?: string; // private — only visible to admins / self (lives in users_private)
+  whatsapp?: string; // public opt-in contact number — shown as a WhatsApp action button
   photoURL?: string;
   bloodGroup?: string;
   isDonor?: boolean;
