@@ -1,0 +1,103 @@
+rules_version = '2';
+
+/* ------------------------------------------------------------------ */
+/*  BCBHS Alumni Portal — Firestore security rules.                    */
+/*                                                                     */
+/*  Model:                                                             */
+/*  - users/{uid}: member profiles. Public reads are limited to        */
+/*    approved profiles; private fields (phone) are enforced by only   */
+/*    exposing approved profiles and letting the client hide phone     */
+/*    from non-admins (see note below).                                */
+/*  - Only admins with the `approve_members` permission (or the super  */
+/*    admin) may change status / role / permissions / memberId.        */
+/*  - The super admin (role == "super_admin") has full write access.   */
+/*                                                                     */
+/*  NOTE: field-level redaction isn't expressible here, so the client  */
+/*  hides `phone` unless the viewer is the owner or has the            */
+/*  `view_member_data` permission. Never ship phone numbers to         */
+/*  unauthenticated clients in a stricter deployment — split PII into  */
+/*  a `users_private/{uid}` collection if needed.                       */
+/* ------------------------------------------------------------------ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function me() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isSuperAdmin() {
+      return signedIn() && me().role == 'super_admin';
+    }
+
+    function isAdmin() {
+      return signedIn() && (me().role == 'admin' || me().role == 'super_admin');
+    }
+
+    function can(perm) {
+      return isSuperAdmin() || (signedIn() && me().role == 'admin' && perm in me().permissions);
+    }
+
+    function onlyStatusFieldsChanged() {
+      // Approvals may touch status + memberId only — never role/permissions.
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'memberId']);
+    }
+
+    match /users/{userId} {
+      // Approved profiles are readable by any signed-in member; owners and
+      // admins can always read their own / any profile.
+      allow read: if signedIn() && (
+        resource.data.status == 'approved' ||
+        request.auth.uid == userId ||
+        isAdmin()
+      );
+
+      // Registration: a signed-in user creates ONLY their own doc, always as
+      // a pending plain member.
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.status == 'pending'
+        && request.resource.data.role == 'member'
+        && request.resource.data.keys().hasAll(['name', 'batch', 'email', 'district', 'status', 'role', 'permissions', 'createdAt']);
+
+      // Approvals: admins with the permission may flip status (+memberId).
+      allow update: if can('approve_members') && onlyStatusFieldsChanged();
+
+      // Roles & permissions: super admin only.
+      allow update: if isSuperAdmin();
+
+      allow delete: if isSuperAdmin();
+    }
+
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if can('manage_events');
+    }
+
+    match /gallery/{photoId} {
+      allow read: if true;
+      allow write: if can('manage_gallery');
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if can('post_announcements');
+    }
+
+    match /committee/{seatId} {
+      allow read: if true;
+      allow write: if can('manage_committee');
+    }
+
+    match /requests/{requestId} {
+      // Urgent blood requests: any signed-in member may create; admins read.
+      allow create: if signedIn();
+      allow read: if isAdmin();
+      allow update, delete: if isSuperAdmin();
+    }
+  }
+}

@@ -88,13 +88,13 @@ export default function Hero() {
           className="mt-10 flex flex-wrap items-center gap-4"
         >
           <Link
-            href="#join"
+            href="/register"
             className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105"
           >
             Join the Alumni
           </Link>
           <Link
-            href="#features"
+            href="/directory"
             className="rounded-full border border-gold/50 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:bg-gold/10"
           >
             Explore Directory

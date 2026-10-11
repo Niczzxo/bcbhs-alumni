@@ -2,7 +2,7 @@
 
 import { useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { PLACEHOLDER_STATS } from "@/lib/site";
+import { useSiteStats } from "@/lib/data";
 import Reveal from "./Reveal";
 
 /** Animated number that counts up when scrolled into view. */
@@ -34,15 +34,15 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   );
 }
 
-const STATS = [
-  { label: "Registered Members", value: PLACEHOLDER_STATS.totalMembers, suffix: "+" },
-  { label: "Living Abroad", value: PLACEHOLDER_STATS.membersAbroad, suffix: "+" },
-  { label: "Batches Connected", value: PLACEHOLDER_STATS.batches, suffix: "" },
-  { label: "Events & Reunions", value: PLACEHOLDER_STATS.eventsHeld, suffix: "" },
-];
-
-/** Gold-on-navy stats band with animated counters (placeholders → Firebase). */
+/** Gold-on-navy stats band — live Firestore counts when configured. */
 export default function StatsBand() {
+  const stats = useSiteStats();
+  const items = [
+    { label: "Registered Members", value: stats.totalMembers, suffix: "+" },
+    { label: "Living Abroad", value: stats.membersAbroad, suffix: "+" },
+    { label: "Batches Connected", value: stats.batches, suffix: "" },
+    { label: "Events & Reunions", value: stats.eventsHeld, suffix: "" },
+  ];
   return (
     <section className="grain relative border-y border-gold/20 bg-ink-2 py-16">
       <div className="sunburst pointer-events-none absolute left-1/2 top-0 h-full w-[900px] -translate-x-1/2 opacity-60" />
@@ -54,7 +54,7 @@ export default function StatsBand() {
           <div className="gold-rule mx-auto mt-4 w-48" />
         </Reveal>
         <div className="grid grid-cols-2 gap-10 lg:grid-cols-4">
-          {STATS.map((s, i) => (
+          {items.map((s, i) => (
             <Reveal key={s.label} delay={i * 0.12} className="text-center">
               <Counter to={s.value} suffix={s.suffix} />
               <p className="mt-3 text-sm font-medium uppercase tracking-[0.2em] text-muted">
@@ -64,7 +64,9 @@ export default function StatsBand() {
           ))}
         </div>
         <p className="mt-10 text-center text-xs text-muted/70">
-          * Live counters — connected to the member database at launch.
+          {stats.live
+            ? "Live counters — synced with the member database."
+            : "* Live counters — connected to the member database at launch."}
         </p>
       </div>
     </section>

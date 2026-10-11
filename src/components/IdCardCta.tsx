@@ -33,7 +33,7 @@ export default function IdCardCta() {
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
-              href="#top"
+              href="/register"
               className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105"
             >
               Register Now

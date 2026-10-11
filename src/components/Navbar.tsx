@@ -5,13 +5,17 @@ import Link from "next/link";
 import { motion, useScroll } from "framer-motion";
 import { useEffect, useState } from "react";
 import { NAV_LINKS } from "@/lib/site";
+import { useAuth } from "@/lib/auth-context";
 
 /** Sticky top navigation — transparent over the hero, solid navy after scroll. */
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
+  const { user, logout, isAdmin, isSuperAdmin } = useAuth();
 
   useEffect(() => scrollY.on("change", (v) => setScrolled(v > 40)), [scrollY]);
+
+  const dashboardHref = isSuperAdmin ? "/super-admin" : isAdmin ? "/admin" : "/id-card";
 
   return (
     <motion.header
@@ -25,7 +29,7 @@ export default function Navbar() {
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-8">
-        <Link href="#top" className="group flex items-center gap-3">
+        <Link href="/" className="group flex items-center gap-3">
           <span className="seal-ring relative block h-12 w-12 overflow-hidden rounded-full transition-transform duration-500 group-hover:rotate-[15deg]">
             <Image
               src="/images/logo.jpg"
@@ -59,12 +63,39 @@ export default function Navbar() {
           ))}
         </ul>
 
-        <Link
-          href="#join"
-          className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-6 py-2.5 text-sm font-bold uppercase tracking-wider text-ink shadow-[0_0_24px_rgba(212,169,78,0.35)] transition-transform duration-300 hover:scale-105"
-        >
-          Register
-        </Link>
+        <div className="flex items-center gap-3">
+          {user ? (
+            <>
+              <Link
+                href={dashboardHref}
+                className="hidden rounded-full border border-gold/40 px-5 py-2 text-xs font-bold uppercase tracking-wider text-gold-2 transition-colors hover:bg-gold/10 sm:block"
+              >
+                {isSuperAdmin ? "Super Admin" : isAdmin ? "Admin" : "My ID Card"}
+              </Link>
+              <button
+                onClick={() => logout()}
+                className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-muted transition-colors hover:text-ivory"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden text-xs font-bold uppercase tracking-wider text-ivory/70 transition-colors hover:text-gold-2 sm:block"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-6 py-2.5 text-sm font-bold uppercase tracking-wider text-ink shadow-[0_0_24px_rgba(212,169,78,0.35)] transition-transform duration-300 hover:scale-105"
+              >
+                Register
+              </Link>
+            </>
+          )}
+        </div>
       </nav>
     </motion.header>
   );

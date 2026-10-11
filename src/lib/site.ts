@@ -16,9 +16,13 @@ export const PLACEHOLDER_STATS = {
 };
 
 export const NAV_LINKS = [
-  { label: "Directory", href: "#features" },
-  { label: "Events", href: "#features" },
-  { label: "Gallery", href: "#features" },
-  { label: "Committee", href: "#committee" },
-  { label: "Join Us", href: "#join" },
+  { label: "Directory", href: "/directory" },
+  { label: "Events", href: "/events" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Committee", href: "/committee" },
+  { label: "Blood Donors", href: "/blood-donors" },
 ];
+
+/* Re-exported demo collections so pages share one placeholder source. */
+/* TODO: wire each to its Firestore collection once the backend is live. */
+export { DEMO_EVENTS as EVENTS, DEMO_COMMITTEE as COMMITTEE } from "./demo-data";

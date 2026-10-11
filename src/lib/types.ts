@@ -1,0 +1,77 @@
+/* ------------------------------------------------------------------ */
+/*  Shared domain types for the BCBHS Alumni Portal.                   */
+/* ------------------------------------------------------------------ */
+
+export type MemberStatus = "pending" | "approved" | "rejected";
+export type MemberRole = "member" | "admin" | "super_admin";
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  batch: string; // e.g. "2015"
+  roll?: string;
+  email: string;
+  phone?: string; // private — only visible to admins / self
+  photoURL?: string;
+  bloodGroup?: string;
+  isDonor?: boolean;
+  district: string; // BD district, or "Abroad"
+  country?: string; // set when district === "Abroad"
+  isAbroad: boolean;
+  profession?: string;
+  company?: string;
+  status: MemberStatus;
+  role: MemberRole;
+  permissions: string[]; // granular admin permissions
+  memberId?: string; // e.g. "BCBHS-2015-0001" — assigned on approval
+  createdAt: string; // ISO date
+}
+
+export interface PortalEvent {
+  id: string;
+  title: string;
+  date: string;
+  venue: string;
+  description: string;
+  upcoming: boolean;
+}
+
+export interface CommitteeSeat {
+  role: string;
+  name: string;
+  batch: string;
+  note: string;
+}
+
+export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
+
+/** Granular admin permissions — toggled by the super admin. */
+export const PERMISSIONS: { key: string; label: string; hint: string }[] = [
+  { key: "approve_members", label: "Approve Members", hint: "Verify & approve new registrations" },
+  { key: "manage_events", label: "Manage Events", hint: "Create, edit & delete events" },
+  { key: "manage_gallery", label: "Manage Gallery", hint: "Upload & curate gallery photos" },
+  { key: "post_announcements", label: "Post Announcements", hint: "Publish notices to all members" },
+  { key: "view_member_data", label: "View Member Data", hint: "See private contact details" },
+  { key: "manage_committee", label: "Manage Committee", hint: "Edit leadership seats" },
+  { key: "moderate_content", label: "Moderate Content", hint: "Remove posts & comments" },
+];
+
+/** All 64 districts of Bangladesh. */
+export const BD_DISTRICTS = [
+  "Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogura",
+  "Brahmanbaria", "Chandpur", "Chattogram", "Chuadanga", "Cox's Bazar", "Cumilla",
+  "Dhaka", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj",
+  "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat",
+  "Khagrachari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur",
+  "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar",
+  "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi",
+  "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh",
+  "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur",
+  "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet",
+  "Tangail", "Thakurgaon",
+];
+
+/** Batch years offered on the registration form. */
+export const BATCH_YEARS: string[] = Array.from({ length: 31 }, (_, i) =>
+  String(2025 - i),
+);
