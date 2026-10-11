@@ -19,10 +19,16 @@ cp .env.example .env.local   # then fill in Firebase credentials
 npm run dev                  # http://localhost:3000
 ```
 
+> **Demo mode:** with no Firebase credentials the portal runs fully on
+> in-memory seed data (`src/lib/demo-data.ts`, persisted to localStorage),
+> so every page — including login, approvals and the ID card — works out
+> of the box. Use the "Demo quick login" buttons on `/login`.
+
 Production build check:
 
 ```bash
-npm run build
+npm run build   # must pass clean — no credentials needed
+npm run lint
 ```
 
 ## Project structure
@@ -30,39 +36,65 @@ npm run build
 ```
 src/
   app/
-    page.tsx          # homepage composition
-    layout.tsx        # fonts (Playfair Display + Inter), metadata
-    globals.css       # design tokens, keyframes, seal/sunburst motifs
+    page.tsx                 # homepage composition
+    layout.tsx               # fonts (Playfair Display + Inter), Providers
+    globals.css              # design tokens, keyframes, seal/sunburst motifs, print CSS
+    register/page.tsx        # registration form → pending approval
+    login/page.tsx           # email/password + demo quick login
+    directory/page.tsx       # searchable/filterable alumni grid
+    member/[id]/             # public profile (page.tsx + MemberView.tsx)
+    search/page.tsx          # location search by district
+    blood-donors/page.tsx    # donor directory (group + district filters)
+    events/page.tsx          # upcoming + past events
+    gallery/page.tsx         # photo grid
+    committee/page.tsx       # leadership page
+    id-card/page.tsx         # official digital ID card + QR + print
+    verify/[memberId]/        # public QR verification (page.tsx + VerifyView.tsx)
+    admin/page.tsx           # approval queue + member list (role: admin+)
+    super-admin/page.tsx     # stats, role + granular permission toggles (super_admin)
   components/
-    Navbar.tsx        # sticky nav, transparent → solid on scroll
-    Hero.tsx          # parallax campus hero
-    StatsBand.tsx     # animated stat counters (placeholder data)
-    Features.tsx      # 6-card feature grid
-    Committee.tsx     # leadership preview strip
-    IdCardCta.tsx     # join CTA + ID-card mock with QR motif
-    Footer.tsx        # school crest + affiliation
-    Reveal.tsx        # scroll-reveal wrapper
+    Navbar.tsx               # sticky nav, auth-aware (Login/Register ↔ Dashboard/Logout)
+    Hero.tsx / StatsBand.tsx / Features.tsx / Committee.tsx / IdCardCta.tsx
+    Footer.tsx / Reveal.tsx / PageHero.tsx
+    MemberCard.tsx           # directory card + initials Avatar
+    IdCard.tsx               # official ID card with QRCodeSVG
+    RequireRole.tsx          # route guard (redirects to /login)
+    Providers.tsx            # AuthProvider wrapper
   lib/
-    site.ts           # placeholder stats & nav links (TODO: wire to Firestore)
-    firebase.ts       # Firebase init from env vars (no-op until configured)
-public/images/       # logo.jpg, school.jpg, school-logo.png
-assets/              # original brand assets
+    types.ts                 # UserProfile, PERMISSIONS, BD_DISTRICTS, BLOOD_GROUPS
+    demo-data.ts             # seed users / events / committee (demo mode)
+    auth-context.tsx         # auth + member store (demo ↔ Firebase Auth/Firestore)
+    data.ts                  # useDirectory / useMember / useSiteStats hooks
+    site.ts                  # nav links, placeholder stats, EVENTS, COMMITTEE
+    firebase.ts              # Firebase init from env vars (no-op until configured)
+firestore.rules              # intended Firestore security rules (deploy with Firebase CLI)
+public/images/               # logo.jpg, school.jpg, school-logo.png
+assets/                      # original brand assets
 ```
+
+## Firestore data model (`users` collection)
+
+`name, batch, roll, email, phone (private), photoURL, bloodGroup, isDonor,`
+`district, country, isAbroad, profession, company, status (pending|approved|`
+`rejected), role (member|admin|super_admin), permissions[], memberId`
+`(BCBHS-<batch>-<seq>), createdAt`
 
 ## Roadmap
 
 **v1.0 (MVP)**
-- [x] Homepage (navy/gold, animated, stats band)
-- [ ] Firebase project setup + Auth
-- [ ] Registration + admin verification flow
-- [ ] Alumni directory (search by name/batch/city)
-- [ ] Auto-generated digital ID card with QR verification page
-- [ ] Gallery, Events, Committee pages
-- [ ] Blood donor directory
-- [ ] Location search (by district)
-- [ ] Career info in profiles
-- [ ] Super admin panel (full access + member approval)
-- [ ] Admin panel (granular, per-admin permissions)
+- [x] Homepage (navy/gold, animated, stats band → live when Firebase configured)
+- [x] Registration + admin verification flow (demo mode; Firestore path coded)
+- [x] Alumni directory (search by name/batch/district/profession/blood group)
+- [x] Auto-generated digital ID card with QR + public verification page
+- [x] Gallery, Events, Committee pages
+- [x] Blood donor directory
+- [x] Location search (by district)
+- [x] Career info in profiles
+- [x] Super admin panel (full access + member approval + granular permission toggles)
+- [x] Admin panel (approval queue; actions gated by granted permissions)
+- [ ] Firebase project setup (console) + deploy `firestore.rules`
+- [ ] Photo upload via Firebase Storage (placeholder on the register form)
+- [ ] Urgent blood-request flow + admin notifications
 
 **v2.0**
 - [ ] Job board, Mentorship program

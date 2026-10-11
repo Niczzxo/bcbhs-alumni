@@ -57,6 +57,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const DEMO_STORAGE_KEY = "bcbhs-demo-members-v1";
+const DEMO_USER_KEY = "bcbhs-demo-user-id";
 
 function nextMemberId(batch: string, members: UserProfile[]): string {
   const seq = members.filter((m) => m.memberId).length + 1;
@@ -68,15 +69,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<UserProfile[]>(DEMO_USERS);
   const [loading, setLoading] = useState(true);
 
-  /* Rehydrate demo store from localStorage (client only). */
+  /* Rehydrate demo store + session from localStorage (client only). */
   useEffect(() => {
     if (isFirebaseConfigured) return;
     try {
       const raw = window.localStorage.getItem(DEMO_STORAGE_KEY);
+      let list = DEMO_USERS;
       if (raw) {
         const parsed = JSON.parse(raw) as UserProfile[];
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time client hydration
-        if (Array.isArray(parsed) && parsed.length > 0) setMembers(parsed);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time client hydration
+          setMembers(parsed);
+          list = parsed;
+        }
+      }
+      const uid = window.localStorage.getItem(DEMO_USER_KEY);
+      if (uid) {
+        const found = list.find((m) => m.id === uid);
+        if (found) setUser(found);
       }
     } catch {
       /* corrupted storage — fall back to seed data */
@@ -139,6 +149,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (found.status === "rejected")
           return { ok: false, error: "This registration was rejected. Please contact the admin." };
         setUser(found);
+        try {
+          window.localStorage.setItem(DEMO_USER_KEY, found.id);
+        } catch {
+          /* session persistence unavailable — in-memory only */
+        }
         return { ok: true };
       }
       try {
@@ -163,6 +178,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isFirebaseConfigured && auth) {
       const { signOut } = await import("firebase/auth");
       await signOut(auth).catch(() => undefined);
+    }
+    try {
+      window.localStorage.removeItem(DEMO_USER_KEY);
+    } catch {
+      /* noop */
     }
     setUser(null);
   }, []);
