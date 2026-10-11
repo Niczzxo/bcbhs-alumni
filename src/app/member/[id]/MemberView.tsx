@@ -40,7 +40,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
             <div className="grid gap-8 lg:grid-cols-5">
               <Reveal className="lg:col-span-3 rounded-3xl border border-ivory/10 bg-ink-2 p-8 sm:p-10">
                 <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-                  <Avatar name={member.name} size="lg" />
+                  <Avatar name={member.name} photoURL={member.photoURL} size="lg" />
                   <div>
                     <h2 className="font-display text-3xl font-extrabold text-ivory">{member.name}</h2>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.25em] text-gold">

@@ -59,7 +59,7 @@ export default function SuperAdminPage() {
             .map((m) => (
               <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
                 <div className="flex flex-wrap items-center gap-4">
-                  <Avatar name={m.name} size="sm" />
+                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-ivory">
                       {m.name} <span className="text-xs text-muted">· Batch {m.batch} · {m.email}</span>
@@ -114,7 +114,7 @@ export default function SuperAdminPage() {
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {pending.map((m) => (
               <div key={m.id} className="flex items-center gap-4 rounded-2xl border border-ivory/10 bg-ink-2 p-5">
-                <Avatar name={m.name} size="sm" />
+                <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold text-ivory">{m.name}</p>
                   <p className="text-xs text-muted">Batch {m.batch} · {m.district} · {m.email}</p>

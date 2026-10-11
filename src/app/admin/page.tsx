@@ -32,7 +32,7 @@ export default function AdminPage() {
             {pending.map((m, i) => (
               <Reveal key={m.id} delay={Math.min(i, 4) * 0.05} className="rounded-2xl border border-ivory/10 bg-ink-2 p-5">
                 <div className="flex items-center gap-4">
-                  <Avatar name={m.name} size="sm" />
+                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-ivory">{m.name}</p>
                     <p className="text-xs text-muted">
@@ -74,7 +74,7 @@ export default function AdminPage() {
           <div className="mt-6 max-h-[560px] space-y-3 overflow-y-auto pr-1">
             {approved.map((m) => (
               <div key={m.id} className="flex items-center gap-3 rounded-2xl border border-ivory/10 bg-ink-2 px-4 py-3">
-                <Avatar name={m.name} size="sm" />
+                <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-ivory">{m.name}</p>
                   <p className="text-xs text-muted">

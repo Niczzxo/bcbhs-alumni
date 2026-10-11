@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { useAuth } from "@/lib/auth-context";
+import { compressImageToDataURL } from "@/lib/image";
 import { BLOOD_GROUPS, BD_DISTRICTS, BATCH_YEARS } from "@/lib/types";
 
 const inputCls =
@@ -19,6 +20,9 @@ export default function RegisterPage() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [photoURL, setPhotoURL] = useState("");
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     name: "",
     batch: "",
@@ -40,6 +44,24 @@ export default function RegisterPage() {
       setForm((f) => ({ ...f, [k]: e.target.value }));
   const toggleDonor = () => setForm((f) => ({ ...f, isDonor: !f.isDonor }));
 
+  async function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file (JPG/PNG).");
+      return;
+    }
+    setPhotoBusy(true);
+    try {
+      const dataUrl = await compressImageToDataURL(file);
+      setPhotoURL(dataUrl);
+      setError("");
+    } catch {
+      setError("Could not process that photo — try another image.");
+    }
+    setPhotoBusy(false);
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
@@ -48,7 +70,7 @@ export default function RegisterPage() {
       return;
     }
     setBusy(true);
-    const res = await register({ ...form });
+    const res = await register({ ...form, photoURL: photoURL || undefined });
     setBusy(false);
     if (res.ok) setDone(true);
     else setError(res.error ?? "Registration failed.");
@@ -161,10 +183,37 @@ export default function RegisterPage() {
                 </div>
                 <div className="sm:col-span-2">
                   <label className={labelCls}>Photo</label>
-                  <div className="rounded-xl border border-dashed border-ivory/20 bg-ink px-4 py-6 text-center text-xs text-muted">
-                    Photo upload connects to Firebase Storage at launch — for now your initials avatar will be used.
-                    {/* TODO: wire to Firebase Storage upload */}
-                  </div>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={onPhotoChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    disabled={photoBusy}
+                    className="flex w-full items-center gap-4 rounded-xl border border-dashed border-ivory/20 bg-ink px-4 py-4 text-left transition-colors hover:border-gold/50 disabled:opacity-60"
+                  >
+                    {photoURL ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={photoURL} alt="Your photo" className="h-16 w-16 shrink-0 rounded-full object-cover ring-2 ring-gold/60" />
+                    ) : (
+                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-ink-3 text-2xl text-gold-2">
+                        📷
+                      </span>
+                    )}
+                    <span className="text-xs leading-relaxed text-muted">
+                      {photoBusy ? (
+                        "Processing photo…"
+                      ) : photoURL ? (
+                        <>Photo added ✓ — <span className="text-gold-2 underline">tap to change</span></>
+                      ) : (
+                        <>Tap to upload your photo (JPG/PNG). It appears on your profile, directory card and ID card.</>
+                      )}
+                    </span>
+                  </button>
                 </div>
                 <label className="flex cursor-pointer items-center gap-3 sm:col-span-2">
                   <input type="checkbox" checked={form.isDonor} onChange={toggleDonor} className="h-4 w-4 accent-[#d4a94e]" />

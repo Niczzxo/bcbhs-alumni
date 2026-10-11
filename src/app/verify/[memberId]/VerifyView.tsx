@@ -43,7 +43,7 @@ export default function VerifyView({ params }: { params: Promise<{ memberId: str
               {genuine && member ? (
                 <>
                   <div className="mt-6 flex justify-center">
-                    <Avatar name={member.name} size="md" />
+                    <Avatar name={member.name} photoURL={member.photoURL} size="md" />
                   </div>
                   <p className="font-display mt-4 text-xl font-bold text-ivory">{member.name}</p>
                   <p className="mt-1 text-xs uppercase tracking-[0.25em] text-gold">

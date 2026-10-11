@@ -15,6 +15,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -35,6 +36,7 @@ export interface RegisterInput {
   country: string;
   profession: string;
   company: string;
+  photoURL?: string;
 }
 
 interface AuthContextValue {
@@ -68,6 +70,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [members, setMembers] = useState<UserProfile[]>(DEMO_USERS);
   const [loading, setLoading] = useState(true);
+  /* Skips the persist effect's first run per mount: the rehydrate effect
+     above calls setMembers asynchronously, so persisting on the very first
+     run would overwrite localStorage with the seed list before the stored
+     list has been applied (and under StrictMode's double effects the
+     second rehydrate would then "restore" that clobbered seed). */
+  const persistArmed = useRef(false);
 
   /* Rehydrate demo store + session from localStorage (client only). */
   useEffect(() => {
@@ -94,9 +102,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  /* Persist demo mutations. */
+  /* Persist demo mutations (never on the effect's first run — see above). */
   useEffect(() => {
     if (isFirebaseConfigured) return;
+    if (!persistArmed.current) {
+      persistArmed.current = true;
+      return;
+    }
     try {
       window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(members));
     } catch {
@@ -208,6 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isAbroad: input.district === "Abroad",
           profession: input.profession.trim() || undefined,
           company: input.company.trim() || undefined,
+          photoURL: input.photoURL || undefined,
           status: "pending",
           role: "member",
           permissions: [],
@@ -235,6 +248,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isAbroad: input.district === "Abroad",
           profession: input.profession.trim() || null,
           company: input.company.trim() || null,
+          photoURL: input.photoURL || null,
           status: "pending",
           role: "member",
           permissions: [],
