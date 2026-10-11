@@ -5,9 +5,10 @@ rules_version = '2';
 /*                                                                     */
 /*  Model:                                                             */
 /*  - users/{uid}: member profiles. Public reads are limited to        */
-/*    approved profiles; private fields (phone) are enforced by only   */
-/*    exposing approved profiles and letting the client hide phone     */
-/*    from non-admins (see note below).                                */
+/*    approved profiles; owners and staff can read any profile.        */
+/*  - users_private/{uid}: phone numbers ONLY. Readable by the owner   */
+/*    and staff (admin / super_admin); writable by the owner only.     */
+/*    The `phone` field is banned from `users` docs by validation.     */
 /*  - Only staff with the `approve_members` permission (or the super   */
 /*    admin) may change status / role / permissions / memberId.        */
 /*  - The super admin (role == "super_admin") has full write access    */
@@ -16,11 +17,9 @@ rules_version = '2';
 /*    manage_events, manage_gallery, post_announcements,               */
 /*    manage_committee.                                                */
 /*                                                                     */
-/*  NOTE: field-level redaction isn't expressible here, so the client  */
-/*  hides `phone` unless the viewer is the owner or has the            */
-/*  `view_member_data` permission. Never ship phone numbers to         */
-/*  unauthenticated clients in a stricter deployment — split PII into  */
-/*  a `users_private/{uid}` collection if needed.                       */
+/*  NOTE: the client additionally hides phone numbers unless the       */
+/*  viewer is the owner or has the `view_member_data` permission —     */
+/*  defence in depth on top of the `users_private` rules above.        */
 /* ------------------------------------------------------------------ */
 
 service cloud.firestore {
