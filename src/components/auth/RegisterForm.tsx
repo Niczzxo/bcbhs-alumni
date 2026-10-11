@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { compressImageToDataURL } from "@/lib/image";
 import { BLOOD_GROUPS, BD_DISTRICTS, BATCH_YEARS, DEPARTMENTS } from "@/lib/types";
@@ -22,6 +22,11 @@ export default function RegisterForm({
   const [photoURL, setPhotoURL] = useState("");
   const [photoBusy, setPhotoBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [today, setToday] = useState("");
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client-only date for the dob max attribute
+    setToday(new Date().toISOString().slice(0, 10));
+  }, []);
   const [form, setForm] = useState({
     name: "",
     batch: "",
@@ -35,6 +40,7 @@ export default function RegisterForm({
     district: "",
     country: "",
     department: "",
+    dob: "",
     profession: "",
     company: "",
   });
@@ -66,8 +72,8 @@ export default function RegisterForm({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    if (!form.name.trim() || !form.batch || !form.email.trim() || !form.password || !form.district || !form.department || !form.whatsapp.trim()) {
-      setError("Please fill in name, batch, email, password, district, department and WhatsApp number.");
+    if (!form.name.trim() || !form.batch || !form.email.trim() || !form.password || !form.district || !form.department || !form.dob || !form.whatsapp.trim()) {
+      setError("Please fill in name, batch, email, password, district, department, date of birth and WhatsApp number.");
       return;
     }
     setBusy(true);
@@ -106,6 +112,10 @@ export default function RegisterForm({
             <option value="">Select department…</option>
             {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
+        </div>
+        <div>
+          <label className={labelCls}>Date of birth *</label>
+          <input type="date" className={inputCls} value={form.dob} onChange={set("dob")} max={today || undefined} />
         </div>
         <div>
           <label className={labelCls}>Email *</label>

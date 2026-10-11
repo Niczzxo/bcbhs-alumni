@@ -12,8 +12,8 @@ import { SITE_EMAIL } from "@/lib/site";
  * FRONT ("Noir Centered"): deep navy + gold, everything centered —
  * logo seal + association name on top, small gold-framed member photo,
  * serif member name, admin-assigned position badge, and a glass details
- * register: Member ID, Passing Year, Blood Group, Department, District,
- * Contact, Email, Profession.
+ * register: Member ID, Passing Year, Blood Group, Department,
+ * Date of Birth, Contact, Email, Profession.
  * BACK ("Scan Me"): same navy sunburst background — outlined gold
  * "SCAN ME" pill, large QR on a white plate, member signature below
  * the QR, association name + contact details.
@@ -47,35 +47,45 @@ function CardBackground() {
   );
 }
 
+/** "1998-05-12" -> "12 May 1998" for the ID card. */
+function formatDob(iso?: string): string {
+  if (!iso) return "—";
+  const parts = iso.split("-");
+  if (parts.length !== 3) return iso;
+  const [y, m, d] = parts.map(Number);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  if (!y || !m || m < 1 || m > 12 || !d) return iso;
+  return `${d} ${months[m - 1]} ${y}`;
+}
+
 function CardFront({ member }: { member: UserProfile }) {
-  const district = member.isAbroad && member.country ? member.country : member.district;
   return (
     <CardShell>
       <div className="relative h-full w-full">
         <CardBackground />
 
         {/* everything centered */}
-        <div className="relative flex h-full flex-col items-center px-[6cqw] pb-[4cqw] pt-[4.5cqw] text-center">
+        <div className="relative flex h-full flex-col items-center px-[6cqw] pb-[4cqw] pt-[5cqw] text-center">
           {/* logo — centered */}
-          <span className="relative block h-[10cqw] w-[10cqw] overflow-hidden rounded-full ring-2 ring-[#d4a94e]">
+          <span className="relative block h-[11cqw] w-[11cqw] overflow-hidden rounded-full ring-2 ring-[#d4a94e]">
             <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
           </span>
           {/* association name — centered */}
-          <p className="font-display mt-[1.6cqw] text-[4.8cqw] font-extrabold tracking-[0.16em] text-white">
+          <p className="font-display mt-[1.8cqw] text-[5.4cqw] font-extrabold tracking-[0.16em] text-white">
             BCBHS <span className="text-gold-gradient">ALUMNI</span>
           </p>
-          <p className="mt-[0.5cqw] text-[1.7cqw] uppercase tracking-[0.32em] text-white/55">
+          <p className="mt-[0.6cqw] text-[1.9cqw] uppercase tracking-[0.32em] text-white/55">
             Official ID · Est. 2023
           </p>
 
           {/* member photo — small, gold framed */}
-          <div className="foil-frame mt-[2.2cqw] rounded-xl p-[1.4cqw] shadow-[0_12px_36px_rgba(0,0,0,0.55)]">
-            <div className="relative h-[22cqw] w-[18.5cqw] overflow-hidden rounded-[8px] border-2 border-[#0a0f24] bg-[#0a0f24]">
+          <div className="foil-frame mt-[2.6cqw] rounded-xl p-[1.5cqw] shadow-[0_12px_36px_rgba(0,0,0,0.55)]">
+            <div className="relative h-[24cqw] w-[20cqw] overflow-hidden rounded-[8px] border-2 border-[#0a0f24] bg-[#0a0f24]">
               {member.photoURL ? (
                 <Image src={member.photoURL} alt={member.name} fill className="object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
-                  <span className="font-display text-[11cqw] font-extrabold text-[#d4a94e]/30">
+                  <span className="font-display text-[12cqw] font-extrabold text-[#d4a94e]/30">
                     {member.name.charAt(0)}
                   </span>
                 </div>
@@ -84,57 +94,57 @@ function CardFront({ member }: { member: UserProfile }) {
           </div>
 
           {/* member name */}
-          <h2 className="font-display mt-[1.8cqw] text-[6.4cqw] font-bold leading-none text-white">
+          <h2 className="font-display mt-[2cqw] text-[7.4cqw] font-bold leading-none text-white">
             {member.name}
           </h2>
 
           {/* official position — admin-assigned only */}
           {member.position && (
-            <span className="mt-[1.4cqw] rounded-full bg-[#d4a94e] px-[4cqw] py-[0.9cqw] text-[2.1cqw] font-extrabold uppercase tracking-[0.24em] text-[#0a0f24]">
+            <span className="mt-[1.6cqw] rounded-full bg-[#d4a94e] px-[4.5cqw] py-[1cqw] text-[2.3cqw] font-extrabold uppercase tracking-[0.24em] text-[#0a0f24]">
               ★ {member.position}
             </span>
           )}
 
           {/* details register */}
-          <div className="mt-[2.4cqw] w-full rounded-2xl border border-white/12 bg-white/[0.05] p-[3.6cqw] backdrop-blur-md">
-            <div className="grid grid-cols-2 gap-x-[4cqw] gap-y-[1.8cqw]">
+          <div className="mt-[2.8cqw] w-full rounded-2xl border border-white/12 bg-white/[0.05] p-[4cqw] backdrop-blur-md">
+            <div className="grid grid-cols-2 gap-x-[4cqw] gap-y-[2.2cqw]">
               <div>
-                <p className="text-[1.6cqw] uppercase tracking-[0.24em] text-white/45">Member ID</p>
-                <p className="mt-[0.4cqw] font-mono text-[2.2cqw] font-bold tracking-wide text-white">
+                <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Member ID</p>
+                <p className="mt-[0.5cqw] font-mono text-[2.6cqw] font-bold tracking-wide text-white">
                   {member.memberId ?? "—"}
                 </p>
               </div>
               <div>
-                <p className="text-[1.6cqw] uppercase tracking-[0.24em] text-white/45">Passing Year</p>
-                <p className="mt-[0.4cqw] text-[2.2cqw] font-bold text-white">{member.batch}</p>
+                <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Passing Year</p>
+                <p className="mt-[0.5cqw] text-[2.6cqw] font-bold text-white">{member.batch}</p>
               </div>
               <div>
-                <p className="text-[1.6cqw] uppercase tracking-[0.24em] text-white/45">Blood Group</p>
-                <p className="mt-[0.4cqw] text-[2.2cqw] font-bold text-white">{member.bloodGroup ?? "—"}</p>
+                <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Blood Group</p>
+                <p className="mt-[0.5cqw] text-[2.6cqw] font-bold text-white">{member.bloodGroup ?? "—"}</p>
               </div>
               <div>
-                <p className="text-[1.6cqw] uppercase tracking-[0.24em] text-white/45">Department</p>
-                <p className="mt-[0.4cqw] text-[2.2cqw] font-bold text-white">{member.department ?? "—"}</p>
+                <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Department</p>
+                <p className="mt-[0.5cqw] text-[2.6cqw] font-bold text-white">{member.department ?? "—"}</p>
               </div>
               <div>
-                <p className="text-[1.6cqw] uppercase tracking-[0.24em] text-white/45">District</p>
-                <p className="mt-[0.4cqw] truncate text-[2.2cqw] font-bold text-white">{district}</p>
+                <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Date of Birth</p>
+                <p className="mt-[0.5cqw] text-[2.6cqw] font-bold text-white">{formatDob(member.dob)}</p>
               </div>
               <div>
-                <p className="text-[1.6cqw] uppercase tracking-[0.24em] text-white/45">Contact</p>
-                <p className="mt-[0.4cqw] font-mono text-[2.2cqw] font-bold text-white">
+                <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Contact</p>
+                <p className="mt-[0.5cqw] font-mono text-[2.6cqw] font-bold text-white">
                   {member.whatsapp ?? "—"}
                 </p>
               </div>
-              <div className="col-span-2 border-t border-white/10 pt-[1.6cqw]">
-                <p className="text-[1.6cqw] uppercase tracking-[0.24em] text-white/45">Email</p>
-                <p className="mt-[0.4cqw] truncate text-[2.1cqw] font-semibold text-white/90">
+              <div className="col-span-2 border-t border-white/10 pt-[2cqw]">
+                <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Email</p>
+                <p className="mt-[0.5cqw] truncate text-[2.4cqw] font-semibold text-white/90">
                   {member.email}
                 </p>
               </div>
               <div className="col-span-2">
-                <p className="text-[1.6cqw] uppercase tracking-[0.24em] text-white/45">Profession</p>
-                <p className="mt-[0.4cqw] truncate text-[2.2cqw] font-semibold text-[#f0cd7e]">
+                <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Profession</p>
+                <p className="mt-[0.5cqw] truncate text-[2.6cqw] font-semibold text-[#f0cd7e]">
                   {member.profession ?? "—"}{member.company ? ` · ${member.company}` : ""}
                 </p>
               </div>
@@ -142,7 +152,7 @@ function CardFront({ member }: { member: UserProfile }) {
           </div>
 
           <div className="flex-1" />
-          <p className="mt-[1.5cqw] text-[1.9cqw] font-bold uppercase tracking-[0.3em] text-[#f0cd7e]/80">
+          <p className="mt-[1.5cqw] text-[2.1cqw] font-bold uppercase tracking-[0.3em] text-[#f0cd7e]/80">
             ✓ Verified Member
           </p>
         </div>
@@ -150,6 +160,7 @@ function CardFront({ member }: { member: UserProfile }) {
     </CardShell>
   );
 }
+
 
 
 
@@ -169,8 +180,8 @@ function CardBack({ member, verifyUrl }: { member: UserProfile; verifyUrl: strin
         </div>
 
         {/* large QR on a white plate so it stays scannable on navy */}
-        <div className="relative mt-[3.5cqw] rounded-2xl bg-white p-[2.5cqw] shadow-[0_10px_36px_rgba(0,0,0,0.45)]">
-          <QRCodeSVG value={verifyUrl} size={200} level="M" className="h-[37cqw] w-[37cqw]" />
+        <div className="relative mt-[3.5cqw] rounded-2xl bg-white p-[2cqw] shadow-[0_10px_36px_rgba(0,0,0,0.45)] ring-2 ring-[#d4a94e]">
+          <QRCodeSVG value={verifyUrl} size={220} level="M" className="h-[42cqw] w-[42cqw]" />
         </div>
 
         {/* member signature right below the QR — centered */}

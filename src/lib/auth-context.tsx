@@ -37,6 +37,7 @@ export interface RegisterInput {
   district: string;
   country: string;
   department: string;
+  dob: string;
   profession: string;
   company: string;
   photoURL?: string;
@@ -70,6 +71,7 @@ export interface ProfileUpdateInput {
   district: string;
   country: string;
   department: string;
+  dob: string;
   profession: string;
   company: string;
   phone: string;
@@ -242,6 +244,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           country: input.district === "Abroad" ? input.country.trim() || undefined : undefined,
           isAbroad: input.district === "Abroad",
           department: input.department || undefined,
+          dob: input.dob || undefined,
           profession: input.profession.trim() || undefined,
           company: input.company.trim() || undefined,
           photoURL: input.photoURL || undefined,
@@ -271,6 +274,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           country: input.district === "Abroad" ? input.country.trim() || null : null,
           isAbroad: input.district === "Abroad",
           department: input.department || null,
+          dob: input.dob || null,
           profession: input.profession.trim() || null,
           company: input.company.trim() || null,
           photoURL: input.photoURL || null,
@@ -388,6 +392,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         country: isAbroad ? input.country.trim() || undefined : undefined,
         isAbroad,
         department: input.department || undefined,
+        dob: input.dob || undefined,
         profession: input.profession.trim() || undefined,
         company: input.company.trim() || undefined,
         whatsapp: input.whatsapp.trim() || undefined,

@@ -20,6 +20,11 @@ export default function EditProfilePage() {
   const [photoBusy, setPhotoBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [today, setToday] = useState("");
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client-only date for the dob max attribute
+    setToday(new Date().toISOString().slice(0, 10));
+  }, []);
   const [f, setF] = useState<ProfileUpdateInput>({
     name: "",
     batch: "",
@@ -27,6 +32,7 @@ export default function EditProfilePage() {
     district: "",
     country: "",
     department: "",
+    dob: "",
     profession: "",
     company: "",
     phone: "",
@@ -50,6 +56,7 @@ export default function EditProfilePage() {
         district: user.district,
         country: user.country ?? "",
         department: user.department ?? "",
+        dob: user.dob ?? "",
         profession: user.profession ?? "",
         company: user.company ?? "",
         phone: user.phone ?? "",
@@ -160,6 +167,10 @@ export default function EditProfilePage() {
                   <option value="">Select…</option>
                   {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
+              </div>
+              <div>
+                <label className={labelCls}>Date of birth *</label>
+                <input type="date" className={inputCls} value={f.dob} onChange={set("dob")} max={today || undefined} />
               </div>
               <div>
                 <label className={labelCls}>Current district *</label>

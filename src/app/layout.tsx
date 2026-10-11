@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter, Great_Vibes } from "next/font/google";
+import { Playfair_Display, Inter, Allura } from "next/font/google";
 import Providers from "@/components/Providers";
 import "./globals.css";
 
@@ -9,7 +9,7 @@ const display = Playfair_Display({
   weight: ["500", "600", "700", "800"],
 });
 
-const signature = Great_Vibes({
+const signature = Allura({
   variable: "--font-signature",
   subsets: ["latin"],
   weight: ["400"],

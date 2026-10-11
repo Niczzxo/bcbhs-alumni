@@ -62,7 +62,7 @@ service cloud.firestore {
 
     function profileEditableFields() {
       return ['name', 'batch', 'roll', 'district', 'country', 'isAbroad',
-              'department', 'profession', 'company', 'photoURL', 'bloodGroup', 'isDonor', 'whatsapp'];
+              'department', 'dob', 'profession', 'company', 'photoURL', 'bloodGroup', 'isDonor', 'whatsapp'];
     }
 
     function onlyPositionChanged() {
@@ -99,7 +99,7 @@ service cloud.firestore {
         && request.resource.data.role == 'member'
         && !('phone' in request.resource.data)
         && whatsappValid()
-        && request.resource.data.keys().hasAll(['name', 'batch', 'email', 'district', 'department', 'status', 'role', 'permissions', 'createdAt']);
+        && request.resource.data.keys().hasAll(['name', 'batch', 'email', 'district', 'department', 'dob', 'status', 'role', 'permissions', 'createdAt']);
 
       // Approvals: admins with the permission may flip status (+memberId).
       allow update: if can('approve_members') && onlyStatusFieldsChanged() && !('phone' in request.resource.data);
