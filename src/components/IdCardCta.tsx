@@ -1,10 +1,31 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Reveal from "./Reveal";
 import { useAuthModal } from "./AuthModal";
+import IdCard from "./IdCard";
+import type { UserProfile } from "@/lib/types";
 
-/** Join CTA band — ID-card teaser with a QR motif. */
+/** Demo member for the homepage teaser — shows the REAL card design. */
+const TEASER_MEMBER: UserProfile = {
+  id: "teaser",
+  name: "Your Name",
+  batch: "20XX",
+  email: "you@example.com",
+  bloodGroup: "O+",
+  district: "Dhaka",
+  isAbroad: false,
+  department: "Science",
+  dob: "2000-01-01",
+  whatsapp: "01XXXXXXXXX",
+  profession: "Member",
+  status: "approved",
+  role: "member",
+  permissions: [],
+  memberId: "BCBHS-20XX-0000",
+  createdAt: "2023-01-01T00:00:00.000Z",
+};
+
+/** Join CTA band — live ID-card teaser (real design, flippable). */
 export default function IdCardCta() {
   const { openAuthModal } = useAuthModal();
   return (
@@ -56,53 +77,12 @@ export default function IdCardCta() {
           </ul>
         </Reveal>
 
-        {/* ID card mock */}
+        {/* Live ID-card teaser — the real portrait design, flippable */}
         <Reveal delay={0.15} className="flex justify-center">
-          <motion.div
-            whileHover={{ rotateY: 8, rotateX: -6, scale: 1.03 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            style={{ transformPerspective: 900 }}
-            className="relative w-full max-w-md overflow-hidden rounded-3xl border border-gold/40 bg-gradient-to-br from-ink-3 via-ink-2 to-ink p-8 shadow-[0_30px_80px_rgba(0,0,0,0.6),0_0_50px_rgba(212,169,78,0.12)]"
-          >
-            <div className="sunburst pointer-events-none absolute inset-0" />
-            <div className="relative flex items-start justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-gold">BCBHS Alumni</p>
-                <p className="font-display mt-1 text-2xl font-bold text-ivory">Official ID Card</p>
-              </div>
-              <div className="seal-ring flex h-14 w-14 items-center justify-center rounded-full bg-ink">
-                <span className="font-display text-lg font-bold text-gold">B</span>
-              </div>
-            </div>
-            <div className="relative mt-8 flex items-center gap-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-gold/30 bg-ink-3 text-3xl">
-                🎓
-              </div>
-              <div>
-                <p className="font-display text-xl font-bold text-ivory">Your Name</p>
-                <p className="text-sm text-muted">Batch of 20XX · Member #0000</p>
-                <p className="mt-1 inline-block rounded-full border border-gold/40 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-gold-2">
-                  Verified
-                </p>
-              </div>
-            </div>
-            <div className="relative mt-8 flex items-center justify-between border-t border-gold/20 pt-6">
-              {/* decorative QR motif */}
-              <div className="grid h-20 w-20 grid-cols-5 gap-1" aria-hidden>
-                {Array.from({ length: 25 }).map((_, i) => (
-                  <span
-                    key={i}
-                    className={`rounded-[2px] ${[0, 4, 6, 8, 12, 16, 18, 20, 24].includes(i) ? "bg-gold" : "bg-ivory/25"}`}
-                  />
-                ))}
-              </div>
-              <p className="max-w-[200px] text-right text-xs leading-relaxed text-muted">
-                Scan to verify
-                <br />
-                alumni membership
-              </p>
-            </div>
-          </motion.div>
+          <IdCard
+            member={TEASER_MEMBER}
+            verifyUrl="https://bcbhs-alumni-niczzxos-projects.vercel.app/verify/BCBHS-20XX-0000"
+          />
         </Reveal>
       </div>
     </section>
