@@ -113,5 +113,11 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow update, delete: if isSuperAdmin();
     }
+
+    match /site/{docId} {
+      // Public site content (About page) — readable by all, writable by super admin only.
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
   }
 }

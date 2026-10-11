@@ -5,6 +5,8 @@ import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import { useAuth } from "@/lib/auth-context";
 import { ROLE_META } from "@/lib/types";
+import ContentManager from "@/components/content/ContentManager";
+import type { ContentKind } from "@/components/content/ContentManager";
 
 /** Admin panel — approval queue + approved members. */
 export default function AdminPage() {
@@ -14,6 +16,15 @@ export default function AdminPage() {
 
   const pending = members.filter((m) => m.status === "pending");
   const approved = members.filter((m) => m.status === "approved");
+
+  const contentSections: { kind: ContentKind; perm: string }[] = (
+    [
+      { kind: "events", perm: "manage_events" },
+      { kind: "announcements", perm: "post_announcements" },
+      { kind: "gallery", perm: "manage_gallery" },
+      { kind: "committee", perm: "manage_committee" },
+    ] as { kind: ContentKind; perm: string }[]
+  ).filter((s) => hasPermission(s.perm));
 
   return (
     <RequireRole role="admin" eyebrow="Administration" title={<>Admin <span className="text-gold-gradient">Panel</span></>}>
@@ -91,6 +102,19 @@ export default function AdminPage() {
           </div>
         </section>
       </div>
+
+      {/* Content sections the staff member is permitted to manage */}
+      {contentSections.length > 0 && (
+        <div className="mt-14">
+          <h2 className="font-display text-2xl font-bold text-ivory">Content management</h2>
+          <div className="gold-rule mt-4 w-32" />
+          <div className="mt-8 grid gap-6 xl:grid-cols-2">
+            {contentSections.map((s) => (
+              <ContentManager key={s.kind} kind={s.kind} />
+            ))}
+          </div>
+        </div>
+      )}
     </RequireRole>
   );
 }

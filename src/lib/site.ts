@@ -16,6 +16,7 @@ export const PLACEHOLDER_STATS = {
 };
 
 export const NAV_LINKS = [
+  { label: "About", href: "/about" },
   { label: "Directory", href: "/directory" },
   { label: "Events", href: "/events" },
   { label: "Gallery", href: "/gallery" },

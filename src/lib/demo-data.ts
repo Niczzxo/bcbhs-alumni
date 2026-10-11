@@ -5,7 +5,7 @@
 /*  TODO: replace with live Firestore reads once the project is live.  */
 /* ------------------------------------------------------------------ */
 
-import type { UserProfile, PortalEvent, CommitteeSeat } from "./types";
+import type { UserProfile, PortalEvent, CommitteeSeat, GalleryPhoto, AnnouncementItem } from "./types";
 
 export const DEMO_USERS: UserProfile[] = [
   {
@@ -294,27 +294,54 @@ export const DEMO_EVENTS: PortalEvent[] = [
 
 export const DEMO_COMMITTEE: CommitteeSeat[] = [
   {
+    id: "c-1",
     role: "President",
     name: "Engr. Mahbub Alam",
     batch: "2005",
     note: "Leads the association and represents the alumni community.",
   },
   {
+    id: "c-2",
     role: "Vice President",
     name: "Dr. Shamima Nasrin",
     batch: "2008",
     note: "Oversees welfare programs and the blood donor network.",
   },
   {
+    id: "c-3",
     role: "General Secretary",
     name: "Tanvir Ahmed",
     batch: "2015",
     note: "Coordinates events, membership, and day-to-day operations.",
   },
   {
+    id: "c-4",
     role: "Director",
     name: "Col. (Retd.) Rezaul Karim",
     batch: "1998",
     note: "Guides strategy and liaison with the school authority.",
+  },
+];
+
+/* ------------------------- gallery (placeholder) ----------------------- */
+/* TODO: move to Firestore `gallery` collection, managed via admin panel.   */
+
+export const DEMO_GALLERY: GalleryPhoto[] = [
+  {
+    id: "g-1",
+    src: "/images/school.jpg",
+    caption: "The campus — home of a thousand memories",
+    createdAt: "2024-01-15T00:00:00.000Z",
+  },
+];
+
+/* ---------------------- announcements (placeholder) -------------------- */
+
+export const DEMO_ANNOUNCEMENTS: AnnouncementItem[] = [
+  {
+    id: "a-1",
+    title: "Grand Reunion 2026 announced",
+    body: "Mark your calendars — December 25, 2026 at the BCBHS School Field. Registration opens soon.",
+    createdAt: "2026-10-01T00:00:00.000Z",
   },
 ];

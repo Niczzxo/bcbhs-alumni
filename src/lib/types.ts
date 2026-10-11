@@ -72,11 +72,63 @@ export interface PortalEvent {
 }
 
 export interface CommitteeSeat {
+  id: string;
   role: string;
   name: string;
   batch: string;
   note: string;
+  photoURL?: string;
 }
+
+export interface GalleryPhoto {
+  id: string;
+  src: string; // data URL or remote URL
+  caption: string;
+  createdAt: string;
+}
+
+export interface AnnouncementItem {
+  id: string;
+  title: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface SiteContent {
+  aboutEyebrow: string;
+  aboutTitle: string;
+  aboutIntro: string;
+  aboutStory: string[];
+  aboutMission: string;
+  aboutValues: { title: string; text: string }[];
+}
+
+export const DEFAULT_SITE_CONTENT: SiteContent = {
+  aboutEyebrow: "Our story",
+  aboutTitle: "The BCBHS Alumni Association",
+  aboutIntro:
+    "We are the former students of Bogura Cantonment Board High School — bound by classrooms, playgrounds, and memories that never fade.",
+  aboutStory: [
+    "The BCBHS Alumni Association was founded in 2023 by a group of former students who refused to let graduation be a goodbye. What began as a small reunion committee has grown into a thriving community of alumni across Bangladesh and beyond.",
+    "Today we connect batches across decades — seniors guide juniors with career advice and referrals, we stand together in emergencies through our blood donor network, and we gather every year to celebrate the school that made us who we are.",
+  ],
+  aboutMission:
+    "To keep every BCBHSian connected for life — fostering fellowship between batches, supporting juniors with mentorship and opportunity, serving our community, and upholding the honour of our school.",
+  aboutValues: [
+    {
+      title: "Brotherhood",
+      text: "Once a BCBHSian, always family — across batches, cities, and countries.",
+    },
+    {
+      title: "Service",
+      text: "Blood drives, scholarships, and welfare — we give back to the community that raised us.",
+    },
+    {
+      title: "Excellence",
+      text: "We carry the discipline of cantonment life into every profession we touch.",
+    },
+  ],
+};
 
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
 

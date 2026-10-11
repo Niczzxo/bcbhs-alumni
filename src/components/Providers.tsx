@@ -2,12 +2,15 @@
 
 import { AuthProvider } from "@/lib/auth-context";
 import { AuthModalProvider } from "@/components/AuthModal";
+import { ContentProvider } from "@/lib/content-context";
 
-/** Client-side providers wrapper (auth context + auth modal) for the root layout. */
+/** Client-side providers wrapper for the root layout. */
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <AuthModalProvider>{children}</AuthModalProvider>
+      <ContentProvider>
+        <AuthModalProvider>{children}</AuthModalProvider>
+      </ContentProvider>
     </AuthProvider>
   );
 }

@@ -4,15 +4,16 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
-import { EVENTS } from "@/lib/site";
+import { useContent } from "@/lib/content-context";
+import type { PortalEvent } from "@/lib/types";
 
 /** Events & reunions — upcoming and past. */
 export default function EventsPage() {
-  const upcoming = EVENTS.filter((e) => e.upcoming);
-  const past = EVENTS.filter((e) => !e.upcoming);
-  /* TODO: Firestore `events` collection, managed from the admin panel. */
+  const { events } = useContent();
+  const upcoming = events.filter((e) => e.upcoming);
+  const past = events.filter((e) => !e.upcoming);
 
-  const Card = ({ e, i }: { e: (typeof EVENTS)[number]; i: number }) => (
+  const Card = ({ e, i }: { e: PortalEvent; i: number }) => (
     <Reveal delay={Math.min(i, 5) * 0.07}>
       <article className="group h-full rounded-3xl border border-ivory/10 bg-ink-2 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40">
         <div className="flex items-center justify-between">

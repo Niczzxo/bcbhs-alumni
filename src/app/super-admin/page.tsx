@@ -3,6 +3,8 @@
 import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
+import ContentManager from "@/components/content/ContentManager";
+import AboutEditor from "@/components/content/AboutEditor";
 import { useAuth } from "@/lib/auth-context";
 import { PERMISSIONS, EDITOR_PERMISSIONS, ROLE_META } from "@/lib/types";
 import type { MemberRole, UserProfile } from "@/lib/types";
@@ -128,6 +130,26 @@ export default function SuperAdminPage() {
               </Reveal>
             ))}
         </div>
+      </section>
+
+      {/* Content management */}
+      <section className="mt-14">
+        <h2 className="font-display text-2xl font-bold text-ivory">Content management</h2>
+        <p className="mt-2 text-sm text-muted">
+          Add, edit or remove events, gallery photos, committee seats and announcements — live on the site instantly.
+        </p>
+        <div className="gold-rule mt-4 w-32" />
+        <div className="mt-8 grid gap-6 xl:grid-cols-2">
+          <ContentManager kind="events" />
+          <ContentManager kind="announcements" />
+          <ContentManager kind="gallery" />
+          <ContentManager kind="committee" />
+        </div>
+      </section>
+
+      {/* About page editor */}
+      <section className="mt-14">
+        <AboutEditor />
       </section>
 
       {/* Quick approvals */}
