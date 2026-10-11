@@ -71,19 +71,33 @@ service cloud.firestore {
       );
 
       // Registration: a signed-in user creates ONLY their own doc, always as
-      // a pending plain member.
+      // a pending plain member. Phone numbers may NEVER live here — they
+      // belong in `users_private/{uid}`.
       allow create: if signedIn()
         && request.auth.uid == userId
         && request.resource.data.status == 'pending'
         && request.resource.data.role == 'member'
+        && !('phone' in request.resource.data)
         && request.resource.data.keys().hasAll(['name', 'batch', 'email', 'district', 'status', 'role', 'permissions', 'createdAt']);
 
       // Approvals: admins with the permission may flip status (+memberId).
-      allow update: if can('approve_members') && onlyStatusFieldsChanged();
+      allow update: if can('approve_members') && onlyStatusFieldsChanged() && !('phone' in request.resource.data);
 
       // Roles & permissions: super admin only.
-      allow update: if isSuperAdmin();
+      allow update: if isSuperAdmin() && !('phone' in request.resource.data);
 
+      allow delete: if isSuperAdmin();
+    }
+
+    match /users_private/{userId} {
+      // Phone numbers: readable by the owner and staff, writable by the
+      // owner only (super admin may delete).
+      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['phone'])
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() <= 20;
       allow delete: if isSuperAdmin();
     }
 

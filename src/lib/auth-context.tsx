@@ -241,7 +241,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           batch: input.batch,
           roll: input.roll.trim(),
           email: clean,
-          phone: input.phone.trim(),
           bloodGroup: input.bloodGroup || null,
           isDonor: input.isDonor,
           district: input.district,
@@ -256,6 +255,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           memberId: null,
           createdAt: new Date().toISOString(),
         });
+        /* Phone numbers live in the private store — never in the public profile. */
+        const phone = input.phone.trim();
+        if (phone) {
+          await setDoc(doc(db, "users_private", cred.user.uid), { phone });
+        }
         return { ok: true };
       } catch (e) {
         return { ok: false, error: e instanceof Error ? e.message : "Registration failed." };

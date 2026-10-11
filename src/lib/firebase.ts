@@ -33,6 +33,27 @@ if (isFirebaseConfigured) {
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
+
+  /* Firebase App Check — attests that requests come from this genuine web
+   * app, blocking API abuse from bots and foreign apps. Requires
+   * NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_KEY; skipped silently without it. */
+  const recaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_KEY;
+  if (recaptchaKey && typeof window !== "undefined") {
+    import("firebase/app-check")
+      .then(({ initializeAppCheck, ReCaptchaEnterpriseProvider }) => {
+        try {
+          initializeAppCheck(app!, {
+            provider: new ReCaptchaEnterpriseProvider(recaptchaKey),
+            isTokenAutoRefreshEnabled: true,
+          });
+        } catch {
+          /* App Check unavailable (e.g. unsupported browser) — app still works */
+        }
+      })
+      .catch(() => {
+        /* firebase/app-check failed to load — app still works */
+      });
+  }
 }
 
 export { app, auth, db, storage };

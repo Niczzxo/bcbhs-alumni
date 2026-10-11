@@ -5,8 +5,16 @@ import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import { useAuth } from "@/lib/auth-context";
 import { ROLE_META } from "@/lib/types";
+import { usePrivatePhone } from "@/lib/data";
 import ContentManager from "@/components/content/ContentManager";
 import type { ContentKind } from "@/components/content/ContentManager";
+
+/** Phone suffix for a member row — fetched from the private store. */
+function MemberPhone({ userId }: { userId: string }) {
+  const phone = usePrivatePhone(userId);
+  if (!phone) return null;
+  return <span> · {phone}</span>;
+}
 
 /** Admin panel — approval queue + approved members. */
 export default function AdminPage() {
@@ -49,7 +57,7 @@ export default function AdminPage() {
                     <p className="truncate font-semibold text-ivory">{m.name}</p>
                     <p className="text-xs text-muted">
                       Batch {m.batch} · {m.district} · {m.email}
-                      {canSeeData && m.phone ? ` · ${m.phone}` : ""}
+                      {canSeeData && <MemberPhone userId={m.id} />}
                     </p>
                     {m.profession && <p className="text-xs text-muted">{m.profession}{m.company ? ` @ ${m.company}` : ""}</p>}
                   </div>
@@ -91,7 +99,7 @@ export default function AdminPage() {
                   <p className="truncate text-sm font-semibold text-ivory">{m.name}</p>
                   <p className="text-xs text-muted">
                     {m.memberId} · Batch {m.batch}
-                    {canSeeData && m.phone ? ` · ${m.phone}` : ""}
+                    {canSeeData && <MemberPhone userId={m.id} />}
                   </p>
                 </div>
                 <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>

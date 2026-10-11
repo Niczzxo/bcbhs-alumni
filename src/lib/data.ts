@@ -112,3 +112,48 @@ export function useMember(lookup: string | undefined): UserProfile | null | unde
   if (isFirebaseConfigured) return undefined; // still loading
   return members.find((m) => m.id === lookup || m.memberId === lookup) ?? null;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Private phone numbers.                                              */
+/*  Live mode: read from `users_private/{uid}` — Firestore rules allow  */
+/*  only the owner and staff (admin / super_admin) to read.             */
+/*  Demo mode: the phone lives on the in-memory profile.                */
+/* ------------------------------------------------------------------ */
+
+/** Phone number of a member, or null when the viewer may not see it. */
+export function usePrivatePhone(userId: string): string | null {
+  const { user, members, isSuperAdmin, hasPermission } = useAuth();
+  const [phone, setPhone] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      let next: string | null = null;
+      if (user) {
+        const allowed =
+          user.id === userId || isSuperAdmin || hasPermission("view_member_data");
+        if (allowed) {
+          if (!isFirebaseConfigured || !db) {
+            next = members.find((m) => m.id === userId)?.phone ?? null;
+          } else {
+            try {
+              const { doc, getDoc } = await import("firebase/firestore");
+              const snap = await getDoc(doc(db, "users_private", userId));
+              next = snap.exists() ? ((snap.data().phone as string) ?? null) : null;
+            } catch {
+              next = null;
+            }
+          }
+        }
+      }
+      if (!cancelled) {
+        setPhone(next);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, user, members, isSuperAdmin, hasPermission]);
+
+  return phone;
+}
