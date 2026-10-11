@@ -109,7 +109,7 @@ function CardFront({ member }: { member: UserProfile }) {
             <p className="font-display emboss-gold truncate text-[19px] font-bold leading-tight text-ivory">
               {member.name}
             </p>
-            <div className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
+            <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px]">
               <div>
                 <p className="text-[6.5px] uppercase tracking-[0.25em] text-muted">Batch</p>
                 <p className="font-bold text-gold-2">{member.batch}</p>
@@ -118,10 +118,20 @@ function CardFront({ member }: { member: UserProfile }) {
                 <p className="text-[6.5px] uppercase tracking-[0.25em] text-muted">Member ID</p>
                 <p className="font-mono font-bold text-ivory">{member.memberId ?? "—"}</p>
               </div>
-              <div className="col-span-2">
-                <p className="text-[6.5px] uppercase tracking-[0.25em] text-muted">Profession</p>
-                <p className="truncate text-ivory/90">{member.profession ?? "—"}</p>
-              </div>
+              {member.profession && (
+                <div className="col-span-2">
+                  <p className="text-[6.5px] uppercase tracking-[0.25em] text-muted">Profession</p>
+                  <p className="truncate text-ivory/90">{member.profession}</p>
+                </div>
+              )}
+            </div>
+            {/* handwritten signature */}
+            <div className="mt-1">
+              <p className="font-signature -rotate-2 truncate text-[22px] leading-none text-[#f5dfa0] drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+                {member.name}
+              </p>
+              <div className="gold-rule mt-0.5 w-4/5" />
+              <p className="mt-0.5 text-[6px] uppercase tracking-[0.3em] text-muted">Signature</p>
             </div>
           </div>
         </div>

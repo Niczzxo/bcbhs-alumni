@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import { Playfair_Display, Inter, Great_Vibes } from "next/font/google";
 import Providers from "@/components/Providers";
 import "./globals.css";
 
@@ -7,6 +7,12 @@ const display = Playfair_Display({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],
+});
+
+const signature = Great_Vibes({
+  variable: "--font-signature",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 const body = Inter({
@@ -29,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${display.variable} ${body.variable} bg-ink text-ivory antialiased`}
+        className={`${display.variable} ${body.variable} ${signature.variable} bg-ink text-ivory antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

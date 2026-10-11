@@ -205,3 +205,8 @@ body {
     0 -1px 1px rgba(0, 0, 0, 0.6),
     0 2px 8px rgba(0, 0, 0, 0.5);
 }
+
+/* Handwritten signature font */
+.font-signature {
+  font-family: var(--font-signature);
+}
