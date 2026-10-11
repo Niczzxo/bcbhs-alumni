@@ -23,12 +23,14 @@ import {
   DEMO_GALLERY,
   DEMO_COMMITTEE,
   DEMO_ANNOUNCEMENTS,
+  DEMO_JOBS,
 } from "./demo-data";
 import { DEFAULT_SITE_CONTENT } from "./types";
 import type {
   AnnouncementItem,
   CommitteeSeat,
   GalleryPhoto,
+  JobPost,
   PortalEvent,
   SiteContent,
 } from "./types";
@@ -40,6 +42,7 @@ interface DemoContent {
   gallery: GalleryPhoto[];
   committee: CommitteeSeat[];
   announcements: AnnouncementItem[];
+  jobs: JobPost[];
   siteContent: SiteContent;
 }
 
@@ -49,6 +52,7 @@ function seedContent(): DemoContent {
     gallery: DEMO_GALLERY,
     committee: DEMO_COMMITTEE,
     announcements: DEMO_ANNOUNCEMENTS,
+    jobs: DEMO_JOBS,
     siteContent: DEFAULT_SITE_CONTENT,
   };
 }
@@ -58,6 +62,7 @@ interface ContentContextValue {
   gallery: GalleryPhoto[];
   committee: CommitteeSeat[];
   announcements: AnnouncementItem[];
+  jobs: JobPost[];
   siteContent: SiteContent;
   loading: boolean;
   addEvent: (e: Omit<PortalEvent, "id">) => Promise<void>;
@@ -72,6 +77,9 @@ interface ContentContextValue {
   addAnnouncement: (a: Omit<AnnouncementItem, "id" | "createdAt">) => Promise<void>;
   updateAnnouncement: (id: string, a: Partial<AnnouncementItem>) => Promise<void>;
   removeAnnouncement: (id: string) => Promise<void>;
+  addJob: (j: Omit<JobPost, "id" | "createdAt">) => Promise<void>;
+  updateJob: (id: string, j: Partial<JobPost>) => Promise<void>;
+  removeJob: (id: string) => Promise<void>;
   saveSiteContent: (c: SiteContent) => Promise<void>;
 }
 
@@ -159,6 +167,16 @@ export function ContentProvider({ children }: { children: ReactNode }) {
               })),
             }));
           }),
+          onSnapshot(collection(db, "jobs"), (snap) => {
+            if (cancelled) return;
+            setContent((p) => ({
+              ...p,
+              jobs: snap.docs.map((d) => ({
+                id: d.id,
+                ...(d.data() as Omit<JobPost, "id">),
+              })),
+            }));
+          }),
           onSnapshot(doc(db, "site", "content"), (snap) => {
             if (cancelled || !snap.exists()) return;
             setContent((p) => ({ ...p, siteContent: snap.data() as SiteContent }));
@@ -177,7 +195,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
 
   const mutate = useCallback(
     async (
-      collection: "events" | "gallery" | "committee" | "announcements",
+      collection: "events" | "gallery" | "committee" | "announcements" | "jobs",
       op: "add" | "update" | "remove",
       id: string | null,
       data?: Record<string, unknown>,
@@ -214,6 +232,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       gallery: content.gallery,
       committee: content.committee,
       announcements: content.announcements,
+      jobs: content.jobs,
       siteContent: content.siteContent,
       loading,
       addEvent: (e) => mutate("events", "add", null, e as Record<string, unknown>),
@@ -237,6 +256,13 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       updateAnnouncement: (id, a) =>
         mutate("announcements", "update", id, a as Record<string, unknown>),
       removeAnnouncement: (id) => mutate("announcements", "remove", id),
+      addJob: (j) =>
+        mutate("jobs", "add", null, {
+          ...j,
+          createdAt: new Date().toISOString(),
+        } as Record<string, unknown>),
+      updateJob: (id, j) => mutate("jobs", "update", id, j as Record<string, unknown>),
+      removeJob: (id) => mutate("jobs", "remove", id),
       saveSiteContent: async (c) => {
         if (!isFirebaseConfigured || !db) {
           setContent((prev) => ({ ...prev, siteContent: c }));

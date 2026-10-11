@@ -31,3 +31,30 @@ export function whatsappChatLink(
   const text = encodeURIComponent(whatsappGreeting(senderName, senderBatch));
   return `https://wa.me/${number}?text=${text}`;
 }
+
+/** Pre-filled inquiry message for a job-board circular. */
+export function jobInquiryMessage(
+  jobTitle: string,
+  company: string,
+  senderName?: string,
+  senderBatch?: string,
+): string {
+  const who =
+    senderName && senderBatch
+      ? `Ami ${senderName}, Batch ${senderBatch}`
+      : "Ami ekjon BCBHS alumnus";
+  return `Assalamu Alaikum! ${who} — BCBHS Alumni portal er Job Board e apnar "${jobTitle}" (${company}) circular ta dekhlam. Ektu details jante chai.`;
+}
+
+/** wa.me deep link that opens a chat about a specific job post. */
+export function jobWhatsappLink(
+  posterWhatsapp: string,
+  jobTitle: string,
+  company: string,
+  senderName?: string,
+  senderBatch?: string,
+): string {
+  const number = normalizeWhatsAppNumber(posterWhatsapp);
+  const text = encodeURIComponent(jobInquiryMessage(jobTitle, company, senderName, senderBatch));
+  return `https://wa.me/${number}?text=${text}`;
+}

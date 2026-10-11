@@ -151,6 +151,46 @@ service cloud.firestore {
       allow update, delete: if isSuperAdmin();
     }
 
+    function jobValid() {
+      // A job circular must carry sane core fields and a contact number.
+      return request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.company is string
+        && request.resource.data.company.size() > 0
+        && request.resource.data.company.size() <= 120
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 5000
+        && request.resource.data.whatsapp is string
+        && request.resource.data.whatsapp.size() >= 8
+        && request.resource.data.whatsapp.size() <= 20
+        && request.resource.data.postedBy is string;
+    }
+
+    match /jobs/{jobId} {
+      // Job Board: visible ONLY to registered (signed-in) members.
+      allow read: if signedIn();
+
+      // Any registered member may post a job circular; the post must be
+      // attributed to the author's own uid.
+      allow create: if signedIn()
+        && request.resource.data.postedBy == request.auth.uid
+        && request.resource.data.keys().hasAll(['title', 'company', 'location', 'jobType', 'description', 'whatsapp', 'postedBy', 'posterName', 'posterBatch', 'createdAt'])
+        && jobValid();
+
+      // The author may edit their own post; staff may moderate any post.
+      // Ownership (postedBy) can never change hands.
+      allow update: if signedIn()
+        && (resource.data.postedBy == request.auth.uid || isAdmin())
+        && request.resource.data.postedBy == resource.data.postedBy
+        && jobValid();
+
+      // The author or staff may remove a post.
+      allow delete: if signedIn()
+        && (resource.data.postedBy == request.auth.uid || isAdmin());
+    }
+
     match /site/{docId} {
       // Public site content (About page) — readable by all, writable by super admin only.
       allow read: if true;

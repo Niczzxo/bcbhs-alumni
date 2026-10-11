@@ -133,6 +133,32 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
 
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
 
+/** Job types offered on the Job Board posting form. */
+export const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Remote"] as const;
+
+/**
+ * A job circular posted by a member on the Job Board.
+ * Only registered (signed-in) members may view or post — enforced by
+ * firestore.rules (`jobs` collection). The poster's WhatsApp number is
+ * public on the card so any member can start a chat with one tap.
+ */
+export interface JobPost {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  jobType: string; // one of JOB_TYPES
+  salary?: string;
+  deadline?: string; // YYYY-MM-DD
+  description: string;
+  requirements?: string;
+  whatsapp: string; // applicant contact number (public)
+  postedBy: string; // uid of the posting member
+  posterName: string;
+  posterBatch: string;
+  createdAt: string; // ISO date
+}
+
 /** Granular admin permissions — toggled by the super admin. */
 export const PERMISSIONS: { key: string; label: string; hint: string }[] = [
   { key: "approve_members", label: "Approve Members", hint: "Verify & approve new registrations" },

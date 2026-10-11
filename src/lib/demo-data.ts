@@ -5,7 +5,7 @@
 /*  TODO: replace with live Firestore reads once the project is live.  */
 /* ------------------------------------------------------------------ */
 
-import type { UserProfile, PortalEvent, CommitteeSeat, GalleryPhoto, AnnouncementItem } from "./types";
+import type { UserProfile, PortalEvent, CommitteeSeat, GalleryPhoto, AnnouncementItem, JobPost } from "./types";
 
 export const DEMO_USERS: UserProfile[] = [
   {
@@ -344,5 +344,62 @@ export const DEMO_ANNOUNCEMENTS: AnnouncementItem[] = [
     title: "Grand Reunion 2026 announced",
     body: "Mark your calendars — December 25, 2026 at the BCBHS School Field. Registration opens soon.",
     createdAt: "2026-10-01T00:00:00.000Z",
+  },
+];
+
+/* ------------------------- job board (placeholder) --------------------- */
+/* TODO: move to Firestore `jobs` collection. Only signed-in members may  */
+/* read/write — see firestore.rules.                                      */
+
+export const DEMO_JOBS: JobPost[] = [
+  {
+    id: "j-1",
+    title: "Junior Software Engineer",
+    company: "Brain Station 23",
+    location: "Dhaka",
+    jobType: "Full-time",
+    salary: "৳45,000 – ৳60,000",
+    deadline: "2026-11-30",
+    description:
+      "We are hiring a junior software engineer for our fintech team. You will build and maintain web applications with React and Node.js, work closely with senior engineers, and ship features used by millions.",
+    requirements: "• 1+ year of React/Node.js experience\n• Good English communication\n• BCBHS alumni preferred",
+    whatsapp: "01712345678",
+    postedBy: "u-1",
+    posterName: "Tanvir Ahmed",
+    posterBatch: "2015",
+    createdAt: "2026-10-08T00:00:00.000Z",
+  },
+  {
+    id: "j-2",
+    title: "Marketing Executive",
+    company: "Grameenphone",
+    location: "Dhaka",
+    jobType: "Full-time",
+    salary: "৳50,000+",
+    deadline: "2026-11-15",
+    description:
+      "Looking for a dynamic marketing executive to lead campus outreach and digital campaigns for our youth segment. Fresh graduates with strong communication skills are welcome to apply.",
+    requirements: "• Bachelor's degree in any discipline\n• Strong presentation skills\n• Willing to travel",
+    whatsapp: "01812345678",
+    postedBy: "u-admin",
+    posterName: "Arifa Sultana",
+    posterBatch: "2012",
+    createdAt: "2026-10-05T00:00:00.000Z",
+  },
+  {
+    id: "j-3",
+    title: "Remote UI/UX Designer (Internship)",
+    company: "Sheba Platform",
+    location: "Remote",
+    jobType: "Internship",
+    salary: "৳20,000",
+    description:
+      "3-month paid remote internship for a UI/UX designer. You will redesign core user flows, build a design system in Figma, and work with our product team. High chance of a full-time offer.",
+    requirements: "• Figma portfolio\n• Basic understanding of design systems",
+    whatsapp: "01912345678",
+    postedBy: "u-2",
+    posterName: "Nusrat Jahan",
+    posterBatch: "2018",
+    createdAt: "2026-10-02T00:00:00.000Z",
   },
 ];
