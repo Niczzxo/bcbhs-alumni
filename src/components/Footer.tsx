@@ -9,6 +9,7 @@ import { NAV_LINKS } from "@/lib/site";
 export default function Footer() {
   // Year is computed client-side so static prerendering stays deterministic.
   const [year, setYear] = useState(2026);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time client hydration
   useEffect(() => setYear(new Date().getFullYear()), []);
   return (
     <footer className="border-t border-gold/20 bg-[#070b1c]">

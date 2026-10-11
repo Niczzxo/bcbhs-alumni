@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { PLACEHOLDER_STATS } from "@/lib/site";
 import Reveal from "./Reveal";
