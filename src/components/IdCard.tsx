@@ -65,22 +65,22 @@ function CardFront({ member }: { member: UserProfile }) {
         <CardBackground />
 
         {/* everything centered */}
-        <div className="relative flex h-full flex-col items-center px-[6cqw] pb-[4cqw] pt-[5cqw] text-center">
+        <div className="relative flex h-full flex-col items-center px-[6cqw] pb-[5cqw] pt-[6cqw] text-center">
           {/* logo — centered */}
-          <span className="relative block h-[11cqw] w-[11cqw] overflow-hidden rounded-full ring-2 ring-[#d4a94e]">
+          <span className="relative block h-[12cqw] w-[12cqw] overflow-hidden rounded-full ring-2 ring-[#d4a94e]">
             <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
           </span>
           {/* association name — centered */}
-          <p className="font-display mt-[1.8cqw] text-[5.4cqw] font-extrabold tracking-[0.16em] text-white">
+          <p className="font-display mt-[2cqw] text-[5.4cqw] font-extrabold tracking-[0.16em] text-white">
             BCBHS <span className="text-gold-gradient">ALUMNI</span>
           </p>
-          <p className="mt-[0.6cqw] text-[1.9cqw] uppercase tracking-[0.32em] text-white/55">
+          <p className="mt-[0.8cqw] text-[1.9cqw] uppercase tracking-[0.32em] text-white/55">
             Official ID · Est. 2023
           </p>
 
           {/* member photo — small, gold framed */}
-          <div className="foil-frame mt-[2.6cqw] rounded-xl p-[1.5cqw] shadow-[0_12px_36px_rgba(0,0,0,0.55)]">
-            <div className="relative h-[24cqw] w-[20cqw] overflow-hidden rounded-[8px] border-2 border-[#0a0f24] bg-[#0a0f24]">
+          <div className="foil-frame mt-[3cqw] rounded-xl p-[1.5cqw] shadow-[0_12px_36px_rgba(0,0,0,0.55)]">
+            <div className="relative h-[30cqw] w-[25cqw] overflow-hidden rounded-[8px] border-2 border-[#0a0f24] bg-[#0a0f24]">
               {member.photoURL ? (
                 <Image src={member.photoURL} alt={member.name} fill className="object-cover" />
               ) : (
@@ -94,20 +94,20 @@ function CardFront({ member }: { member: UserProfile }) {
           </div>
 
           {/* member name */}
-          <h2 className="font-display mt-[2cqw] text-[7.4cqw] font-bold leading-none text-white">
+          <h2 className="font-display mt-[2.4cqw] text-[7.4cqw] font-bold leading-none text-white">
             {member.name}
           </h2>
 
-          {/* official position — admin-assigned only */}
+          {/* official position — big, right below the name (admin-assigned only) */}
           {member.position && (
-            <span className="mt-[1.6cqw] rounded-full bg-[#d4a94e] px-[4.5cqw] py-[1cqw] text-[2.3cqw] font-extrabold uppercase tracking-[0.24em] text-[#0a0f24]">
-              ★ {member.position}
-            </span>
+            <p className="font-display mt-[1.8cqw] text-[4.4cqw] font-extrabold uppercase leading-none tracking-[0.18em] text-[#f0cd7e]">
+              {member.position}
+            </p>
           )}
 
           {/* details register */}
-          <div className="mt-[2.8cqw] w-full rounded-2xl border border-white/12 bg-white/[0.05] p-[4cqw] backdrop-blur-md">
-            <div className="grid grid-cols-2 gap-x-[4cqw] gap-y-[2.2cqw]">
+          <div className="mt-[3.4cqw] w-full rounded-2xl border border-white/12 bg-white/[0.05] p-[5cqw] backdrop-blur-md">
+            <div className="grid grid-cols-2 gap-x-[4cqw] gap-y-[3cqw]">
               <div>
                 <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Member ID</p>
                 <p className="mt-[0.5cqw] font-mono text-[2.6cqw] font-bold tracking-wide text-white">
