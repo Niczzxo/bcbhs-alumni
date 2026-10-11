@@ -1,26 +1,131 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ------------------------------------------------------------------ */
+/*  BCBHS Alumni design tokens — navy & gold drawn from the alumni logo */
+/* ------------------------------------------------------------------ */
+@theme {
+  --color-ink: #0a0f24; /* deep navy (page background) */
+  --color-ink-2: #10173a; /* raised navy surface */
+  --color-ink-3: #182052; /* navy for cards / borders */
+  --color-gold: #d4a94e; /* logo gold */
+  --color-gold-2: #f0cd7e; /* bright gold highlight */
+  --color-gold-deep: #9c7422; /* dark gold for gradients */
+  --color-ivory: #f7f3e8; /* warm off-white text */
+  --color-muted: #a8aec9; /* muted bluish-grey text */
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-ink);
+  color: var(--color-ivory);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Gold gradient text — signature headline treatment */
+.text-gold-gradient {
+  background: linear-gradient(115deg, #f5dfa0 0%, #d4a94e 38%, #f0cd7e 55%, #9c7422 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Thin gold rule with center flourish (divider motif) */
+.gold-rule {
+  background: linear-gradient(90deg, transparent, #d4a94e 30%, #f0cd7e 50%, #d4a94e 70%, transparent);
+  height: 1px;
+}
+
+/* Sunburst echo of the alumni logo — decorative conic rays */
+.sunburst {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(212, 169, 78, 0.06) 0deg 2deg,
+    transparent 2deg 9deg
+  );
+  -webkit-mask-image: radial-gradient(circle, black 0%, transparent 68%);
+  mask-image: radial-gradient(circle, black 0%, transparent 68%);
+}
+
+/* Double-ring seal motif (echoes the circular emblem) */
+.seal-ring {
+  border: 1px solid rgba(212, 169, 78, 0.35);
+  box-shadow: inset 0 0 0 6px rgba(10, 15, 36, 0.9), inset 0 0 0 7px rgba(212, 169, 78, 0.18);
+}
+
+/* Slow float for decorative elements */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+.animate-drift {
+  animation: drift 7s ease-in-out infinite;
+}
+
+/* Scroll cue bounce */
+@keyframes cue {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(10px);
+    opacity: 0.4;
+  }
+}
+.animate-cue {
+  animation: cue 2.2s ease-in-out infinite;
+}
+
+/* Shimmer sweep across gold buttons */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(240%) skewX(-18deg);
+  }
+}
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: shimmer 3.2s ease-in-out infinite;
+}
+
+/* Subtle grain so large navy fields never look flat */
+.grain {
+  position: relative;
+}
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 26px 26px;
 }

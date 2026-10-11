@@ -1,0 +1,57 @@
+import Reveal from "./Reveal";
+
+/* Placeholder committee — real names/photos come from the admin panel later. */
+const SEATS = [
+  { role: "President", name: "To be announced", note: "সভাপতি" },
+  { role: "Vice President", name: "To be announced", note: "সহ-সভাপতি" },
+  { role: "General Secretary", name: "To be announced", note: "সাধারণ সম্পাদক" },
+  { role: "Director", name: "To be announced", note: "পরিচালক" },
+];
+
+/** Leadership strip — who steers the alumni community. */
+export default function Committee() {
+  return (
+    <section id="committee" className="grain relative overflow-hidden border-y border-gold/20 bg-ink-2 py-24">
+      <div className="sunburst pointer-events-none absolute -left-40 top-0 h-[500px] w-[500px]" />
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
+        <Reveal className="mb-14 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gold">
+            Leadership
+          </p>
+          <h2 className="font-display mt-4 text-4xl font-bold text-ivory sm:text-5xl">
+            Guided by <span className="text-gold-gradient">our own</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-muted">
+            The alumni committee — elected from the community — keeps the spirit
+            alive: events, welfare, and the bond between batches.
+          </p>
+          <div className="gold-rule mx-auto mt-6 w-56" />
+        </Reveal>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {SEATS.map((s, i) => (
+            <Reveal key={s.role} delay={i * 0.12}>
+              <article className="group rounded-3xl border border-gold/15 bg-ink p-8 text-center transition-all duration-500 hover:-translate-y-2 hover:border-gold/50 hover:shadow-[0_20px_60px_rgba(212,169,78,0.15)]">
+                {/* avatar placeholder inside a seal ring */}
+                <div className="seal-ring mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-ink-3">
+                  <span className="font-display text-3xl font-bold text-gold/70">
+                    {s.role.charAt(0)}
+                  </span>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-gold">
+                  {s.role}
+                </p>
+                <p className="font-display mt-2 text-xl font-semibold text-ivory">{s.name}</p>
+                <p className="mt-1 text-sm text-muted">{s.note}</p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+
+        <p className="mt-10 text-center text-xs text-muted/70">
+          Committee seats are filled from verified alumni — managed in the admin panel.
+        </p>
+      </div>
+    </section>
+  );
+}
