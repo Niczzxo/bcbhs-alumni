@@ -19,9 +19,11 @@ export default function MemoriesPage() {
   const router = useRouter();
   const isGuest = !user;
   const photos = isGuest ? gallery.slice(0, PREVIEW_COUNT) : gallery;
-  // Split across two counter-sliding rows for a living wall effect.
-  const rowA = photos.filter((_, i) => i % 2 === 0);
-  const rowB = photos.filter((_, i) => i % 2 === 1);
+  // Deal photos across four marquees: left, right, up, down.
+  // (A marquee with no photos renders nothing, so fall back to the full set.)
+  const groups: typeof photos[] = [[], [], [], []];
+  photos.forEach((p, i) => groups[i % 4].push(p));
+  const filled = groups.map((g) => (g.length > 0 ? g : photos));
 
   return (
     <>
@@ -42,15 +44,25 @@ export default function MemoriesPage() {
               No memories yet — check back soon.
             </p>
           ) : (
-            <div className="-mx-5 space-y-5 sm:-mx-8">
-              <Reveal>
-                <MemoriesMarquee photos={rowA} duration={50} />
-              </Reveal>
-              {rowB.length > 0 && (
+            <div className="space-y-5">
+              <div className="-mx-5 sm:-mx-8">
                 <Reveal>
-                  <MemoriesMarquee photos={rowB} reverse duration={60} />
+                  <MemoriesMarquee photos={filled[0]} direction="left" duration={50} />
                 </Reveal>
-              )}
+              </div>
+              <div className="-mx-5 sm:-mx-8">
+                <Reveal>
+                  <MemoriesMarquee photos={filled[1]} direction="right" duration={60} />
+                </Reveal>
+              </div>
+              <div className="mx-auto grid max-w-3xl gap-5 pt-5 sm:grid-cols-2">
+                <Reveal>
+                  <MemoriesMarquee photos={filled[2]} direction="up" duration={45} />
+                </Reveal>
+                <Reveal>
+                  <MemoriesMarquee photos={filled[3]} direction="down" duration={55} />
+                </Reveal>
+              </div>
             </div>
           )}
 
