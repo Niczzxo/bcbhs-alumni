@@ -18,7 +18,7 @@ function MemberPhone({ userId }: { userId: string }) {
 
 /** Admin panel — approval queue + approved members. */
 export default function AdminPage() {
-  const { members, approveMember, rejectMember, setPosition, hasPermission } = useAuth();
+  const { members, approveMember, rejectMember, setPosition, setGuestVisible, hasPermission } = useAuth();
   const canApprove = hasPermission("approve_members");
   const canSeeData = hasPermission("view_member_data");
 
@@ -130,6 +130,16 @@ export default function AdminPage() {
                         ★ {m.position}
                       </span>
                     )}
+                    <label className="ml-auto flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted hover:text-gold-2">
+                      <input
+                        type="checkbox"
+                        checked={!!m.guestVisible}
+                        onChange={(e) => setGuestVisible(m.id, e.target.checked)}
+                        aria-label={`Show ${m.name} in the public guest directory`}
+                        className="h-4 w-4 accent-[#d4a94e]"
+                      />
+                      Guest view
+                    </label>
                   </div>
                 )}
               </div>

@@ -1,25 +1,70 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import MemberCard from "@/components/MemberCard";
 import Reveal from "@/components/Reveal";
 import { useDirectory } from "@/lib/data";
+import { useAuth } from "@/lib/auth-context";
+import { isFirebaseConfigured, db } from "@/lib/firebase";
+import type { UserProfile } from "@/lib/types";
 import { BLOOD_GROUPS, BD_DISTRICTS, BATCH_YEARS } from "@/lib/types";
 
 const inputCls =
   "w-full rounded-xl border border-ivory/15 bg-ink px-4 py-2.5 text-sm text-ivory outline-none transition-colors focus:border-gold/60";
 
-/** Searchable / filterable alumni directory. */
+/** How many picked members a logged-out guest may preview. */
+const GUEST_PREVIEW_COUNT = 6;
+
+/** Searchable / filterable alumni directory. Guests see an admin-picked preview. */
 export default function DirectoryPage() {
-  const members = useDirectory();
+  const { user } = useAuth();
+  const router = useRouter();
+  const approvedMembers = useDirectory();
+  const isGuest = !user;
+  const [guestMembers, setGuestMembers] = useState<UserProfile[] | null>(null);
   const [q, setQ] = useState("");
   const [batch, setBatch] = useState("");
   const [district, setDistrict] = useState("");
   const [profession, setProfession] = useState("");
   const [blood, setBlood] = useState("");
+
+  /* Guests: show only the admin-picked preview members.
+     Live mode fetches them from Firestore; demo mode filters the local list. */
+  useEffect(() => {
+    if (!isGuest || !isFirebaseConfigured || !db) {
+      setGuestMembers(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { collection, query, where, limit, getDocs } = await import("firebase/firestore");
+        const snap = await getDocs(
+          query(collection(db, "users"), where("guestVisible", "==", true), limit(GUEST_PREVIEW_COUNT * 2))
+        );
+        const list = snap.docs
+          .map((d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) }))
+          .filter((m) => m.status === "approved" && m.guestVisible)
+          .slice(0, GUEST_PREVIEW_COUNT);
+        if (!cancelled) setGuestMembers(list);
+      } catch {
+        if (!cancelled) setGuestMembers([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isGuest]);
+
+  const members = useMemo(() => {
+    if (!isGuest) return approvedMembers;
+    if (isFirebaseConfigured) return guestMembers ?? [];
+    return approvedMembers.filter((m) => m.guestVisible).slice(0, GUEST_PREVIEW_COUNT);
+  }, [isGuest, approvedMembers, guestMembers]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -42,7 +87,11 @@ export default function DirectoryPage() {
         <PageHero
           eyebrow="Find your people"
           title={<>Alumni <span className="text-gold-gradient">Directory</span></>}
-          subtitle={`${members.length} verified members — search by name, batch, district, profession or blood group.`}
+          subtitle={
+            isGuest
+              ? "A preview of our community — log in to search every verified member."
+              : `${members.length} verified members — search by name, batch, district, profession or blood group.`
+          }
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           <Reveal className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
@@ -70,9 +119,11 @@ export default function DirectoryPage() {
             )}
           </Reveal>
 
-          <p className="mt-8 text-sm text-muted">
-            Showing <span className="font-semibold text-gold-2">{filtered.length}</span> of {members.length} members
-          </p>
+          {!isGuest && (
+            <p className="mt-8 text-sm text-muted">
+              Showing <span className="font-semibold text-gold-2">{filtered.length}</span> of {members.length} members
+            </p>
+          )}
           {filtered.length === 0 ? (
             <div className="mt-8 rounded-3xl border border-ivory/10 bg-ink-2 p-14 text-center">
               <p className="font-display text-xl font-bold text-ivory">No members match your filters</p>
@@ -82,6 +133,19 @@ export default function DirectoryPage() {
             <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((m, i) => <MemberCard key={m.id} member={m} delay={Math.min(i % 6, 5) * 0.06} />)}
             </div>
+          )}
+          {isGuest && (
+            <Reveal className="mt-12 text-center">
+              <button
+                onClick={() => router.push("/login?next=/directory")}
+                className="rounded-full border border-gold/40 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:scale-105 hover:bg-gold/10 hover:shadow-[0_0_30px_rgba(212,169,78,0.25)]"
+              >
+                See more directory members
+              </button>
+              <p className="mt-4 text-xs text-muted">
+                Log in to search the full verified directory.
+              </p>
+            </Reveal>
           )}
         </div>
       </main>

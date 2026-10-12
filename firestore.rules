@@ -4,8 +4,10 @@ rules_version = '2';
 /*  BCBHS Alumni Portal — Firestore security rules.                    */
 /*                                                                     */
 /*  Model:                                                             */
-/*  - users/{uid}: member profiles. Public reads are limited to        */
-/*    approved profiles; owners and staff can read any profile.        */
+/*  - users/{uid}: member profiles. Logged-out guests may read only    */
+/*    approved profiles flagged guestVisible (the admin-picked public  */
+/*    directory preview); signed-in members may read all approved      */
+/*    profiles; owners and staff can read any profile.                 */
 /*  - users_private/{uid}: phone numbers ONLY. Readable by the owner   */
 /*    and staff (admin / super_admin); writable by the owner only.     */
 /*    The `phone` field is banned from `users` docs by validation.     */
@@ -70,6 +72,11 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['position']);
     }
 
+    function onlyGuestVisibleChanged() {
+      // The guest-directory preview flag is toggled by staff only.
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['guestVisible']);
+    }
+
     function onlyProfileFieldsChanged() {
       // Members editing their own profile: safe fields only.
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(profileEditableFields());
@@ -82,13 +89,15 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      // Approved profiles are readable by any signed-in member; owners and
-      // admins can always read their own / any profile.
-      allow read: if signedIn() && (
-        resource.data.status == 'approved' ||
-        request.auth.uid == userId ||
-        isAdmin()
-      );
+      // Reads: the admin-picked guest preview (approved + guestVisible) is
+      // public; approved profiles are readable by any signed-in member;
+      // owners and admins can always read their own / any profile.
+      allow read: if (resource.data.status == 'approved' && resource.data.guestVisible == true)
+        || (signedIn() && (
+          resource.data.status == 'approved' ||
+          request.auth.uid == userId ||
+          isAdmin()
+        ));
 
       // Registration: a signed-in user creates ONLY their own doc, always as
       // a pending plain member. Phone numbers may NEVER live here — they
@@ -107,6 +116,10 @@ service cloud.firestore {
       // Positions: staff with the approval permission may assign / clear a
       // member's official position after manual verification.
       allow update: if can('approve_members') && onlyPositionChanged() && !('phone' in request.resource.data);
+
+      // Guest preview: staff with the approval permission may toggle which
+      // approved members appear in the public (logged-out) directory.
+      allow update: if can('approve_members') && onlyGuestVisibleChanged() && !('phone' in request.resource.data);
 
       // Self-service: a member may edit their own profile fields only.
       allow update: if signedIn()

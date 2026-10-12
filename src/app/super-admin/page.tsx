@@ -11,7 +11,7 @@ import type { MemberRole, UserProfile } from "@/lib/types";
 
 /** Super admin — full control: roles, granular permissions, stats. */
 export default function SuperAdminPage() {
-  const { user, members, setPermissions, setRole, setPosition, approveMember, rejectMember } = useAuth();
+  const { user, members, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember } = useAuth();
 
   const approved = members.filter((m) => m.status === "approved");
   const pending = members.filter((m) => m.status === "pending");
@@ -113,6 +113,16 @@ export default function SuperAdminPage() {
                       ★ {m.position}
                     </span>
                   )}
+                  <label className="ml-auto flex cursor-pointer items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted hover:text-gold-2">
+                    <input
+                      type="checkbox"
+                      checked={!!m.guestVisible}
+                      onChange={(e) => setGuestVisible(m.id, e.target.checked)}
+                      aria-label={`Show ${m.name} in the public guest directory`}
+                      className="h-4 w-4 accent-[#d4a94e]"
+                    />
+                    Guest view
+                  </label>
                 </div>
                 <p className="mt-1.5 text-[11px] text-muted/70">
                   Official positions are manually verified — allow up to 7 days.

@@ -64,6 +64,7 @@ export const DEMO_USERS: UserProfile[] = [
     role: "member",
     permissions: [],
     memberId: "BCBHS-2015-0003",
+    guestVisible: true,
     createdAt: "2024-05-01T00:00:00.000Z",
   },
   {
@@ -83,6 +84,7 @@ export const DEMO_USERS: UserProfile[] = [
     role: "member",
     permissions: [],
     memberId: "BCBHS-2018-0004",
+    guestVisible: true,
     createdAt: "2024-06-12T00:00:00.000Z",
   },
   {
@@ -103,6 +105,7 @@ export const DEMO_USERS: UserProfile[] = [
     role: "member",
     permissions: [],
     memberId: "BCBHS-2012-0005",
+    guestVisible: true,
     createdAt: "2024-03-20T00:00:00.000Z",
   },
   {
@@ -122,6 +125,7 @@ export const DEMO_USERS: UserProfile[] = [
     role: "member",
     permissions: [],
     memberId: "BCBHS-2020-0006",
+    guestVisible: true,
     createdAt: "2024-08-02T00:00:00.000Z",
   },
   {
@@ -141,6 +145,7 @@ export const DEMO_USERS: UserProfile[] = [
     role: "member",
     permissions: [],
     memberId: "BCBHS-2016-0007",
+    guestVisible: true,
     createdAt: "2024-04-15T00:00:00.000Z",
   },
   {
@@ -161,6 +166,7 @@ export const DEMO_USERS: UserProfile[] = [
     role: "member",
     permissions: [],
     memberId: "BCBHS-2019-0008",
+    guestVisible: true,
     createdAt: "2024-09-10T00:00:00.000Z",
   },
   {

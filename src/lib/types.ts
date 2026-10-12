@@ -58,6 +58,7 @@ export interface UserProfile {
   company?: string;
   department?: string; // Science | Arts | Commerce — shown on the ID card
   position?: string; // e.g. "President" — set ONLY by admins after manual verification
+  guestVisible?: boolean; // admin-picked: this profile shows in the public (logged-out) directory
   dob?: string; // Date of birth, ISO YYYY-MM-DD — shown on the ID card
   status: MemberStatus;
   role: MemberRole;

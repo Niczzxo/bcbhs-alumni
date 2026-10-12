@@ -57,6 +57,8 @@ interface AuthContextValue {
   setRole: (id: string, role: UserProfile["role"]) => Promise<void>;
   /** Assign / clear a member's official position (admin only, manually verified). */
   setPosition: (id: string, position: string) => Promise<void>;
+  /** Toggle whether a member shows in the public (logged-out) directory (staff only). */
+  setGuestVisible: (id: string, visible: boolean) => Promise<void>;
   updateProfile: (input: ProfileUpdateInput) => Promise<{ ok: boolean; error?: string }>;
   hasPermission: (perm: string) => boolean;
   isAdmin: boolean;
@@ -363,6 +365,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await updateDoc(doc(db, "users", id), { position: clean ?? null }).catch(() => undefined);
   }, []);
 
+  const setGuestVisible = useCallback(async (id: string, visible: boolean) => {
+    if (!isFirebaseConfigured || !db) {
+      setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, guestVisible: visible } : m)));
+      setUser((u) => (u && u.id === id ? { ...u, guestVisible: visible } : u));
+      return;
+    }
+    const { doc, updateDoc } = await import("firebase/firestore");
+    await updateDoc(doc(db, "users", id), { guestVisible: visible }).catch(() => undefined);
+  }, []);
+
   const hasPermission = useCallback(
     (perm: string) => {
       if (!user) return false;
@@ -441,12 +453,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPermissions,
       setRole,
       setPosition,
+      setGuestVisible,
       updateProfile,
       hasPermission,
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, logout, register, approveMember, rejectMember, setPermissions, setRole, setPosition, updateProfile, hasPermission],
+    [user, members, loading, login, logout, register, approveMember, rejectMember, setPermissions, setRole, setPosition, setGuestVisible, updateProfile, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
