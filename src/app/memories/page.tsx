@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
+import MemoriesMarquee from "@/components/MemoriesMarquee";
 import { useContent } from "@/lib/content-context";
 import { useAuth } from "@/lib/auth-context";
 
@@ -19,6 +19,9 @@ export default function MemoriesPage() {
   const router = useRouter();
   const isGuest = !user;
   const photos = isGuest ? gallery.slice(0, PREVIEW_COUNT) : gallery;
+  // Split across two counter-sliding rows for a living wall effect.
+  const rowA = photos.filter((_, i) => i % 2 === 0);
+  const rowB = photos.filter((_, i) => i % 2 === 1);
 
   return (
     <>
@@ -39,24 +42,15 @@ export default function MemoriesPage() {
               No memories yet — check back soon.
             </p>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {photos.map((photo, i) => (
-                <Reveal key={photo.id} delay={Math.min(i, 5) * 0.06}>
-                  <figure className="group relative h-64 overflow-hidden rounded-3xl border border-ivory/10">
-                    <Image
-                      src={photo.src}
-                      alt={photo.caption}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      unoptimized={photo.src.startsWith("data:")}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent" />
-                    <figcaption className="absolute bottom-0 p-5 text-sm font-medium text-ivory">
-                      {photo.caption}
-                    </figcaption>
-                  </figure>
+            <div className="-mx-5 space-y-5 sm:-mx-8">
+              <Reveal>
+                <MemoriesMarquee photos={rowA} duration={50} />
+              </Reveal>
+              {rowB.length > 0 && (
+                <Reveal>
+                  <MemoriesMarquee photos={rowB} reverse duration={60} />
                 </Reveal>
-              ))}
+              )}
             </div>
           )}
 

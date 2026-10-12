@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Reveal from "./Reveal";
+import MemoriesMarquee from "./MemoriesMarquee";
 import { useContent } from "@/lib/content-context";
 import { useAuth } from "@/lib/auth-context";
 
@@ -38,32 +38,20 @@ export default function MemoriesSection() {
           <div className="gold-rule mx-auto mt-6 w-56" />
         </Reveal>
 
-        {preview.length === 0 ? (
+        {preview.length === 0 && (
           <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
             No memories yet — check back soon.
           </p>
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {preview.map((photo, i) => (
-              <Reveal key={photo.id} delay={Math.min(i, 5) * 0.08}>
-                <figure className="group relative h-64 overflow-hidden rounded-3xl border border-ivory/10">
-                  <Image
-                    src={photo.src}
-                    alt={photo.caption}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    unoptimized={photo.src.startsWith("data:")}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent" />
-                  <figcaption className="absolute bottom-0 p-5 text-sm font-medium text-ivory">
-                    {photo.caption}
-                  </figcaption>
-                </figure>
-              </Reveal>
-            ))}
-          </div>
         )}
+      </div>
 
+      {preview.length > 0 && (
+        <Reveal>
+          <MemoriesMarquee photos={preview} />
+        </Reveal>
+      )}
+
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="mt-12 text-center">
           <button
             onClick={handleSeeMore}
