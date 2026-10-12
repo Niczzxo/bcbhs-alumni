@@ -28,7 +28,7 @@ export const NAV_LINKS = [
 /** Public navbar — visitors who are not verified members. */
 export const PUBLIC_NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Memories", href: "/#memories" },
+  { label: "Memories", href: "/memories" },
   { label: "Events", href: "/events" },
   { label: "Directory", href: "/directory" },
   { label: "Contact", href: "/contact" },
@@ -38,7 +38,7 @@ export const PUBLIC_NAV_LINKS = [
 /** Navbar for verified (approved) members. Profile renders after the More dropdown. */
 export const MEMBER_NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Memories", href: "/#memories" },
+  { label: "Memories", href: "/memories" },
   { label: "Gallery", href: "/gallery" },
   { label: "Events", href: "/events" },
   { label: "Contacts", href: "/contact" },

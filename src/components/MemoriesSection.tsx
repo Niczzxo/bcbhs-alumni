@@ -15,9 +15,9 @@ export default function MemoriesSection() {
 
   const handleSeeMore = () => {
     if (user) {
-      router.push("/gallery");
+      router.push("/memories");
     } else {
-      router.push("/login?next=/gallery");
+      router.push("/login?next=/memories");
     }
   };
 
