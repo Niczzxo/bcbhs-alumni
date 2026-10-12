@@ -22,7 +22,7 @@ export default function MemoriesSection() {
   };
 
   return (
-    <section className="relative overflow-hidden py-24 sm:py-32">
+    <section id="memories" className="relative overflow-hidden py-24 sm:py-32 scroll-mt-20">
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="mb-14 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gold">
