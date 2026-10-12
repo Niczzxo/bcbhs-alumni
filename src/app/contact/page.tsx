@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { WhatsAppIcon } from "@/components/Footer";
+import { useAuth } from "@/lib/auth-context";
 import { SITE_FACEBOOK, SITE_INSTAGRAM, SITE_WHATSAPP, SITE_EMAIL } from "@/lib/site";
 
 const FacebookIcon = () => (
@@ -30,6 +31,9 @@ const MailIcon = () => (
 
 /** Contact the BCBHS Alumni Association — official channels. */
 export default function ContactPage() {
+  const { user } = useAuth();
+  // WhatsApp community link is for verified (approved) members only: hidden from guests and pending accounts.
+  const isVerified = user?.status === "approved";
   const channels = [
     {
       icon: <MailIcon />,
@@ -52,13 +56,18 @@ export default function ContactPage() {
       href: SITE_INSTAGRAM,
       blurb: "Moments in gold — follow the visual story of the community.",
     },
-    {
-      icon: <WhatsAppIcon />,
-      title: "WhatsApp community",
-      detail: "Members-only group",
-      href: SITE_WHATSAPP,
-      blurb: "Daily adda, urgent notices, and blood requests — for verified members.",
-    },
+    // WhatsApp community link is verified-members-only: hidden from logged-out guests and pending accounts.
+    ...(isVerified
+      ? [
+          {
+            icon: <WhatsAppIcon />,
+            title: "WhatsApp community",
+            detail: "Members-only group",
+            href: SITE_WHATSAPP,
+            blurb: "Daily adda, urgent notices, and blood requests — for verified members.",
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -71,7 +80,7 @@ export default function ContactPage() {
           subtitle="Questions about membership, events, or verification — reach us on any official channel."
         />
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className={`grid gap-6 sm:grid-cols-2 ${isVerified ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
             {channels.map((c, i) => (
               <Reveal key={c.title} delay={i * 0.08} className="h-full">
                 <a
