@@ -104,12 +104,12 @@ export default function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* Scroll cue */}
+      {/* Scroll cue — desktop only; on short mobile viewports it would overlap the CTAs */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.4 }}
-        className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 text-center"
+        className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 text-center sm:block"
       >
         <div className="animate-cue mx-auto flex h-12 w-7 items-start justify-center rounded-full border border-gold/50 p-1.5">
           <div className="h-2 w-2 rounded-full bg-gold" />
