@@ -44,11 +44,11 @@ export default function MemberCard({ member, delay = 0 }: { member: UserProfile;
   const href = `/member/${member.memberId ?? member.id}`;
   const showDonor = member.isDonor && member.bloodGroup;
   return (
-    <Reveal delay={delay} className="h-full">
+    <Reveal delay={delay} className="h-full min-w-0">
       <div className="relative h-full">
         <Link
           href={href}
-          className="group flex h-full flex-col rounded-3xl border border-ivory/10 bg-ink-2 p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/40 hover:shadow-[0_18px_50px_rgba(212,169,78,0.12)]"
+          className="card-lift-sm group flex h-full flex-col rounded-3xl border border-ivory/10 bg-ink-2 p-6 transition-all duration-300 hover:border-gold/40 hover:shadow-[0_18px_50px_rgba(212,169,78,0.12)]"
         >
         <div className="flex items-center gap-4">
           <Avatar name={member.name} photoURL={member.photoURL} />

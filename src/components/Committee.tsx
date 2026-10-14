@@ -31,7 +31,7 @@ export default function Committee() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {SEATS.map((s, i) => (
             <Reveal key={s.role} delay={i * 0.12}>
-              <article className="group rounded-3xl border border-gold/15 bg-ink p-8 text-center transition-all duration-500 hover:-translate-y-2 hover:border-gold/50 hover:shadow-[0_20px_60px_rgba(212,169,78,0.15)]">
+              <article className="card-lift group rounded-3xl border border-gold/15 bg-ink p-8 text-center transition-all duration-500 hover:border-gold/50 hover:shadow-[0_20px_60px_rgba(212,169,78,0.15)]">
                 {/* avatar placeholder inside a seal ring */}
                 <div className="seal-ring mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-ink-3">
                   <span className="font-display text-3xl font-bold text-gold/70">

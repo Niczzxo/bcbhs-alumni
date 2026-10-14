@@ -292,3 +292,14 @@ body {
 .marquee:hover .animate-marquee-down {
   animation-play-state: paused;
 }
+
+/* Card hover lift — only where a true hover exists (desktop mouse).
+   On touch screens a tap would otherwise make the card visibly jump. */
+@media (hover: hover) and (pointer: fine) {
+  .card-lift:hover {
+    translate: 0 -0.5rem;
+  }
+  .card-lift-sm:hover {
+    translate: 0 -0.375rem;
+  }
+}

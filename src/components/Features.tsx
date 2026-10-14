@@ -102,7 +102,7 @@ export default function Features() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={(i % 3) * 0.12}>
-              <article className="group relative h-full overflow-hidden rounded-3xl border border-gold/15 bg-ink-2/80 p-8 transition-all duration-500 hover:-translate-y-2 hover:border-gold/50 hover:shadow-[0_20px_60px_rgba(212,169,78,0.18)]">
+              <article className="card-lift group relative h-full overflow-hidden rounded-3xl border border-gold/15 bg-ink-2/80 p-8 transition-all duration-500 hover:border-gold/50 hover:shadow-[0_20px_60px_rgba(212,169,78,0.18)]">
                 {/* corner seal glow on hover */}
                 <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gold/0 blur-2xl transition-all duration-500 group-hover:bg-gold/20" />
                 <div className="seal-ring mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-ink transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110">
