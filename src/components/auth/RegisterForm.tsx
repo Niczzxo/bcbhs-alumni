@@ -206,6 +206,12 @@ export default function RegisterForm({
       >
         {busy ? "Submitting…" : "Submit for Approval"}
       </button>
+      <p className="mt-4 text-center text-xs leading-relaxed text-muted">
+        By registering, you agree to our{" "}
+        <Link href="/terms" className="text-gold-2 hover:underline">Terms of Service</Link>
+        {" "}and{" "}
+        <Link href="/privacy" className="text-gold-2 hover:underline">Privacy Policy</Link>.
+      </p>
       <p className="mt-5 text-center text-xs text-muted">
         Already registered?{" "}
         {onSwitchToLogin ? (

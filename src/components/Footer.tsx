@@ -163,7 +163,15 @@ export default function Footer() {
           <p className="text-xs text-muted/70">
             © {year} BCBHS Alumni Portal. All rights reserved.
           </p>
-          <p className="text-xs uppercase tracking-[0.3em] text-gold/70">Est. 2023 · Bogura</p>
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="text-xs text-muted/70 transition-colors hover:text-gold-2">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="text-xs text-muted/70 transition-colors hover:text-gold-2">
+              Terms of Service
+            </Link>
+            <p className="text-xs uppercase tracking-[0.3em] text-gold/70">Est. 2023 · Bogura</p>
+          </div>
         </div>
       </div>
     </footer>
