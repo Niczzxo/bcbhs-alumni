@@ -53,7 +53,7 @@ export default function IdCardPage() {
             </Reveal>
           ) : (
             <Reveal className="flex flex-col items-center">
-              <div id="id-card-print">
+              <div id="id-card-print" className="w-full max-w-[340px]">
                 <IdCard member={user} verifyUrl={verifyUrl} />
               </div>
               <div className="mt-8 flex flex-wrap justify-center gap-4 print:hidden">
