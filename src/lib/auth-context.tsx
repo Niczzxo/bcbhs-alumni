@@ -14,6 +14,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -87,6 +88,27 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 const DEMO_STORAGE_KEY = "bcbhs-demo-members-v1";
 const DEMO_USER_KEY = "bcbhs-demo-user-id";
+/* Last known live profile, kept in the browser so a page reload can
+ * paint the signed-in UI instantly while Firebase re-verifies the
+ * session in the background. Display-only — Firestore rules still
+ * guard every read and write server-side. */
+const AUTH_CACHE_KEY = "bcbhs-auth-cache-v1";
+
+/* Layout effects run before the browser paints — used for the cache
+ * hydration below so the very first visible frame is already correct.
+ * On the server this falls back to useEffect (no window, no cache). */
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+function readCachedProfile(): UserProfile | null {
+  try {
+    const raw = window.localStorage.getItem(AUTH_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as UserProfile;
+    return parsed && typeof parsed === "object" && typeof parsed.id === "string" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
 
 function nextMemberId(batch: string, members: UserProfile[]): string {
   const seq = members.filter((m) => m.memberId).length + 1;
@@ -142,6 +164,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       /* storage full / unavailable — demo still works in memory */
     }
   }, [members]);
+
+  /* Live mode: paint the cached profile the moment the app mounts, so a
+   * reload shows the signed-in UI immediately instead of waiting on the
+   * network. Runs as a layout effect — before the first paint. The
+   * subscription below then refreshes (or clears) it. */
+  useIsomorphicLayoutEffect(() => {
+    if (!isFirebaseConfigured) return;
+    const cached = readCachedProfile();
+    if (cached) {
+      setUser(cached);
+      setLoading(false);
+    }
+  }, []);
+
+  /* Keep the cache in step with the verified profile. First run is
+   * skipped: on mount `user` is still null until hydration lands, and
+   * persisting then would wipe the very cache being restored. */
+  const cacheArmed = useRef(false);
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+    if (!cacheArmed.current) {
+      cacheArmed.current = true;
+      return;
+    }
+    try {
+      if (user) window.localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(user));
+      else window.localStorage.removeItem(AUTH_CACHE_KEY);
+    } catch {
+      /* storage unavailable — reloads simply fall back to the network */
+    }
+  }, [user]);
 
   /* Live-mode auth subscription. */
   useEffect(() => {
