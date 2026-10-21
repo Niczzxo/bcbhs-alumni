@@ -162,7 +162,7 @@ export default function IdCardCta() {
         {/* Right side: the member's real card, a pending panel, or the guest teaser */}
         <Reveal delay={0.15} className="flex justify-center">
           {approved && user ? (
-            <div id="id-card-print">
+            <div id="id-card-print" className="w-full max-w-[340px]">
               <IdCard member={user} verifyUrl={verifyUrl} />
             </div>
           ) : pending ? (
