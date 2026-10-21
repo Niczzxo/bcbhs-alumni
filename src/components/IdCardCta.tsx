@@ -105,6 +105,9 @@ export default function IdCardCta() {
                 <Link href="/id-card" className={GOLD_BUTTON}>
                   View My ID Card
                 </Link>
+                <button onClick={() => window.print()} className={GHOST_BUTTON}>
+                  🖨 Print Card
+                </button>
                 <Link href="/profile/edit" className={GHOST_BUTTON}>
                   Edit Profile
                 </Link>
@@ -159,7 +162,9 @@ export default function IdCardCta() {
         {/* Right side: the member's real card, a pending panel, or the guest teaser */}
         <Reveal delay={0.15} className="flex justify-center">
           {approved && user ? (
-            <IdCard member={user} verifyUrl={verifyUrl} />
+            <div id="id-card-print">
+              <IdCard member={user} verifyUrl={verifyUrl} />
+            </div>
           ) : pending ? (
             <div className="flex w-full max-w-sm flex-col items-center rounded-3xl border border-gold/25 bg-ink-2/80 px-8 py-14 text-center">
               <span className="seal-ring flex h-20 w-20 items-center justify-center rounded-full bg-ink text-3xl">

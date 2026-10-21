@@ -63,9 +63,11 @@ function CardFront({ member }: { member: UserProfile }) {
     <CardShell>
       <div className="relative h-full w-full">
         <CardBackground />
+        {/* hairline gold frame — same as the back side */}
+        <div className="pointer-events-none absolute inset-[8px] rounded-[12px] border border-[#d4a94e]/40" />
 
-        {/* everything centered */}
-        <div className="relative flex h-full flex-col items-center px-[6cqw] pb-[5cqw] pt-[6cqw] text-center">
+        {/* everything centered — inside the gold frame */}
+        <div className="absolute inset-[8px] flex flex-col items-center overflow-hidden rounded-[12px] px-[4.5cqw] pb-[4cqw] pt-[4.5cqw] text-center">
           {/* logo — centered */}
           <span className="relative block h-[12cqw] w-[12cqw] overflow-hidden rounded-full ring-2 ring-[#d4a94e]">
             <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
@@ -145,7 +147,7 @@ function CardFront({ member }: { member: UserProfile }) {
               <div className="col-span-2">
                 <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Profession</p>
                 <p className="mt-[0.5cqw] truncate text-[2.6cqw] font-semibold text-[#f0cd7e]">
-                  {member.profession ?? "—"}{member.company ? ` · ${member.company}` : ""}
+                  {member.profession ?? "—"}
                 </p>
               </div>
             </div>
@@ -167,10 +169,13 @@ function CardFront({ member }: { member: UserProfile }) {
 function CardBack({ member, verifyUrl }: { member: UserProfile; verifyUrl: string }) {
   return (
     <CardShell>
-      <div className="relative flex h-full w-full flex-col items-center px-[8cqw] pb-[5cqw] pt-[8cqw] text-center">
+      <div className="relative h-full w-full">
         <CardBackground />
         {/* hairline gold frame */}
         <div className="pointer-events-none absolute inset-[8px] rounded-[12px] border border-[#d4a94e]/40" />
+
+        {/* all content lives inside the gold frame */}
+        <div className="absolute inset-[8px] flex flex-col items-center overflow-hidden rounded-[12px] px-[5.5cqw] pb-[4cqw] pt-[5.5cqw] text-center">
 
         {/* SCAN ME pill */}
         <div className="relative rounded-full border-[2.5px] border-[#d4a94e] px-[9cqw] py-[1.4cqw]">
@@ -218,6 +223,7 @@ function CardBack({ member, verifyUrl }: { member: UserProfile; verifyUrl: strin
         <p className="relative mt-[1.8cqw] text-[1.9cqw] uppercase tracking-[0.3em] text-white/45">
           Official identification · Lifetime
         </p>
+        </div>
       </div>
     </CardShell>
   );
