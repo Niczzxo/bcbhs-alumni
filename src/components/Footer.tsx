@@ -159,18 +159,18 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-ivory/10 pt-8 sm:flex-row">
+        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-ivory/10 pt-8 text-center sm:flex-row sm:text-left">
           <p className="text-xs text-muted/70">
             © {year} BCBHS Alumni Portal. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-xs text-muted/70 transition-colors hover:text-gold-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <Link href="/privacy" className="whitespace-nowrap text-xs text-muted/70 transition-colors hover:text-gold-2">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-xs text-muted/70 transition-colors hover:text-gold-2">
+            <Link href="/terms" className="whitespace-nowrap text-xs text-muted/70 transition-colors hover:text-gold-2">
               Terms of Service
             </Link>
-            <p className="text-xs uppercase tracking-[0.3em] text-gold/70">Est. 2023 · Bogura</p>
+            <p className="whitespace-nowrap text-xs uppercase tracking-[0.3em] text-gold/70">Est. 2023 · Bogura</p>
           </div>
         </div>
       </div>
