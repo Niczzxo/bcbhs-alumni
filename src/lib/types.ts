@@ -166,6 +166,22 @@ export interface JobPost {
   createdAt: string; // ISO date
 }
 
+/**
+ * Official association positions — chosen from this list in the admin
+ * dashboards (never typed freehand) and printed on the member's ID card
+ * under their name.
+ */
+export const POSITIONS: string[] = [
+  "President",
+  "Vice President",
+  "General Secretary",
+  "Joint Secretary",
+  "Organizing Secretary",
+  "Treasurer",
+  "Director",
+  "Executive Member",
+];
+
 /** Granular admin permissions — toggled by the super admin. */
 export const PERMISSIONS: { key: string; label: string; hint: string }[] = [
   { key: "approve_members", label: "Approve Members", hint: "Verify & approve new registrations" },

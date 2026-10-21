@@ -6,7 +6,7 @@ import { Avatar } from "@/components/MemberCard";
 import ContentManager from "@/components/content/ContentManager";
 import AboutEditor from "@/components/content/AboutEditor";
 import { useAuth } from "@/lib/auth-context";
-import { PERMISSIONS, EDITOR_PERMISSIONS, ROLE_META } from "@/lib/types";
+import { PERMISSIONS, EDITOR_PERMISSIONS, ROLE_META, POSITIONS } from "@/lib/types";
 import type { MemberRole, UserProfile } from "@/lib/types";
 
 /** Super admin — full control: roles, granular permissions, stats. */
@@ -90,24 +90,32 @@ export default function SuperAdminPage() {
                   )}
                 </div>
                 <p className="mt-2 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
-                {/* Official position — admin-assigned after manual verification */}
+                {/* Official position — picked from the association's list;
+                    the chosen value is what prints on the member's ID card */}
                 <div className="mt-3 flex flex-wrap items-center gap-3">
                   <label className="text-[11px] font-bold uppercase tracking-widest text-muted">
                     Position
                   </label>
-                  <input
-                    key={`${m.id}-${m.position ?? "none"}`}
-                    defaultValue={m.position ?? ""}
-                    placeholder="e.g. President"
+                  <select
+                    value={m.position ?? ""}
                     aria-label={`Official position for ${m.name}`}
-                    onBlur={(e) => {
-                      if (e.target.value.trim() !== (m.position ?? "")) setPosition(m.id, e.target.value);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                    }}
-                    className="w-56 rounded-full border border-ivory/15 bg-ink px-4 py-2 text-xs text-ivory placeholder:text-muted/50 outline-none focus:border-gold/60"
-                  />
+                    onChange={(e) => setPosition(m.id, e.target.value)}
+                    className="w-56 cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
+                  >
+                    <option value="" className="bg-ink text-ivory">
+                      — No position —
+                    </option>
+                    {m.position && !POSITIONS.includes(m.position) && (
+                      <option value={m.position} className="bg-ink text-ivory">
+                        {m.position}
+                      </option>
+                    )}
+                    {POSITIONS.map((p) => (
+                      <option key={p} value={p} className="bg-ink text-ivory">
+                        {p}
+                      </option>
+                    ))}
+                  </select>
                   {m.position && (
                     <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
                       ★ {m.position}

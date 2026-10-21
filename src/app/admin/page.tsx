@@ -4,7 +4,7 @@ import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import { useAuth } from "@/lib/auth-context";
-import { ROLE_META } from "@/lib/types";
+import { ROLE_META, POSITIONS } from "@/lib/types";
 import { usePrivatePhone } from "@/lib/data";
 import ContentManager from "@/components/content/ContentManager";
 import type { ContentKind } from "@/components/content/ContentManager";
@@ -112,19 +112,26 @@ export default function AdminPage() {
                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted">
                       Position
                     </label>
-                    <input
-                      key={`${m.id}-${m.position ?? "none"}`}
-                      defaultValue={m.position ?? ""}
-                      placeholder="e.g. President"
+                    <select
+                      value={m.position ?? ""}
                       aria-label={`Official position for ${m.name}`}
-                      onBlur={(e) => {
-                        if (e.target.value.trim() !== (m.position ?? "")) setPosition(m.id, e.target.value);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                      }}
-                      className="w-44 rounded-full border border-ivory/15 bg-ink px-3 py-1.5 text-xs text-ivory placeholder:text-muted/50 outline-none focus:border-gold/60"
-                    />
+                      onChange={(e) => setPosition(m.id, e.target.value)}
+                      className="w-48 cursor-pointer rounded-full border border-gold/40 bg-ink px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
+                    >
+                      <option value="" className="bg-ink text-ivory">
+                        — No position —
+                      </option>
+                      {m.position && !POSITIONS.includes(m.position) && (
+                        <option value={m.position} className="bg-ink text-ivory">
+                          {m.position}
+                        </option>
+                      )}
+                      {POSITIONS.map((p) => (
+                        <option key={p} value={p} className="bg-ink text-ivory">
+                          {p}
+                        </option>
+                      ))}
+                    </select>
                     {m.position && (
                       <span className="rounded-full bg-gold/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-gold-2">
                         ★ {m.position}
