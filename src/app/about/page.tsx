@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { useContent } from "@/lib/content-context";
+import { SITE_SCHOOL } from "@/lib/site";
 
 /** About the BCBHS Alumni Association — content editable by the super admin. */
 export default function AboutPage() {
@@ -64,21 +65,33 @@ export default function AboutPage() {
             ))}
           </div>
 
-          {/* Affiliation */}
-          <Reveal className="mt-14 rounded-3xl border border-ivory/10 bg-ink-2 p-8 sm:p-10">
-            <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
+          {/* Affiliation — the whole card links to the school's official site */}
+          <Reveal className="mt-14 rounded-3xl border border-ivory/10 bg-ink-2 p-8 transition-colors duration-300 hover:border-gold/40 sm:p-10">
+            <a
+              href={SITE_SCHOOL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left"
+              aria-label="Visit the official website of Bogura Cantonment Board High School"
+            >
               <span className="relative block h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-ivory/10">
                 <Image src="/images/school-logo.png" alt="BCBHS school logo" fill className="object-contain bg-white p-1" />
               </span>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold">Affiliated with</p>
-                <h3 className="font-display mt-2 text-2xl font-bold text-ivory">Bogura Cantonment Board High School</h3>
+                <h3 className="font-display mt-2 text-2xl font-bold text-ivory transition-colors group-hover:text-gold-2">Bogura Cantonment Board High School</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted">
                   Our alma mater in Bogura Cantonment — the classrooms and playgrounds where every
                   BCBHSian&apos;s story began. This alumni association is run by former students.
                 </p>
+                <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-gold/80 transition-colors group-hover:text-gold">
+                  Visit the school website
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                    <path d="M7 17 17 7M9 7h8v8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </div>
-            </div>
+            </a>
           </Reveal>
         </section>
       </main>

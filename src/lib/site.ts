@@ -65,3 +65,4 @@ export const SITE_FACEBOOK = "https://www.facebook.com/share/1DYzEdVYQV/";
 export const SITE_INSTAGRAM = "https://instagram.com/bcbhsalumni";
 export const SITE_WHATSAPP = "https://chat.whatsapp.com/LOb86Kx4UL04AV3dQSnTCo?s=cl&p=a&mlu=4&ilr=4";
 export const SITE_EMAIL = "bcbhs.alumni2023@gmail.com";
+export const SITE_SCHOOL = "https://bcbhs.edu.bd/";
