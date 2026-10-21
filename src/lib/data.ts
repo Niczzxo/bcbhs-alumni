@@ -8,8 +8,8 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "./auth-context";
+import { useContent } from "./content-context";
 import { isFirebaseConfigured, db } from "./firebase";
-import { PLACEHOLDER_STATS } from "./site";
 import type { UserProfile } from "./types";
 
 export interface SiteStats {
@@ -20,56 +20,67 @@ export interface SiteStats {
   live: boolean;
 }
 
-/** Homepage counters — live Firestore aggregates when configured. */
+/**
+ * Homepage counters.
+ *
+ * Live mode: read the public `site/stats` document — Firestore rules
+ * stop guests from counting the `users` collection directly (they may
+ * only read guest-visible profiles), so the totals are published to
+ * this doc instead. StatsSync (mounted in Providers) recomputes it
+ * from the real member list whenever the super admin is signed in.
+ *
+ * Demo mode / before the doc exists: derive from the member list in
+ * context. "Registered" counts everyone who signed up and was not
+ * rejected (pending + approved).
+ */
 export function useSiteStats(): SiteStats {
-  const { members, isDemo } = useAuth();
-  const [live, setLive] = useState<SiteStats | null>(null);
+  const { members } = useAuth();
+  const { events } = useContent();
+  const [remote, setRemote] = useState<SiteStats | null>(null);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !db) return;
     let cancelled = false;
+    let unsub: (() => void) | undefined;
     (async () => {
       try {
-        const { collection, getDocs, query, where } = await import("firebase/firestore");
-        const approved = query(collection(db, "users"), where("status", "==", "approved"));
-        const abroad = query(
-          collection(db, "users"),
-          where("status", "==", "approved"),
-          where("isAbroad", "==", true),
+        const { doc, onSnapshot } = await import("firebase/firestore");
+        if (cancelled || !db) return;
+        unsub = onSnapshot(
+          doc(db, "site", "stats"),
+          (snap) => {
+            if (!snap.exists()) return;
+            const d = snap.data() as Partial<SiteStats>;
+            setRemote({
+              totalMembers: d.totalMembers ?? 0,
+              membersAbroad: d.membersAbroad ?? 0,
+              batches: d.batches ?? 0,
+              eventsHeld: d.eventsHeld ?? 0,
+              live: true,
+            });
+          },
+          () => undefined,
         );
-        const [aSnap, bSnap] = await Promise.all([getDocs(approved), getDocs(abroad)]);
-        const batches = new Set(aSnap.docs.map((d) => (d.data() as { batch?: string }).batch).filter(Boolean));
-        if (!cancelled) {
-          setLive({
-            totalMembers: aSnap.size,
-            membersAbroad: bSnap.size,
-            batches: batches.size,
-            eventsHeld: PLACEHOLDER_STATS.eventsHeld,
-            live: true,
-          });
-        }
       } catch {
-        /* fall back to placeholders */
+        /* no stats doc yet — the derived fallback below applies */
       }
     })();
     return () => {
       cancelled = true;
+      unsub?.();
     };
   }, []);
 
-  if (live) return live;
-  if (!isDemo) {
-    /* Configured but query pending/failed — derive from context members. */
-    const approved = members.filter((m) => m.status === "approved");
-    return {
-      totalMembers: approved.length,
-      membersAbroad: approved.filter((m) => m.isAbroad).length,
-      batches: new Set(approved.map((m) => m.batch)).size,
-      eventsHeld: PLACEHOLDER_STATS.eventsHeld,
-      live: false,
-    };
-  }
-  return { ...PLACEHOLDER_STATS, live: false };
+  if (remote) return remote;
+
+  const counted = members.filter((m) => m.status !== "rejected");
+  return {
+    totalMembers: counted.length,
+    membersAbroad: counted.filter((m) => m.isAbroad).length,
+    batches: new Set(counted.map((m) => m.batch).filter(Boolean)).size,
+    eventsHeld: events.length,
+    live: false,
+  };
 }
 
 /** Approved members only — the public directory. */
