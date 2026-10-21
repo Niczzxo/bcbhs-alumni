@@ -5,10 +5,15 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { useAuthModal } from "@/components/AuthModal";
+import { useAuth } from "@/lib/auth-context";
+
+const PRIMARY_CTA =
+  "btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105";
 
 /** Full-viewport hero — campus photo with parallax, seal-ring emblem, gold CTAs. */
 export default function Hero() {
   const { openAuthModal } = useAuthModal();
+  const { user } = useAuth();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -89,12 +94,20 @@ export default function Hero() {
           transition={{ delay: 0.78, duration: 0.7 }}
           className="mt-10 flex flex-wrap items-center gap-4"
         >
-          <button
-            onClick={() => openAuthModal("register")}
-            className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105"
-          >
-            Join the Alumni
-          </button>
+          {/* Members already joined — send them to their card/application, not registration */}
+          {user?.status === "approved" ? (
+            <Link href="/id-card" className={PRIMARY_CTA}>
+              My ID Card
+            </Link>
+          ) : user?.status === "pending" ? (
+            <Link href="/profile/edit" className={PRIMARY_CTA}>
+              My Application
+            </Link>
+          ) : (
+            <button onClick={() => openAuthModal("register")} className={PRIMARY_CTA}>
+              Join the Alumni
+            </button>
+          )}
           <Link
             href="/directory"
             className="rounded-full border border-gold/50 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:bg-gold/10"
