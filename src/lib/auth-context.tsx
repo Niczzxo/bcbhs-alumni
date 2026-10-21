@@ -300,77 +300,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [members],
   );
 
+  /* Admin mutations update local state FIRST in both modes, then write
+   * to Firestore in live mode. The member list is loaded once per login
+   * (no live subscription), so without the optimistic update the
+   * dashboard controls — controlled selects, checkboxes, badges — snap
+   * back to the old value and look broken until the next page reload. */
+
   const approveMember = useCallback(
     async (id: string) => {
-      if (!isFirebaseConfigured || !db) {
-        setMembers((prev) =>
-          prev.map((m) =>
-            m.id === id ? { ...m, status: "approved", memberId: m.memberId ?? nextMemberId(m.batch, prev) } : m,
-          ),
-        );
-        return;
-      }
-      const { doc, updateDoc } = await import("firebase/firestore");
       const target = members.find((m) => m.id === id);
-      await updateDoc(doc(db, "users", id), {
-        status: "approved",
-        memberId: target?.memberId ?? nextMemberId(target?.batch ?? "0000", members),
-      }).catch(() => undefined);
+      const memberId = target?.memberId ?? nextMemberId(target?.batch ?? "0000", members);
+      setMembers((prev) =>
+        prev.map((m) => (m.id === id ? { ...m, status: "approved", memberId } : m)),
+      );
+      setUser((u) => (u && u.id === id ? { ...u, status: "approved", memberId } : u));
+      if (!isFirebaseConfigured || !db) return;
+      const { doc, updateDoc } = await import("firebase/firestore");
+      await updateDoc(doc(db, "users", id), { status: "approved", memberId }).catch(() => undefined);
     },
     [members],
   );
 
   const rejectMember = useCallback(async (id: string) => {
-    if (!isFirebaseConfigured || !db) {
-      setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "rejected" } : m)));
-      return;
-    }
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "rejected" } : m)));
+    setUser((u) => (u && u.id === id ? { ...u, status: "rejected" } : u));
+    if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { status: "rejected" }).catch(() => undefined);
   }, []);
 
-  const setPermissions = useCallback(
-    async (id: string, permissions: string[]) => {
-      if (!isFirebaseConfigured || !db) {
-        setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, permissions } : m)));
-        setUser((u) => (u && u.id === id ? { ...u, permissions } : u));
-        return;
-      }
-      const { doc, updateDoc } = await import("firebase/firestore");
-      await updateDoc(doc(db, "users", id), { permissions }).catch(() => undefined);
-    },
-    [],
-  );
+  const setPermissions = useCallback(async (id: string, permissions: string[]) => {
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, permissions } : m)));
+    setUser((u) => (u && u.id === id ? { ...u, permissions } : u));
+    if (!isFirebaseConfigured || !db) return;
+    const { doc, updateDoc } = await import("firebase/firestore");
+    await updateDoc(doc(db, "users", id), { permissions }).catch(() => undefined);
+  }, []);
 
   const setRole = useCallback(async (id: string, role: UserProfile["role"]) => {
-    if (!isFirebaseConfigured || !db) {
-      setMembers((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, role, permissions: role === "member" ? [] : m.permissions } : m)),
-      );
-      setUser((u) => (u && u.id === id ? { ...u, role } : u));
-      return;
-    }
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, role, permissions: role === "member" ? [] : m.permissions } : m)),
+    );
+    setUser((u) => (u && u.id === id ? { ...u, role } : u));
+    if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { role }).catch(() => undefined);
   }, []);
 
   const setPosition = useCallback(async (id: string, position: string) => {
     const clean = position.trim() || undefined;
-    if (!isFirebaseConfigured || !db) {
-      setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, position: clean } : m)));
-      setUser((u) => (u && u.id === id ? { ...u, position: clean } : u));
-      return;
-    }
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, position: clean } : m)));
+    setUser((u) => (u && u.id === id ? { ...u, position: clean } : u));
+    if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { position: clean ?? null }).catch(() => undefined);
   }, []);
 
   const setGuestVisible = useCallback(async (id: string, visible: boolean) => {
-    if (!isFirebaseConfigured || !db) {
-      setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, guestVisible: visible } : m)));
-      setUser((u) => (u && u.id === id ? { ...u, guestVisible: visible } : u));
-      return;
-    }
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, guestVisible: visible } : m)));
+    setUser((u) => (u && u.id === id ? { ...u, guestVisible: visible } : u));
+    if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { guestVisible: visible }).catch(() => undefined);
   }, []);
