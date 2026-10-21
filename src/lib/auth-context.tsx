@@ -268,7 +268,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await setDoc(doc(db, "users", cred.user.uid), {
           name: input.name.trim(),
           batch: input.batch,
-          roll: input.roll?.trim(),
+          roll: input.roll?.trim() || null,
           email: clean,
           bloodGroup: input.bloodGroup || null,
           isDonor: input.isDonor,
