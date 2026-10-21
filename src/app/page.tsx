@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import NoticeBoard from "@/components/NoticeBoard";
 import StatsBand from "@/components/StatsBand";
 import Committee from "@/components/Committee";
 import MemoriesSection from "@/components/MemoriesSection";
@@ -13,6 +14,7 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
+        <NoticeBoard />
         <StatsBand />
         <Committee />
         <MemoriesSection />
