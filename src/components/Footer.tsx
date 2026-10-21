@@ -42,8 +42,8 @@ export default function Footer() {
   const { user } = useAuth();
   return (
     <footer className="border-t border-gold/20 bg-[#070b1c]">
-      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
-        <div className="grid gap-12 md:grid-cols-3">
+      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-16">
+        <div className="grid gap-9 md:grid-cols-3 md:gap-12">
           {/* Brand + affiliation */}
           <div>
             <div className="flex items-center gap-4">
@@ -71,7 +71,7 @@ export default function Footer() {
           {/* Quick links */}
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold">Explore</p>
-            <ul className="mt-5 space-y-3">
+            <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-1">
               {NAV_LINKS.map((l) => (
                 <li key={l.label}>
                   <Link href={l.href} className="text-sm text-muted transition-colors hover:text-gold-2">
@@ -85,7 +85,7 @@ export default function Footer() {
           {/* Connect */}
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold">Connect</p>
-            <ul className="mt-5 space-y-4">
+            <ul className="mt-4 space-y-3">
               <li>
                 <a
                   href={SITE_FACEBOOK}
@@ -159,7 +159,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-ivory/10 pt-8 text-center sm:flex-row sm:text-left">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-ivory/10 pt-6 text-center sm:mt-14 sm:flex-row sm:pt-8 sm:text-left">
           <p className="text-xs text-muted/70">
             © {year} BCBHS Alumni Portal. All rights reserved.
           </p>
