@@ -160,12 +160,16 @@ export default function Navbar() {
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {user ? (
             <>
-              <Link
-                href={dashboardHref}
-                className="hidden rounded-full border border-gold/40 px-5 py-2 text-xs font-bold uppercase tracking-wider text-gold-2 transition-colors hover:bg-gold/10 sm:block"
-              >
-                {isSuperAdmin ? "Super Admin" : isAdmin ? "Admin" : "My ID Card"}
-              </Link>
+              {/* Staff-only: the dashboard button appears solely for
+                  members a super admin has given an admin/editor role. */}
+              {isAdmin && (
+                <Link
+                  href={dashboardHref}
+                  className="hidden rounded-full border border-gold/40 px-5 py-2 text-xs font-bold uppercase tracking-wider text-gold-2 transition-colors hover:bg-gold/10 sm:block"
+                >
+                  {isSuperAdmin ? "Super Admin" : "Admin"}
+                </Link>
+              )}
               <button
                 onClick={() => logout()}
                 className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-muted transition-colors hover:text-ivory"
@@ -264,14 +268,14 @@ export default function Navbar() {
               </Link>
             </li>
           )}
-          {user && (
+          {user && isAdmin && (
             <li>
               <Link
                 href={dashboardHref}
                 onClick={() => setMenuOpen(false)}
                 className="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-gold-2"
               >
-                {isSuperAdmin ? "Super Admin" : isAdmin ? "Admin" : "My ID Card"}
+                {isSuperAdmin ? "Super Admin" : "Admin"}
               </Link>
             </li>
           )}
