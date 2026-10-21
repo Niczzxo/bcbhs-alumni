@@ -51,7 +51,7 @@ function Tick({ children }: { children: React.ReactNode }) {
  */
 export default function IdCardCta() {
   const { openAuthModal } = useAuthModal();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [verifyUrl, setVerifyUrl] = useState("");
 
   useEffect(() => {
@@ -74,6 +74,25 @@ export default function IdCardCta() {
       </div>
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-2">
+        {loading ? (
+          /* Auth still resolving — skeleton in the exact layout, so a
+           * reload never flashes the guest pitch + sample card at a
+           * signed-in member. */
+          <>
+            <div className="animate-pulse">
+              <div className="h-3 w-32 rounded bg-ivory/10" />
+              <div className="mt-6 h-12 w-3/4 rounded bg-ivory/10" />
+              <div className="mt-4 h-12 w-1/2 rounded bg-ivory/10" />
+              <div className="mt-8 h-4 w-full max-w-md rounded bg-ivory/10" />
+              <div className="mt-3 h-4 w-2/3 max-w-md rounded bg-ivory/10" />
+              <div className="mt-10 h-12 w-48 rounded-full bg-ivory/10" />
+            </div>
+            <div className="flex justify-center">
+              <div className="aspect-[53.98/85.6] w-full max-w-[340px] animate-pulse rounded-[18px] bg-ivory/[0.06]" />
+            </div>
+          </>
+        ) : (
+          <>
         <Reveal>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gold">
             Membership
@@ -185,6 +204,8 @@ export default function IdCardCta() {
             />
           )}
         </Reveal>
+          </>
+        )}
       </div>
     </section>
   );

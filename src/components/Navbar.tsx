@@ -16,7 +16,7 @@ export default function Navbar() {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLLIElement>(null);
   const { scrollY } = useScroll();
-  const { user, logout, isAdmin, isSuperAdmin } = useAuth();
+  const { user, logout, isAdmin, isSuperAdmin, loading } = useAuth();
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
 
@@ -158,7 +158,11 @@ export default function Navbar() {
         </ul>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          {user ? (
+          {loading ? (
+            /* Auth still resolving — hold the space so a reload never
+             * flashes the logged-out buttons at a signed-in member. */
+            <div className="h-9 w-36" aria-hidden="true" />
+          ) : user ? (
             <>
               {/* Staff-only: the dashboard button appears solely for
                   members a super admin has given an admin/editor role. */}

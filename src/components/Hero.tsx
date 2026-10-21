@@ -13,7 +13,7 @@ const PRIMARY_CTA =
 /** Full-viewport hero — campus photo with parallax, seal-ring emblem, gold CTAs. */
 export default function Hero() {
   const { openAuthModal } = useAuthModal();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -94,8 +94,14 @@ export default function Hero() {
           transition={{ delay: 0.78, duration: 0.7 }}
           className="mt-10 flex flex-wrap items-center gap-4"
         >
-          {/* Members already joined — send them to their card/application, not registration */}
-          {user?.status === "approved" ? (
+          {/* Members already joined — send them to their card/application, not registration.
+              While auth is still resolving, hold an invisible placeholder so a reload
+              never flashes "Join the Alumni" at a signed-in member. */}
+          {loading ? (
+            <span className={`${PRIMARY_CTA} invisible`} aria-hidden="true">
+              Join the Alumni
+            </span>
+          ) : user?.status === "approved" ? (
             <Link href="/id-card" className={PRIMARY_CTA}>
               My ID Card
             </Link>

@@ -156,19 +156,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         try {
           if (fbUser) {
+            /* Resolve the visitor's OWN profile first and end the
+             * loading state immediately — the full member list (needed
+             * by the directory and dashboards) loads right after, so a
+             * page reload never flashes the logged-out UI while the
+             * whole collection is still downloading. */
             const snap = await getDoc(doc(liveDb, "users", fbUser.uid));
+            if (cancelled) return;
+            if (snap.exists()) setUser({ id: snap.id, ...(snap.data() as Omit<UserProfile, "id">) });
+            setLoading(false);
             const all = await getDocs(collection(liveDb, "users"));
             if (!cancelled) {
-              if (snap.exists()) setUser({ id: snap.id, ...(snap.data() as Omit<UserProfile, "id">) });
               setMembers(all.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) })));
             }
           } else {
             setUser(null);
+            if (!cancelled) setLoading(false);
           }
         } catch {
           /* Firestore unreachable — stay logged out of member data */
+          if (!cancelled) setLoading(false);
         }
-        if (!cancelled) setLoading(false);
       });
     };
     const unsubPromise = load();
