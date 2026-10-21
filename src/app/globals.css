@@ -137,18 +137,24 @@ body {
   body {
     background: #fff !important;
   }
-  body * {
-    visibility: hidden;
+  /* When a printable ID card is on the page it is portalled to <body>
+   * level (.print-portal). Hide the entire app so ONLY the card prints
+   * — display:none, not visibility, so the rest of the page cannot
+   * paginate into blank pages. */
+  body:has(.print-portal) > *:not(.print-portal) {
+    display: none !important;
   }
-  #id-card-print,
+  .print-portal {
+    display: flex !important;
+  }
+  /* Keep the card's navy + gold exactly as on screen. */
+  .print-portal *,
   #id-card-print * {
-    visibility: visible;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-  #id-card-print {
-    position: absolute;
-    left: 50%;
-    top: 2rem;
-    transform: translateX(-50%);
+  @page {
+    margin: 10mm;
   }
 }
 

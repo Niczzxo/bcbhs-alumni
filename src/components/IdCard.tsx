@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
 import type { UserProfile } from "@/lib/types";
@@ -237,6 +238,11 @@ export default function IdCard({
   verifyUrl: string;
 }) {
   const [flipped, setFlipped] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target exists only after mount
+    setMounted(true);
+  }, []);
 
   return (
     <div className="w-full max-w-[340px]">
@@ -261,14 +267,21 @@ export default function IdCard({
         </button>
       </div>
 
-      <div className="hidden print:flex print:flex-col print:items-center print:gap-4">
-        <div className="print:h-[85.6mm] print:w-[53.98mm]">
-          <CardFront member={member} />
-        </div>
-        <div className="print:h-[85.6mm] print:w-[53.98mm]">
-          <CardBack member={member} verifyUrl={verifyUrl} />
-        </div>
-      </div>
+      {/* Print output: portalled to <body> so print CSS can hide the
+       * whole app and print ONLY this — front + back stacked on a
+       * single page at exact CR80 size, colours preserved. */}
+      {mounted &&
+        createPortal(
+          <div className="print-portal hidden flex-col items-center gap-[6mm]">
+            <div className="h-[85.6mm] w-[53.98mm]">
+              <CardFront member={member} />
+            </div>
+            <div className="h-[85.6mm] w-[53.98mm]">
+              <CardBack member={member} verifyUrl={verifyUrl} />
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
