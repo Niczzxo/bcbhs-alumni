@@ -4,6 +4,7 @@ import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import ContentManager from "@/components/content/ContentManager";
+import V2Manager from "@/components/content/V2Manager";
 import AboutEditor from "@/components/content/AboutEditor";
 import { useAuth } from "@/lib/auth-context";
 import { PERMISSIONS, EDITOR_PERMISSIONS, ROLE_META, POSITIONS } from "@/lib/types";
@@ -189,6 +190,18 @@ export default function SuperAdminPage() {
           <ContentManager kind="announcements" />
           <ContentManager kind="gallery" />
           <ContentManager kind="committee" />
+        </div>
+      </section>
+
+      {/* Community features (v2.0) */}
+      <section className="mt-14">
+        <h2 className="font-display text-2xl font-bold text-ivory">Community features</h2>
+        <p className="mt-2 text-sm text-muted">
+          Blood requests, polls, hall of fame, memory wall, fund and batch groups — managed here, live instantly.
+        </p>
+        <div className="gold-rule mt-4 w-32" />
+        <div className="mt-8">
+          <V2Manager />
         </div>
       </section>
 

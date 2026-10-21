@@ -212,3 +212,123 @@ export const BD_DISTRICTS = [
 export const BATCH_YEARS: string[] = Array.from({ length: 31 }, (_, i) =>
   String(2025 - i),
 );
+
+/* ------------------------------------------------------------------ */
+/*  v2.0 community features                                            */
+/* ------------------------------------------------------------------ */
+
+/** An urgent blood request posted by a member; donors respond directly. */
+export interface BloodRequest {
+  id: string;
+  patientName: string;
+  bloodGroup: string; // one of BLOOD_GROUPS
+  bagsNeeded?: string;
+  hospital: string;
+  district: string;
+  contact: string; // phone / WhatsApp of the attendant
+  neededBy?: string; // YYYY-MM-DD
+  note?: string;
+  postedBy: string; // uid
+  posterName: string;
+  createdAt: string; // ISO
+  resolved?: boolean;
+}
+
+/** A community poll. Votes live in PollVote docs (one per member). */
+export interface Poll {
+  id: string;
+  question: string;
+  options: string[];
+  active: boolean;
+  createdAt: string; // ISO
+}
+
+export interface PollVote {
+  id: string; // `${pollId}_${uid}` in live mode
+  pollId: string;
+  uid: string;
+  optionIndex: number;
+}
+
+/** A Hall of Fame entry — a notable alumnus and their story. */
+export interface SuccessStory {
+  id: string;
+  name: string;
+  batch: string;
+  title: string; // achievement / role, e.g. "BCS Cadre · Administration"
+  story: string;
+  photoURL?: string;
+  createdAt: string; // ISO
+}
+
+/** An alumnus-owned business in the Business Directory. */
+export interface Business {
+  id: string;
+  name: string;
+  ownerId: string; // uid
+  ownerName: string;
+  ownerBatch: string;
+  category: string;
+  district: string;
+  description: string;
+  whatsapp: string;
+  createdAt: string; // ISO
+}
+
+/** A photo on the Memory Wall — school-day memories, super-admin curated. */
+export interface WallPhoto {
+  id: string;
+  url: string; // data URL (browser-compressed) or remote URL
+  caption: string;
+  year?: string;
+  createdAt: string; // ISO
+}
+
+/** A senior alumnus offering mentorship to juniors. */
+export interface MentorProfile {
+  id: string;
+  memberId: string; // uid
+  name: string;
+  batch: string;
+  expertise: string; // e.g. "HSC Science · BUET admission · BCS"
+  bio: string;
+  whatsapp: string;
+  createdAt: string; // ISO
+}
+
+/** A supporter listed on the Scholarship & Donation Fund honour roll. */
+export interface FundDonor {
+  id: string;
+  name: string;
+  batch?: string;
+  amount?: string;
+  note?: string;
+  createdAt: string; // ISO
+}
+
+/** Editable Scholarship & Donation Fund settings (site/fund document). */
+export interface FundInfo {
+  bkash: string;
+  totalRaised: string;
+  totalAwarded: string;
+  studentsHelped: string;
+  aboutText: string;
+  applyText: string;
+}
+
+export const DEFAULT_FUND_INFO: FundInfo = {
+  bkash: "",
+  totalRaised: "0",
+  totalAwarded: "0",
+  studentsHelped: "0",
+  aboutText:
+    "The BCBHS Alumni Scholarship & Donation Fund supports our own — helping talented students from the school and alumni families through hardship, exam fees, books and emergencies. Every taka is accounted for by the association and reported to members.",
+  applyText:
+    "To apply for support, contact the association office or any committee member with the student's details and the reason for support. All applications are verified by the fund committee before disbursement.",
+};
+
+/** A per-batch WhatsApp group link, set by the super admin. */
+export interface BatchLink {
+  id: string; // the batch year, e.g. "2015"
+  link: string;
+}

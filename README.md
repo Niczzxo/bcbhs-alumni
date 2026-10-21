@@ -92,20 +92,21 @@ assets/                      # original brand assets
 - [x] Career info in profiles
 - [x] Super admin panel (full access + member approval + granular permission toggles)
 - [x] Admin panel (approval queue; actions gated by granted permissions)
-- [ ] Firebase project setup (console) + deploy `firestore.rules`
-- [ ] Photo upload via Firebase Storage (placeholder on the register form)
-- [ ] Urgent blood-request flow + admin notifications
+- [x] Firebase project setup (console) + deploy `firestore.rules`
+- [x] Photo upload (browser-compressed data URLs in the profile — no Storage bucket needed)
+- [x] Urgent blood-request flow (members post; super admin resolves from the dashboard)
 
 **v2.0**
-- [ ] Job board, Mentorship program
-- [ ] Scholarship / donation fund
-- [ ] Success stories / Hall of fame
-- [ ] Polls & voting, Batch groups
-- [ ] Memory wall (super-admin only)
-- [ ] Business directory
+- [x] Job board (members-only, WhatsApp apply)
+- [x] Mentorship program (senior mentors list themselves; juniors reach out on WhatsApp)
+- [x] Scholarship / donation fund (staff-managed totals, bKash channel, honour roll)
+- [x] Success stories / Hall of fame
+- [x] Polls & voting (one vote per member, live results), Batch groups (per-batch WhatsApp links)
+- [x] Memory wall (super-admin curated)
+- [x] Business directory (member-submitted, staff-moderated)
 
 ## Notes
 
-- Homepage stats are placeholders (`src/lib/site.ts`) until Firestore is wired.
-- Committee seats are placeholders until the admin panel manages them.
+- Homepage stats are live: a public `site/stats` document (kept in sync whenever a super admin is signed in) feeds the counters, since guests may not count the `users` collection under the security rules.
+- Committee seats, events, gallery, announcements and all v2.0 content are managed from the admin dashboards — nothing is hardcoded.
 - Site copy is English; a Bangla/English toggle is planned.

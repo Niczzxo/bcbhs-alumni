@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { ROLE_META, POSITIONS } from "@/lib/types";
 import { usePrivatePhone } from "@/lib/data";
 import ContentManager from "@/components/content/ContentManager";
+import V2Manager from "@/components/content/V2Manager";
 import type { ContentKind } from "@/components/content/ContentManager";
 
 /** Phone suffix for a member row — fetched from the private store. */
@@ -172,6 +173,15 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {/* Community features (v2.0) — sections self-gate by permission */}
+      <div className="mt-14">
+        <h2 className="font-display text-2xl font-bold text-ivory">Community features</h2>
+        <div className="gold-rule mt-4 w-32" />
+        <div className="mt-8">
+          <V2Manager />
+        </div>
+      </div>
     </RequireRole>
   );
 }

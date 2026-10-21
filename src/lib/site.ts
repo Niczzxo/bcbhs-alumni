@@ -23,6 +23,10 @@ export const NAV_LINKS = [
   { label: "Gallery", href: "/gallery" },
   { label: "Committee", href: "/committee" },
   { label: "Blood Donors", href: "/blood-donors" },
+  { label: "Success Stories", href: "/stories" },
+  { label: "Businesses", href: "/businesses" },
+  { label: "Memory Wall", href: "/memory-wall" },
+  { label: "Scholarship Fund", href: "/fund" },
 ];
 
 /** Public navbar — visitors who are not verified members. */
@@ -51,6 +55,13 @@ export const MEMBER_PROFILE_LINK = { label: "Profile", href: "/profile/edit" };
 export const MEMBER_MORE_LINKS = [
   { label: "Jobs", href: "/jobs" },
   { label: "Blood Donors", href: "/blood-donors" },
+  { label: "Polls & Voting", href: "/polls" },
+  { label: "Mentorship", href: "/mentorship" },
+  { label: "Batch Groups", href: "/batches" },
+  { label: "Success Stories", href: "/stories" },
+  { label: "Businesses", href: "/businesses" },
+  { label: "Memory Wall", href: "/memory-wall" },
+  { label: "Scholarship Fund", href: "/fund" },
   { label: "About", href: "/about" },
   { label: "Committee", href: "/committee" },
 ];

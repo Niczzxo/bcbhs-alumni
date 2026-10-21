@@ -5,7 +5,23 @@
 /*  TODO: replace with live Firestore reads once the project is live.  */
 /* ------------------------------------------------------------------ */
 
-import type { UserProfile, PortalEvent, CommitteeSeat, GalleryPhoto, AnnouncementItem, JobPost } from "./types";
+import type {
+  UserProfile,
+  PortalEvent,
+  CommitteeSeat,
+  GalleryPhoto,
+  AnnouncementItem,
+  JobPost,
+  BloodRequest,
+  Poll,
+  PollVote,
+  SuccessStory,
+  Business,
+  WallPhoto,
+  MentorProfile,
+  FundDonor,
+  BatchLink,
+} from "./types";
 
 export const DEMO_USERS: UserProfile[] = [
   {
@@ -409,3 +425,101 @@ export const DEMO_JOBS: JobPost[] = [
     createdAt: "2026-10-02T00:00:00.000Z",
   },
 ];
+
+/* --------------------------- v2.0 features ----------------------------- */
+
+export const DEMO_BLOOD_REQUESTS: BloodRequest[] = [
+  {
+    id: "br-1",
+    patientName: "Abdul Karim",
+    bloodGroup: "B+",
+    bagsNeeded: "2 bags",
+    hospital: "Shaheed Ziaur Rahman Medical College, Bogura",
+    district: "Bogura",
+    contact: "01712345678",
+    note: "Urgent — surgery scheduled tomorrow morning.",
+    postedBy: "u-1",
+    posterName: "Tanvir Ahmed",
+    createdAt: "2026-10-20T00:00:00.000Z",
+  },
+];
+
+export const DEMO_POLLS: Poll[] = [
+  {
+    id: "p-1",
+    question: "Where should the Grand Reunion 2026 be held?",
+    options: ["School Field", "Bogura Convention Centre", "Momo Inn Park"],
+    active: true,
+    createdAt: "2026-10-15T00:00:00.000Z",
+  },
+];
+
+export const DEMO_POLL_VOTES: PollVote[] = [
+  { id: "p-1_u-1", pollId: "p-1", uid: "u-1", optionIndex: 0 },
+  { id: "p-1_u-admin", pollId: "p-1", uid: "u-admin", optionIndex: 0 },
+  { id: "p-1_u-superadmin", pollId: "p-1", uid: "u-superadmin", optionIndex: 2 },
+];
+
+export const DEMO_STORIES: SuccessStory[] = [
+  {
+    id: "s-1",
+    name: "Tanvir Ahmed",
+    batch: "2015",
+    title: "Software Engineer · Brain Station 23",
+    story:
+      "From the back benches of BCBHS to building fintech used by millions — Tanvir credits the discipline of cantonment school life for his work ethic, and now mentors junior alumni entering tech.",
+    createdAt: "2026-10-10T00:00:00.000Z",
+  },
+];
+
+export const DEMO_BUSINESSES: Business[] = [
+  {
+    id: "b-1",
+    name: "Bogura Computer & IT Solution",
+    ownerId: "u-1",
+    ownerName: "Tanvir Ahmed",
+    ownerBatch: "2015",
+    category: "IT & Electronics",
+    district: "Bogura",
+    description:
+      "Sales and servicing of laptops, desktops and accessories. Special discount for BCBHS alumni — just show your alumni ID card.",
+    whatsapp: "01712345678",
+    createdAt: "2026-10-09T00:00:00.000Z",
+  },
+];
+
+export const DEMO_WALL: WallPhoto[] = [
+  {
+    id: "w-1",
+    url: "/images/school.jpg",
+    caption: "The school building — where it all began",
+    year: "2010",
+    createdAt: "2026-10-01T00:00:00.000Z",
+  },
+];
+
+export const DEMO_MENTORS: MentorProfile[] = [
+  {
+    id: "m-1",
+    memberId: "u-1",
+    name: "Tanvir Ahmed",
+    batch: "2015",
+    expertise: "Software careers · React · Job interviews",
+    bio: "Working in fintech for 6+ years. Happy to guide juniors on learning programming, building a CV and preparing for software job interviews.",
+    whatsapp: "01712345678",
+    createdAt: "2026-10-08T00:00:00.000Z",
+  },
+];
+
+export const DEMO_FUND_DONORS: FundDonor[] = [
+  {
+    id: "fd-1",
+    name: "Tanvir Ahmed",
+    batch: "2015",
+    amount: "৳5,000",
+    note: "For the scholarship fund",
+    createdAt: "2026-10-05T00:00:00.000Z",
+  },
+];
+
+export const DEMO_BATCH_LINKS: BatchLink[] = [];
