@@ -6,7 +6,7 @@ import "./globals.css";
 const display = Playfair_Display({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["500", "600", "700", "800", "900"],
 });
 
 const signature = Allura({
