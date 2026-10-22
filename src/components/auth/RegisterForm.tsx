@@ -71,8 +71,26 @@ export default function RegisterForm({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    if (!form.name.trim() || !form.batch || !form.email.trim() || !form.password || !form.district || !form.department || !form.dob || !form.whatsapp.trim()) {
-      setError("Please fill in name, batch, email, password, district, department, date of birth and WhatsApp number.");
+    /* Every field in the form is mandatory (owner's rule, 2026-10-23):
+       a registration missing any of them is incomplete by definition,
+       so name exactly what is missing and refuse to submit. */
+    const missing: string[] = [];
+    if (!form.name.trim()) missing.push("full name");
+    if (!form.batch) missing.push("batch");
+    if (!form.department) missing.push("department");
+    if (!form.dob) missing.push("date of birth");
+    if (!form.email.trim()) missing.push("email");
+    if (!form.password) missing.push("password");
+    if (!form.phone.trim()) missing.push("phone number");
+    if (!form.whatsapp.trim()) missing.push("WhatsApp number");
+    if (!form.bloodGroup) missing.push("blood group");
+    if (!form.district) missing.push("current district");
+    if (form.district === "Abroad" && !form.country.trim()) missing.push("country");
+    if (!form.profession.trim()) missing.push("profession");
+    if (!form.company.trim()) missing.push("company / organization");
+    if (!photoURL) missing.push("photo");
+    if (missing.length) {
+      setError(`Every field is required. Please fill in: ${missing.join(", ")}.`);
       return;
     }
     setBusy(true);
@@ -121,15 +139,15 @@ export default function RegisterForm({
           <input type="password" className={inputCls} value={form.password} onChange={set("password")} placeholder="Min. 6 characters" />
         </div>
         <div>
-          <label className={labelCls}>Phone</label>
+          <label className={labelCls}>Phone *</label>
           <input className={inputCls} value={form.phone} onChange={set("phone")} placeholder="01XXXXXXXXX" />
         </div>
         <div>
-          <label className={labelCls}>WhatsApp number</label>
+          <label className={labelCls}>WhatsApp number *</label>
           <input className={inputCls} value={form.whatsapp} onChange={set("whatsapp")} placeholder="01XXXXXXXXX" />
         </div>
         <div>
-          <label className={labelCls}>Blood group</label>
+          <label className={labelCls}>Blood group *</label>
           <select className={inputCls} value={form.bloodGroup} onChange={set("bloodGroup")}>
             <option value="">Select…</option>
             {BLOOD_GROUPS.map((b) => <option key={b} value={b}>{b}</option>)}
@@ -145,20 +163,20 @@ export default function RegisterForm({
         </div>
         {form.district === "Abroad" && (
           <div>
-            <label className={labelCls}>Country</label>
+            <label className={labelCls}>Country *</label>
             <input className={inputCls} value={form.country} onChange={set("country")} placeholder="e.g. United Kingdom" />
           </div>
         )}
         <div>
-          <label className={labelCls}>Profession</label>
+          <label className={labelCls}>Profession *</label>
           <input className={inputCls} value={form.profession} onChange={set("profession")} placeholder="e.g. Software Engineer" />
         </div>
         <div>
-          <label className={labelCls}>Company / Organization</label>
+          <label className={labelCls}>Company / Organization *</label>
           <input className={inputCls} value={form.company} onChange={set("company")} placeholder="e.g. Brain Station 23" />
         </div>
         <div className="sm:col-span-2">
-          <label className={labelCls}>Photo</label>
+          <label className={labelCls}>Photo *</label>
           <input
             ref={fileRef}
             type="file"
