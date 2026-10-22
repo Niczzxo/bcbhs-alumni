@@ -244,7 +244,7 @@ function ContactRow({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
-function CardBack({ verifyUrl }: { verifyUrl: string }) {
+function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: string }) {
   return (
     <CardShell>
       <div className="relative h-full w-full">
@@ -283,9 +283,9 @@ function CardBack({ verifyUrl }: { verifyUrl: string }) {
             Verify Membership
           </p>
 
-          {/* authorized signature — the association's, same on every card */}
+          {/* signature — the card holder's own name, in script */}
           <div className="mt-[2.3cqw] w-full rounded-[2.6cqw] border border-[#d4a94e]/45 bg-[#0d1d40]/70 px-[4cqw] pb-[1.6cqw] pt-[0.8cqw]">
-            <p className="font-signature text-[7.2cqw] leading-tight text-white">Riyazul Islam</p>
+            <p className="font-signature text-[7.2cqw] leading-tight text-white">{memberName}</p>
             <div className="mx-auto mt-[0.4cqw] h-px w-[45%] bg-gradient-to-r from-transparent via-[#d4a94e] to-transparent" />
             <p className="mt-[1.1cqw] text-[2cqw] uppercase tracking-[0.42em] text-[#d4a94e]">
               Authorized Signature
@@ -379,7 +379,7 @@ export default function IdCard({
             <CardFront member={member} />
           </div>
           <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            {lockBack ? <LockedBack /> : <CardBack verifyUrl={verifyUrl} />}
+            {lockBack ? <LockedBack /> : <CardBack verifyUrl={verifyUrl} memberName={member.name} />}
           </div>
         </div>
         <button
@@ -400,7 +400,7 @@ export default function IdCard({
               <CardFront member={member} />
             </div>
             <div className="h-[85.6mm] w-[53.98mm]">
-              {lockBack ? <LockedBack /> : <CardBack verifyUrl={verifyUrl} />}
+              {lockBack ? <LockedBack /> : <CardBack verifyUrl={verifyUrl} memberName={member.name} />}
             </div>
           </div>,
           document.body,
@@ -456,7 +456,7 @@ export function CardDownloadButton({
       <div aria-hidden className="pointer-events-none fixed left-[-10000px] top-0">
         <div ref={stageRef} className="flex w-[340px] flex-col items-center gap-4">
           <CardFront member={member} />
-          <CardBack verifyUrl={verifyUrl} />
+          <CardBack verifyUrl={verifyUrl} memberName={member.name} />
         </div>
       </div>
     </>
