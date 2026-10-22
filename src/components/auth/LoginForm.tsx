@@ -13,20 +13,46 @@ export default function LoginForm({
   onSuccess?: () => void;
   onSwitchToRegister?: () => void;
 }) {
-  const { login, isDemo } = useAuth();
+  const { login, resetPassword, isDemo } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function doLogin(e: FormEvent | null, em: string, pw: string) {
     e?.preventDefault();
     setError("");
+    setNotice("");
     setBusy(true);
     const res = await login(em, pw);
     setBusy(false);
     if (res.ok) onSuccess?.();
     else setError(res.error ?? "Login failed.");
+  }
+
+  /* Forgot password: Firebase emails a link that sets a new one. */
+  async function doReset() {
+    setError("");
+    setNotice("");
+    if (isDemo) {
+      setNotice("Demo mode: any password works here, nothing to reset.");
+      return;
+    }
+    if (!email.trim()) {
+      setError("Type your email above first, then tap Forgot password.");
+      return;
+    }
+    setBusy(true);
+    const res = await resetPassword(email);
+    setBusy(false);
+    if (res.ok) {
+      setNotice(
+        "Password reset link sent. Check your inbox (and the spam folder) for an email from Firebase, then follow its link to set a new password.",
+      );
+    } else {
+      setError(res.error ?? "Could not send the reset email.");
+    }
   }
 
   return (
@@ -52,12 +78,27 @@ export default function LoginForm({
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
             />
+            <p className="mt-2 text-right">
+              <button
+                type="button"
+                onClick={doReset}
+                disabled={busy}
+                className="text-xs font-semibold text-gold-2 hover:underline disabled:opacity-60"
+              >
+                Forgot password?
+              </button>
+            </p>
           </div>
         </div>
 
         {error && (
           <p className="mt-5 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
             {error}
+          </p>
+        )}
+        {notice && (
+          <p className="mt-5 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+            {notice}
           </p>
         )}
 
