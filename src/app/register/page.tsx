@@ -1,16 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import RegisterForm from "@/components/auth/RegisterForm";
+import { useAuth } from "@/lib/auth-context";
 
 /** Registration page, also available as a popup via the navbar. */
 export default function RegisterPage() {
   const [doneName, setDoneName] = useState<string | null>(null);
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  /* A signed-in member has no business on the register form; send
+     them home instead of letting them create a duplicate account. */
+  useEffect(() => {
+    if (!loading && user && !doneName) router.replace("/");
+  }, [loading, user, doneName, router]);
 
   if (doneName) {
     return (

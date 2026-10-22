@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth-context";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -25,6 +25,18 @@ export default function RequireRole({
   const { user, loading, isSuperAdmin } = useAuth();
   const router = useRouter();
 
+  /* Grace period before bouncing to /login: a restored session can
+     resolve a beat after the first paint, and redirecting on the
+     first null would strand a signed-in member on the login page
+     (owner report, 2026-10-23). Only a user who is STILL signed out
+     after the grace window is redirected. */
+  const [graceOver, setGraceOver] = useState(false);
+  useEffect(() => {
+    if (user || loading) return;
+    const t = setTimeout(() => setGraceOver(true), 1200);
+    return () => clearTimeout(t);
+  }, [user, loading]);
+
   /* Each staff role has its OWN dashboard (owner's rule, 2026-10-23):
      super admins reach everything; admins and editors each reach
      only their own panel, never each other's. */
@@ -37,8 +49,8 @@ export default function RequireRole({
     role === "super_admin" ? "the super admin" : role === "editor" ? "editors" : "administrators";
 
   useEffect(() => {
-    if (!loading && !user) router.replace("/login");
-  }, [loading, user, router]);
+    if (graceOver && !user) router.replace("/login");
+  }, [graceOver, user, router]);
 
   return (
     <>
