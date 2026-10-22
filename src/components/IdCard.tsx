@@ -101,12 +101,12 @@ function CardFront({ member }: { member: UserProfile }) {
             {member.name}
           </h2>
 
-          {/* official position — big, right below the name (admin-assigned only) */}
-          {member.position && (
-            <p className="font-display mt-[1.8cqw] text-[4.4cqw] font-extrabold uppercase leading-none tracking-[0.18em] text-[#f0cd7e]">
-              {member.position}
-            </p>
-          )}
+          {/* standing — big, right below the name: the member's official
+              position when one is assigned, otherwise plain MEMBER, so the
+              card always states what the holder is in the association */}
+          <p className="font-display mt-[1.8cqw] text-[4.4cqw] font-extrabold uppercase leading-none tracking-[0.18em] text-[#f0cd7e]">
+            {member.position?.trim() ? member.position : "Member"}
+          </p>
 
           {/* details register */}
           <div className="mt-[3.4cqw] w-full rounded-2xl border border-white/12 bg-white/[0.05] p-[5cqw] backdrop-blur-md">
