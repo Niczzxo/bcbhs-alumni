@@ -313,7 +313,7 @@ function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: st
  * (verification QR, authorized signature, contacts) is members-only,
  * so a signed-out visitor who flips the sample card meets this face
  * instead of the card's details. */
-function LockedBack() {
+export function LockedBack() {
   return (
     <CardShell>
       <div className="relative h-full w-full">

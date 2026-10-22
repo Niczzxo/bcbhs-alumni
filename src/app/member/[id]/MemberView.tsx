@@ -7,8 +7,9 @@ import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
-import IdCardView from "@/components/IdCard";
+import IdCardView, { LockedBack } from "@/components/IdCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { useAuthModal } from "@/components/AuthModal";
 import { useMember } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
 
@@ -16,8 +17,13 @@ import { useAuth } from "@/lib/auth-context";
 export default function MemberView({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const member = useMember(decodeURIComponent(id));
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const isOwn = !!user && !!member && user.id === member.id;
+  /* The official ID card carries the member's full details (photo,
+     contact, email, DOB), so it is rendered for approved members
+     only. Guests and pending accounts get the locked face instead. */
+  const canViewCard = user?.status === "approved";
 
   const verifyUrl =
     typeof window !== "undefined"
@@ -85,7 +91,28 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
               </Reveal>
               <Reveal delay={0.1} className="lg:col-span-2">
                 <p className="mb-4 text-xs font-bold uppercase tracking-[0.25em] text-gold">Official ID card</p>
-                <IdCardView member={member} verifyUrl={verifyUrl} />
+                {loading ? (
+                  <div className="aspect-[53.98/85.6] w-full max-w-[340px] animate-pulse rounded-[18px] bg-ivory/[0.06]" />
+                ) : canViewCard ? (
+                  <IdCardView member={member} verifyUrl={verifyUrl} />
+                ) : (
+                  <div className="w-full max-w-[340px]">
+                    <LockedBack />
+                    <p className="mt-4 text-center text-xs leading-relaxed text-muted">
+                      {isOwn
+                        ? "Your official ID card appears here once your registration is approved."
+                        : "The official ID card holds the member's full details, so it is visible to approved members only."}
+                    </p>
+                    {!user && (
+                      <button
+                        onClick={() => openAuthModal("login")}
+                        className="mx-auto mt-4 block rounded-full border border-gold/40 px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+                      >
+                        Log In to View
+                      </button>
+                    )}
+                  </div>
+                )}
               </Reveal>
             </div>
           )}
