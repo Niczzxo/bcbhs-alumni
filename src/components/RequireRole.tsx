@@ -22,10 +22,19 @@ export default function RequireRole({
   eyebrow: string;
   title: ReactNode;
 }) {
-  const { user, loading, isAdmin, isSuperAdmin } = useAuth();
+  const { user, loading, isSuperAdmin } = useAuth();
   const router = useRouter();
 
-  const allowed = role === "super_admin" ? isSuperAdmin : isAdmin;
+  /* Each staff role has its OWN dashboard (owner's rule, 2026-10-23):
+     super admins reach everything; admins and editors each reach
+     only their own panel, never each other's. */
+  const allowed =
+    role === "super_admin"
+      ? isSuperAdmin
+      : isSuperAdmin || user?.role === role;
+
+  const roleLabel =
+    role === "super_admin" ? "the super admin" : role === "editor" ? "editors" : "administrators";
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
@@ -45,7 +54,7 @@ export default function RequireRole({
             <div className="mx-auto max-w-md rounded-3xl border border-red-400/30 bg-ink-2 p-10 text-center">
               <p className="font-display text-2xl font-bold text-ivory">Access denied</p>
               <p className="mt-3 text-sm text-muted">
-                This area is restricted to {role === "super_admin" ? "the super admin" : "administrators"}.
+                This area is restricted to {roleLabel}.
                 You are signed in as {user.name}.
               </p>
             </div>

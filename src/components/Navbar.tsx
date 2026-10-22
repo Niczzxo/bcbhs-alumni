@@ -40,7 +40,15 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", onDown);
   }, [moreOpen]);
 
-  const dashboardHref = isSuperAdmin ? "/super-admin" : isAdmin ? "/admin" : "/id-card";
+  /* Every staff role lands on its OWN dashboard. */
+  const dashboardHref = isSuperAdmin
+    ? "/super-admin"
+    : user?.role === "admin"
+      ? "/admin"
+      : user?.role === "editor"
+        ? "/editor"
+        : "/id-card";
+  const dashboardLabel = isSuperAdmin ? "Super Admin" : user?.role === "editor" ? "Editor" : "Admin";
 
   /** Verified (approved) members get the members menu; everyone else the public menu. */
   const isVerifiedMember =
@@ -171,7 +179,7 @@ export default function Navbar() {
                   href={dashboardHref}
                   className="hidden rounded-full border border-gold/40 px-5 py-2 text-xs font-bold uppercase tracking-wider text-gold-2 transition-colors hover:bg-gold/10 sm:block"
                 >
-                  {isSuperAdmin ? "Super Admin" : "Admin"}
+                  {dashboardLabel}
                 </Link>
               )}
               <button
@@ -279,7 +287,7 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-gold-2"
               >
-                {isSuperAdmin ? "Super Admin" : "Admin"}
+                {dashboardLabel}
               </Link>
             </li>
           )}
