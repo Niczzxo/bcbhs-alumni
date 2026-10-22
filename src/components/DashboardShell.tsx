@@ -24,7 +24,19 @@ export default function DashboardShell({
   defaultKey?: string;
 }) {
   const [active, setActive] = useState(defaultKey ?? sections[0]?.key);
+  /* Keep-alive (owner's speed rule, 2026-10-23): a section mounts the
+     first time it is opened and then STAYS mounted, only hidden, so
+     switching back is instant, images are not re-decoded and lists
+     are not rebuilt on every click. */
+  const [visited, setVisited] = useState<ReadonlySet<string>>(
+    () => new Set([defaultKey ?? sections[0]?.key].filter(Boolean) as string[]),
+  );
   const current = sections.find((s) => s.key === active) ?? sections[0];
+
+  const open = (key: string) => {
+    setActive(key);
+    setVisited((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+  };
 
   return (
     <div className="lg:flex lg:items-start lg:gap-10">
@@ -38,7 +50,7 @@ export default function DashboardShell({
             return (
               <button
                 key={s.key}
-                onClick={() => setActive(s.key)}
+                onClick={() => open(s.key)}
                 aria-current={isActive ? "page" : undefined}
                 className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-widest transition-all lg:w-full lg:rounded-2xl lg:px-5 lg:py-3.5 ${
                   isActive
@@ -61,7 +73,15 @@ export default function DashboardShell({
           })}
         </nav>
       </aside>
-      <div className="min-w-0 flex-1">{current?.content}</div>
+      <div className="min-w-0 flex-1">
+        {sections
+          .filter((s) => visited.has(s.key))
+          .map((s) => (
+            <div key={s.key} hidden={s.key !== current?.key}>
+              {s.content}
+            </div>
+          ))}
+      </div>
     </div>
   );
 }
