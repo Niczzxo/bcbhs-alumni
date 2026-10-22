@@ -12,15 +12,22 @@ import { PERMISSIONS, EDITOR_PERMISSIONS, ROLE_META, POSITIONS } from "@/lib/typ
 import type { MemberRole, UserProfile } from "@/lib/types";
 
 /**
- * Super admin, full control: roles, granular permissions, stats.
- * Every sector sits in the sidebar (owner's rule, 2026-10-23); one
- * click opens one sector's work area instead of one endless page.
+ * Super admin, full control. Every sector sits in the sidebar
+ * (owner's rule, 2026-10-23); one click opens one sector's work area.
+ * People management is split three ways (owner's layout, 2026-10-23):
+ * Roles & Access holds only the people who HAVE a role, All Members
+ * holds every approved member (give roles and ban from there), and
+ * Banned holds the suspended members until they are unbanned.
  */
 export default function SuperAdminPage() {
   const { user, members, loading, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember, banMember, unbanMember } = useAuth();
 
   const approved = members.filter((m) => m.status === "approved");
   const pending = members.filter((m) => m.status === "pending");
+  const banned = members.filter((m) => m.status === "banned");
+  const staff = members.filter(
+    (m) => (m.status === "approved" || m.status === "banned") && m.role !== "member",
+  );
   const admins = members.filter((m) => m.role === "admin" || m.role === "super_admin");
   const editors = members.filter((m) => m.role === "editor");
 
@@ -43,6 +50,143 @@ export default function SuperAdminPage() {
     if (m.id === user?.id) return; /* never change your own role from here */
     setRole(m.id, role);
   };
+
+  /* The one member card: role select, position, guest view, ban and
+     the permission grid. Used by Roles & Access (staff only) and by
+     All Members (every approved member). */
+  const renderCard = (m: UserProfile) => (
+    <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
+      <div className="flex flex-wrap items-center gap-4">
+        <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold text-ivory">
+            {m.name} <span className="text-xs text-muted">· Batch {m.batch} · {m.email}</span>
+          </p>
+        </div>
+        <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
+          {ROLE_META[m.role].label}
+        </span>
+        {m.id === user?.id ? (
+          <span className="rounded-full border border-ivory/10 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-muted">
+            You
+          </span>
+        ) : (
+          <select
+            value={m.role}
+            onChange={(e) => changeRole(m, e.target.value as MemberRole)}
+            aria-label={`Change role for ${m.name}`}
+            className="cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
+          >
+            {(Object.keys(ROLE_META) as MemberRole[]).map((r) => (
+              <option key={r} value={r} className="bg-ink text-ivory">
+                {ROLE_META[r].label}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+      <p className="mt-2 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <label className="text-[11px] font-bold uppercase tracking-widest text-muted">
+          Position
+        </label>
+        <select
+          value={m.position ?? ""}
+          aria-label={`Official position for ${m.name}`}
+          onChange={(e) => setPosition(m.id, e.target.value)}
+          className="w-56 cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
+        >
+          <option value="" className="bg-ink text-ivory">
+           , No position
+          </option>
+          {m.position && !POSITIONS.includes(m.position) && (
+            <option value={m.position} className="bg-ink text-ivory">
+              {m.position}
+            </option>
+          )}
+          {POSITIONS.map((p) => (
+            <option key={p} value={p} className="bg-ink text-ivory">
+              {p}
+            </option>
+          ))}
+        </select>
+        {m.position && (
+          <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
+            ★ {m.position}
+          </span>
+        )}
+        <label className="ml-auto flex cursor-pointer items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted hover:text-gold-2">
+          <input
+            type="checkbox"
+            checked={!!m.guestVisible}
+            onChange={(e) => setGuestVisible(m.id, e.target.checked)}
+            aria-label={`Show ${m.name} in the public guest directory`}
+            className="h-4 w-4 accent-[#d4a94e]"
+          />
+          Guest view
+        </label>
+      </div>
+      {m.role !== "super_admin" && m.id !== user?.id && (m.status === "approved" || m.status === "banned") && (
+        <div className="mt-4 flex items-center gap-3">
+          {m.status === "banned" ? (
+            <>
+              <span className="rounded-full bg-red-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-red-300">
+                Banned
+              </span>
+              <button
+                type="button"
+                onClick={() => unbanMember(m.id)}
+                className="rounded-full border border-gold/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+              >
+                Unban
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => banMember(m.id)}
+              className="rounded-full border border-red-400/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-red-300 transition-colors hover:bg-red-500/10"
+            >
+              Ban member
+            </button>
+          )}
+        </div>
+      )}
+      <p className="mt-1.5 text-[11px] text-muted/70">
+        Official positions are manually verified, allow up to 7 days.
+      </p>
+      {(m.role === "admin" || m.role === "editor") && (
+        <div className="mt-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {PERMISSIONS.map((p) => {
+              const on = effectivePerms(m).includes(p.key);
+              return (
+                <button
+                  key={p.key}
+                  onClick={() => togglePerm(m, p.key)}
+                  className={`rounded-2xl border p-4 text-left transition-all ${on ? "border-gold/60 bg-gold/10" : "border-ivory/10 bg-ink hover:border-gold/30"}`}
+                >
+                  <p className="flex items-center justify-between text-sm font-semibold text-ivory">
+                    {p.label}
+                    <span className={`ml-2 inline-block h-5 w-9 shrink-0 rounded-full p-0.5 transition-colors ${on ? "bg-gold" : "bg-ivory/20"}`}>
+                      <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${on ? "translate-x-4" : ""}`} />
+                    </span>
+                  </p>
+                  <p className="mt-1 text-xs text-muted">{p.hint}</p>
+                </button>
+              );
+            })}
+          </div>
+          {m.role === "editor" && !m.permissionsCustom && (
+            <p className="mt-3 text-[11px] text-muted/70">
+              This editor is on the standard bundle (events, gallery, announcements, committee).
+              Flip any switch to customize this editor individually.
+            </p>
+          )}
+        </div>
+      )}
+    </Reveal>
+  );
 
   const sections: DashSection[] = [
     {
@@ -107,149 +251,96 @@ export default function SuperAdminPage() {
         <section>
           <h2 className="font-display text-2xl font-bold text-ivory">Role & access control</h2>
           <p className="mt-2 text-sm text-muted">
-            Give anyone any role, member, editor, batch rep or super admin. Batch reps and editors
-            each get exactly the permissions you toggle below; a new editor starts with the standard
+            Only the people who hold a role live here. Give someone a role from the
+            All Members section and they appear here automatically. Batch reps and editors
+            each get exactly the permissions you toggle; a new editor starts with the standard
             content bundle until you customize them. Super admin always has full access.
           </p>
           <div className="gold-rule mt-4 w-32" />
           <div className="mt-8 space-y-5">
-            {members
-              /* Banned members stay listed here so the super admin can
-                 see the BANNED badge and unban them. */
-              .filter((m) => m.status === "approved" || m.status === "banned")
-              .map((m) => (
-                <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
-                  <div className="flex flex-wrap items-center gap-4">
-                    <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-ivory">
-                        {m.name} <span className="text-xs text-muted">· Batch {m.batch} · {m.email}</span>
-                      </p>
-                    </div>
-                    <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
-                      {ROLE_META[m.role].label}
-                    </span>
-                    {m.id === user?.id ? (
-                      <span className="rounded-full border border-ivory/10 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-muted">
-                        You
-                      </span>
-                    ) : (
-                      <select
-                        value={m.role}
-                        onChange={(e) => changeRole(m, e.target.value as MemberRole)}
-                        aria-label={`Change role for ${m.name}`}
-                        className="cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
-                      >
-                        {(Object.keys(ROLE_META) as MemberRole[]).map((r) => (
-                          <option key={r} value={r} className="bg-ink text-ivory">
-                            {ROLE_META[r].label}
-                          </option>
-                        ))}
-                      </select>
-                    )}
+            {staff.length === 0 ? (
+              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
+                No one holds a role yet. Open All Members and give someone a role.
+              </p>
+            ) : (
+              staff.map(renderCard)
+            )}
+          </div>
+        </section>
+      ),
+    },
+    {
+      key: "all-members",
+      label: "All Members",
+      badge: approved.length,
+      content: (
+        <section>
+          <h2 className="font-display text-2xl font-bold text-ivory">
+            All approved members <span className="text-gold-2">({approved.length})</span>
+          </h2>
+          <p className="mt-2 text-sm text-muted">
+            Everyone approved lives here. Give anyone role access from their card and they
+            also appear under Roles & Access. Ban from here too; banned members move to the
+            Banned section until they are unbanned.
+          </p>
+          <div className="gold-rule mt-4 w-32" />
+          <div className="mt-8 space-y-5">
+            {approved.length === 0 ? (
+              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
+                {loading ? "Loading members…" : "No approved members yet."}
+              </p>
+            ) : (
+              approved.map(renderCard)
+            )}
+          </div>
+        </section>
+      ),
+    },
+    {
+      key: "banned",
+      label: "Banned",
+      badge: banned.length,
+      content: (
+        <section>
+          <h2 className="font-display text-2xl font-bold text-ivory">
+            Banned members <span className="text-red-300">({banned.length})</span>
+          </h2>
+          <p className="mt-2 text-sm text-muted">
+            Suspended members wait here. They cannot use the portal while banned;
+            unban restores their full access, ID card included.
+          </p>
+          <div className="gold-rule mt-4 w-32" />
+          <div className="mt-8 space-y-3">
+            {banned.length === 0 ? (
+              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
+                No banned members. When you ban someone, they will appear here.
+              </p>
+            ) : (
+              banned.map((m) => (
+                <div key={m.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-red-400/20 bg-ink-2 px-4 py-3">
+                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-ivory">{m.name}</p>
+                    <p className="text-xs text-muted">
+                      {m.memberId} · Batch {m.batch} · {m.email}
+                    </p>
                   </div>
-                  <p className="mt-2 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-muted">
-                      Position
-                    </label>
-                    <select
-                      value={m.position ?? ""}
-                      aria-label={`Official position for ${m.name}`}
-                      onChange={(e) => setPosition(m.id, e.target.value)}
-                      className="w-56 cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
-                    >
-                      <option value="" className="bg-ink text-ivory">
-                       , No position
-                      </option>
-                      {m.position && !POSITIONS.includes(m.position) && (
-                        <option value={m.position} className="bg-ink text-ivory">
-                          {m.position}
-                        </option>
-                      )}
-                      {POSITIONS.map((p) => (
-                        <option key={p} value={p} className="bg-ink text-ivory">
-                          {p}
-                        </option>
-                      ))}
-                    </select>
-                    {m.position && (
-                      <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
-                        ★ {m.position}
-                      </span>
-                    )}
-                    <label className="ml-auto flex cursor-pointer items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted hover:text-gold-2">
-                      <input
-                        type="checkbox"
-                        checked={!!m.guestVisible}
-                        onChange={(e) => setGuestVisible(m.id, e.target.checked)}
-                        aria-label={`Show ${m.name} in the public guest directory`}
-                        className="h-4 w-4 accent-[#d4a94e]"
-                      />
-                      Guest view
-                    </label>
-                  </div>
-                  {m.role !== "super_admin" && m.id !== user?.id && (m.status === "approved" || m.status === "banned") && (
-                    <div className="mt-4 flex items-center gap-3">
-                      {m.status === "banned" ? (
-                        <>
-                          <span className="rounded-full bg-red-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-red-300">
-                            Banned
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => unbanMember(m.id)}
-                            className="rounded-full border border-gold/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
-                          >
-                            Unban
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => banMember(m.id)}
-                          className="rounded-full border border-red-400/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-red-300 transition-colors hover:bg-red-500/10"
-                        >
-                          Ban member
-                        </button>
-                      )}
-                    </div>
-                  )}
-                  <p className="mt-1.5 text-[11px] text-muted/70">
-                    Official positions are manually verified, allow up to 7 days.
-                  </p>
-                  {(m.role === "admin" || m.role === "editor") && (
-                    <div className="mt-5">
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {PERMISSIONS.map((p) => {
-                          const on = effectivePerms(m).includes(p.key);
-                          return (
-                            <button
-                              key={p.key}
-                              onClick={() => togglePerm(m, p.key)}
-                              className={`rounded-2xl border p-4 text-left transition-all ${on ? "border-gold/60 bg-gold/10" : "border-ivory/10 bg-ink hover:border-gold/30"}`}
-                            >
-                              <p className="flex items-center justify-between text-sm font-semibold text-ivory">
-                                {p.label}
-                                <span className={`ml-2 inline-block h-5 w-9 shrink-0 rounded-full p-0.5 transition-colors ${on ? "bg-gold" : "bg-ivory/20"}`}>
-                                  <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${on ? "translate-x-4" : ""}`} />
-                                </span>
-                              </p>
-                              <p className="mt-1 text-xs text-muted">{p.hint}</p>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {m.role === "editor" && !m.permissionsCustom && (
-                        <p className="mt-3 text-[11px] text-muted/70">
-                          This editor is on the standard bundle (events, gallery, announcements, committee).
-                          Flip any switch to customize this editor individually.
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </Reveal>
-              ))}
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
+                    {ROLE_META[m.role].label}
+                  </span>
+                  <span className="rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-red-300">
+                    Banned
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => unbanMember(m.id)}
+                    className="rounded-full border border-gold/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+                  >
+                    Unban
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </section>
       ),
