@@ -118,8 +118,8 @@ export default function Footer() {
                   </span>
                 </a>
               </li>
-              {/* WhatsApp group, members only, hidden until login */}
-              {user && (
+              {/* WhatsApp group, approved members only */}
+              {user?.status === "approved" && (
                 <li>
                   <a
                     href={SITE_WHATSAPP}

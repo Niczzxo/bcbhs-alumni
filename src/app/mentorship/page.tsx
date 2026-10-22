@@ -107,14 +107,16 @@ export default function MentorshipPage() {
                     </div>
                     <p className="mt-4 text-xs font-bold uppercase tracking-wider text-gold-2">{m.expertise}</p>
                     <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">{m.bio}</p>
-                    <a
-                      href={`https://wa.me/${normalizeWhatsAppNumber(m.whatsapp)}?text=${encodeURIComponent(`Assalamu Alaikum! Ami ${user.name}, Batch ${user.batch}, BCBHS Mentorship program theke apnar guidance chachhi.`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-5 rounded-full border border-gold/40 px-5 py-2 text-center text-xs font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
-                    >
-                      Ask on WhatsApp
-                    </a>
+                    {user?.status === "approved" && (
+                      <a
+                        href={`https://wa.me/${normalizeWhatsAppNumber(m.whatsapp)}?text=${encodeURIComponent(`Assalamu Alaikum! Ami ${user.name}, Batch ${user.batch}, BCBHS Mentorship program theke apnar guidance chachhi.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-5 rounded-full border border-gold/40 px-5 py-2 text-center text-xs font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+                      >
+                        Ask on WhatsApp
+                      </a>
+                    )}
                   </Reveal>
                 ))}
               </div>

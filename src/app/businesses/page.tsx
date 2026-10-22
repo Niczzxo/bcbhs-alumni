@@ -149,14 +149,23 @@ export default function BusinessesPage() {
                 </div>
                 <p className="mt-1 text-xs text-muted">📍 {b.district} · by {b.ownerName} (Batch {b.ownerBatch})</p>
                 <p className="mt-4 flex-1 text-sm leading-relaxed text-muted">{b.description}</p>
-                <a
-                  href={`https://wa.me/${normalizeWhatsAppNumber(b.whatsapp)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 rounded-full border border-gold/40 px-5 py-2 text-center text-xs font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
-                >
-                  WhatsApp the Owner
-                </a>
+                {user?.status === "approved" ? (
+                  <a
+                    href={`https://wa.me/${normalizeWhatsAppNumber(b.whatsapp)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 rounded-full border border-gold/40 px-5 py-2 text-center text-xs font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+                  >
+                    WhatsApp the Owner
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => openAuthModal("login")}
+                    className="mt-5 rounded-full border border-gold/40 px-5 py-2 text-center text-xs font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+                  >
+                    Log In to Contact
+                  </button>
+                )}
               </Reveal>
             ))}
           </div>

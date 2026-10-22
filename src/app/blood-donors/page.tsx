@@ -168,20 +168,31 @@ export default function BloodDonorsPage() {
                       {r.neededBy ? ` · Needed by ${r.neededBy}` : ""}
                     </p>
                     <div className="mt-5 flex flex-wrap gap-3">
-                      <a
-                        href={`tel:${r.contact}`}
-                        className="rounded-full bg-gradient-to-r from-red-700 via-red-500 to-red-700 px-5 py-2 text-xs font-bold uppercase tracking-widest text-white"
-                      >
-                        📞 Call {r.contact}
-                      </a>
-                      <a
-                        href={`https://wa.me/${normalizeWhatsAppNumber(r.contact)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-full border border-gold/40 px-5 py-2 text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10"
-                      >
-                        WhatsApp
-                      </a>
+                      {user?.status === "approved" ? (
+                        <>
+                          <a
+                            href={`tel:${r.contact}`}
+                            className="rounded-full bg-gradient-to-r from-red-700 via-red-500 to-red-700 px-5 py-2 text-xs font-bold uppercase tracking-widest text-white"
+                          >
+                            📞 Call {r.contact}
+                          </a>
+                          <a
+                            href={`https://wa.me/${normalizeWhatsAppNumber(r.contact)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-full border border-gold/40 px-5 py-2 text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10"
+                          >
+                            WhatsApp
+                          </a>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => openAuthModal("login")}
+                          className="rounded-full border border-gold/40 px-5 py-2 text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10"
+                        >
+                          Log In to Contact
+                        </button>
+                      )}
                     </div>
                   </Reveal>
                 ))}

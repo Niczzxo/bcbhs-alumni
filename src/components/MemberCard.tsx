@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { UserProfile } from "@/lib/types";
+import { useAuth } from "@/lib/auth-context";
 import Reveal from "./Reveal";
 import WhatsAppButton from "./WhatsAppButton";
 
@@ -41,6 +42,10 @@ export function Avatar({
 
 /** Alumni card for directory / search grids. */
 export default function MemberCard({ member, delay = 0 }: { member: UserProfile; delay?: number }) {
+  /* WhatsApp contact is members-only: signed-out visitors and pending
+     accounts never see the button (it would hand out the number). */
+  const { user } = useAuth();
+  const canContact = user?.status === "approved";
   const href = `/member/${member.memberId ?? member.id}`;
   const showDonor = member.isDonor && member.bloodGroup;
   return (
@@ -86,7 +91,7 @@ export default function MemberCard({ member, delay = 0 }: { member: UserProfile;
           </p>
         </div>
         </Link>
-        {member.whatsapp && (
+        {member.whatsapp && canContact && (
           <div className="absolute right-4 top-4">
             <WhatsAppButton whatsapp={member.whatsapp} />
           </div>

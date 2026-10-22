@@ -76,7 +76,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                   <Link href="/directory" className="rounded-full border border-gold/40 px-6 py-3 text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10">
                     Back to Directory
                   </Link>
-                  {member.whatsapp && <WhatsAppButton whatsapp={member.whatsapp} labeled />}
+                  {member.whatsapp && canViewCard && <WhatsAppButton whatsapp={member.whatsapp} labeled />}
                   {isOwn && (
                     <Link href="/profile/edit" className="rounded-full border border-ivory/15 px-6 py-3 text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory">
                       Edit profile
