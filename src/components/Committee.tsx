@@ -4,6 +4,8 @@ import Link from "next/link";
 import Reveal from "./Reveal";
 import { Avatar } from "./MemberCard";
 import { useContent } from "@/lib/content-context";
+import { useAuth } from "@/lib/auth-context";
+import { mergeLeadership } from "@/lib/leadership";
 
 /* Shown only until real seats are added from the dashboard. */
 const PLACEHOLDER_SEATS = [
@@ -14,16 +16,19 @@ const PLACEHOLDER_SEATS = [
 ];
 
 /**
- * Homepage Leadership strip. Renders the REAL committee seats from
- * the content store (the same seats the dashboard Committee section
- * manages and the /committee page shows); the placeholder cards
- * appear only while no seat has been added yet. (Owner report,
- * 2026-10-23: this section used to be hardcoded placeholders and
- * never showed the seats he added.)
+ * Homepage Leadership strip. Shows THE leadership list (owner's
+ * merge rule, 2026-10-23): profile position holders automatically,
+ * plus any hand-added committee seats; the placeholder cards appear
+ * only while the list is completely empty. (This section used to be
+ * hardcoded placeholders that never showed the real seats.)
  */
 export default function Committee() {
   const { committee } = useContent();
-  const hasSeats = committee.length > 0;
+  const { user, members } = useAuth();
+  const canSeeAll = !!user && user.status === "approved";
+  const visible = canSeeAll ? members : members.filter((m) => m.guestVisible);
+  const leaders = mergeLeadership(visible, committee);
+  const hasSeats = leaders.length > 0;
 
   return (
     <section id="committee" className="grain relative overflow-hidden border-y border-gold/20 bg-ink-2 py-24">
@@ -45,7 +50,7 @@ export default function Committee() {
 
         {hasSeats ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {committee.map((seat, i) => (
+            {leaders.map((seat, i) => (
               <Reveal key={seat.id} delay={Math.min(i, 5) * 0.12}>
                 <article className="card-lift group h-full rounded-3xl border border-gold/15 bg-ink p-8 text-center transition-all duration-500 hover:border-gold/50 hover:shadow-[0_20px_60px_rgba(212,169,78,0.15)]">
                   <div className="flex justify-center">
