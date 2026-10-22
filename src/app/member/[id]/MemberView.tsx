@@ -61,6 +61,13 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.25em] text-gold">
                       Batch of {member.batch} · {member.memberId}
                     </p>
+                    {member.position && (
+                      <p className="mt-2">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gold-2">
+                          ★ {member.position}
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="gold-rule my-8" />

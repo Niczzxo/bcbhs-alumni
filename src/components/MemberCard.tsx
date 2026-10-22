@@ -62,6 +62,16 @@ export default function MemberCard({ member, delay = 0 }: { member: UserProfile;
               {member.name}
             </p>
             <p className="text-xs uppercase tracking-[0.2em] text-gold">Batch of {member.batch}</p>
+            {/* Official position, shown wherever the member holds one:
+                on the Directory every card is a position holder, so
+                visitors can see who holds which position. */}
+            {member.position && (
+              <p className="mt-1.5">
+                <span className="inline-flex max-w-full items-center gap-1 truncate rounded-full border border-gold/40 bg-gold/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gold-2">
+                  ★ {member.position}
+                </span>
+              </p>
+            )}
           </div>
         </div>
         <div className="mt-5 space-y-1.5 text-sm text-muted">
