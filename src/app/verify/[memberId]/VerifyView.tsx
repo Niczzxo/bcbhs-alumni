@@ -7,12 +7,12 @@ import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
-import { useMember } from "@/lib/data";
+import { useVerifiedMember } from "@/lib/data";
 
 /** PUBLIC membership verification — consumes the route-params promise via `use()`. */
 export default function VerifyView({ params }: { params: Promise<{ memberId: string }> }) {
   const { memberId } = use(params);
-  const member = useMember(decodeURIComponent(memberId));
+  const member = useVerifiedMember(decodeURIComponent(memberId));
 
   const genuine = member !== null && member !== undefined && member.status === "approved" && !!member.memberId;
 

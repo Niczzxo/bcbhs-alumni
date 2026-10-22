@@ -278,5 +278,20 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isSuperAdmin();
     }
+
+    match /verify/{memberId} {
+      // Public ID-card verification registry. Holds ONLY the facts
+      // printed on the card itself (name, batch, photo, position), so
+      // anyone scanning a card QR can confirm a genuine member without
+      // the `users` collection being readable by guests (a `users`
+      // query cannot be authorized for guests at all — the read rule
+      // depends on fields a memberId lookup does not constrain).
+      // A document exists exactly while the member is approved.
+      allow read: if true;
+      allow create, update: if isAdmin()
+        || (signedIn() && me().memberId == memberId && me().status == 'approved');
+      allow delete: if isAdmin()
+        || (signedIn() && me().memberId == memberId);
+    }
   }
 }

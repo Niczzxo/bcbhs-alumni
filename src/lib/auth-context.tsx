@@ -117,7 +117,11 @@ function nextMemberId(batch: string, members: UserProfile[]): string {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [members, setMembers] = useState<UserProfile[]>(DEMO_USERS);
+  /* Live mode starts EMPTY — seeding demo members here would flash
+     fake people (and fake stats) on the real site before sign-in
+     resolves, and a member whose list query was denied would keep
+     seeing them. Demo data belongs to demo mode only. */
+  const [members, setMembers] = useState<UserProfile[]>(isFirebaseConfigured ? [] : DEMO_USERS);
   const [loading, setLoading] = useState(true);
   /* Skips the persist effect's first run per mount: the rehydrate effect
      above calls setMembers asynchronously, so persisting on the very first
@@ -204,23 +208,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     const load = async () => {
       const { onAuthStateChanged } = await import("firebase/auth");
-      const { doc, getDoc, collection, getDocs } = await import("firebase/firestore");
+      const { doc, getDoc, collection, getDocs, query, where } = await import("firebase/firestore");
       return onAuthStateChanged(liveAuth, async (fbUser) => {
         if (cancelled) return;
         try {
           if (fbUser) {
             /* Resolve the visitor's OWN profile first and end the
-             * loading state immediately — the full member list (needed
-             * by the directory and dashboards) loads right after, so a
+             * loading state immediately — the member list (needed by
+             * the directory and dashboards) loads right after, so a
              * page reload never flashes the logged-out UI while the
-             * whole collection is still downloading. */
+             * collection is still downloading. */
             const snap = await getDoc(doc(liveDb, "users", fbUser.uid));
             if (cancelled) return;
-            if (snap.exists()) setUser({ id: snap.id, ...(snap.data() as Omit<UserProfile, "id">) });
+            const own = snap.exists()
+              ? ({ id: snap.id, ...(snap.data() as Omit<UserProfile, "id">) } as UserProfile)
+              : null;
+            if (own) setUser(own);
             setLoading(false);
-            const all = await getDocs(collection(liveDb, "users"));
+            /* Role-aware list fetch. Firestore denies a query whose
+             * results it cannot prove readable: the full collection is
+             * only readable by admins, while regular members may read
+             * approved profiles — so they get a status-constrained
+             * query (plus their own doc, whatever its status). The old
+             * unconstrained fetch silently failed for every non-admin
+             * and left the demo seed list on screen. */
+            const isStaff = own?.role === "admin" || own?.role === "super_admin";
+            const snapList = isStaff
+              ? await getDocs(collection(liveDb, "users"))
+              : await getDocs(
+                  query(collection(liveDb, "users"), where("status", "==", "approved")),
+                );
             if (!cancelled) {
-              setMembers(all.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) })));
+              const list = snapList.docs.map(
+                (d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) }) as UserProfile,
+              );
+              if (own && !list.some((m) => m.id === own.id)) list.push(own);
+              setMembers(list);
             }
           } else {
             setUser(null);
@@ -378,17 +401,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!isFirebaseConfigured || !db) return;
       const { doc, updateDoc } = await import("firebase/firestore");
       await updateDoc(doc(db, "users", id), { status: "approved", memberId }).catch(() => undefined);
+      /* Publish the public verification record so the new member's
+         card QR verifies for anyone, signed in or not. */
+      if (target) {
+        const { syncVerifyDoc } = await import("./verify-sync");
+        await syncVerifyDoc(db, { ...target, status: "approved", memberId });
+      }
     },
     [members],
   );
 
   const rejectMember = useCallback(async (id: string) => {
+    const target = members.find((m) => m.id === id);
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "rejected" } : m)));
     setUser((u) => (u && u.id === id ? { ...u, status: "rejected" } : u));
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { status: "rejected" }).catch(() => undefined);
-  }, []);
+    /* A rejected / revoked member must stop verifying immediately. */
+    const { removeVerifyDoc } = await import("./verify-sync");
+    await removeVerifyDoc(db, target?.memberId);
+  }, [members]);
 
   const setPermissions = useCallback(async (id: string, permissions: string[]) => {
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, permissions } : m)));
@@ -415,7 +448,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { position: clean ?? null }).catch(() => undefined);
-  }, []);
+    /* The position is printed on the public verification record too. */
+    const target = members.find((m) => m.id === id);
+    if (target?.memberId && target.status === "approved") {
+      const { syncVerifyDoc } = await import("./verify-sync");
+      await syncVerifyDoc(db, { ...target, position: clean });
+    }
+  }, [members]);
 
   const setGuestVisible = useCallback(async (id: string, visible: boolean) => {
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, guestVisible: visible } : m)));
@@ -479,6 +518,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await updateDoc(doc(db, "users", user.id), clean);
         if (phone) {
           await setDoc(doc(db, "users_private", user.id), { phone });
+        }
+        /* Keep the public verification record (name / batch / photo)
+           in step with the profile. */
+        if (user.status === "approved" && user.memberId) {
+          const { syncVerifyDoc } = await import("./verify-sync");
+          await syncVerifyDoc(db, { ...user, ...patch } as UserProfile);
         }
         setUser((u) => (u ? ({ ...u, ...patch, phone: phone || u.phone } as UserProfile) : u));
         return { ok: true };

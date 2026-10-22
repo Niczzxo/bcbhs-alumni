@@ -91,16 +91,30 @@ export function useDirectory(): UserProfile[] {
 
 /** Find one member by id or memberId. */
 export function useMember(lookup: string | undefined): UserProfile | null | undefined {
-  const { members } = useAuth();
+  const { members, user } = useAuth();
   const [remote, setRemote] = useState<UserProfile | null | undefined>(undefined);
+  const fromContext = lookup
+    ? members.find((m) => m.id === lookup || m.memberId === lookup)
+    : undefined;
 
   useEffect(() => {
     if (!lookup || !isFirebaseConfigured || !db) return;
+    if (fromContext) return; // the role-aware member list already has them
     let cancelled = false;
     (async () => {
       try {
         const { collection, getDocs, query, where, limit } = await import("firebase/firestore");
-        const q = query(collection(db, "users"), where("memberId", "==", lookup), limit(1));
+        /* The query must constrain every field the read rule checks,
+           or Firestore denies it outright ("rules are not filters") —
+           an unconstrained memberId lookup fails for everyone except
+           admins and the profile page reports "not found". Guests are
+           additionally limited to guestVisible profiles. */
+        const constraints = [
+          where("memberId", "==", lookup),
+          where("status", "==", "approved"),
+        ];
+        if (!user) constraints.push(where("guestVisible", "==", true));
+        const q = query(collection(db, "users"), ...constraints, limit(1));
         const snap = await getDocs(q);
         if (!cancelled) {
           setRemote(
@@ -116,12 +130,66 @@ export function useMember(lookup: string | undefined): UserProfile | null | unde
     return () => {
       cancelled = true;
     };
-  }, [lookup]);
+  }, [lookup, user, fromContext]);
 
   if (!lookup) return null;
+  if (fromContext) return fromContext;
   if (remote !== undefined) return remote; // live result (or null)
   if (isFirebaseConfigured) return undefined; // still loading
-  return members.find((m) => m.id === lookup || m.memberId === lookup) ?? null;
+  return null; // demo mode: absence from the list means not found
+}
+
+/**
+ * PUBLIC card verification — resolves a memberId against the public
+ * `verify` registry (see lib/verify-sync.ts), NOT the `users`
+ * collection: a guest scanning a card QR cannot be authorized to read
+ * `users` at all, so genuine members used to show "Not Verified".
+ * Returns undefined while loading, null when no approved member
+ * carries this ID.
+ */
+export function useVerifiedMember(memberId: string | undefined): UserProfile | null | undefined {
+  const { members } = useAuth();
+  const [remote, setRemote] = useState<UserProfile | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (!memberId || !isFirebaseConfigured || !db) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { doc, getDoc } = await import("firebase/firestore");
+        const snap = await getDoc(doc(db, "verify", memberId));
+        if (!cancelled) {
+          setRemote(
+            snap.exists()
+              ? ({
+                  id: memberId,
+                  email: "",
+                  status: "approved",
+                  role: "member",
+                  permissions: [],
+                  isDonor: false,
+                  isAbroad: false,
+                  district: "",
+                  createdAt: "",
+                  ...(snap.data() as Record<string, unknown>),
+                } as unknown as UserProfile)
+              : null,
+          );
+        }
+      } catch {
+        if (!cancelled) setRemote(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [memberId]);
+
+  if (!memberId) return null;
+  if (remote !== undefined) return remote; // live registry result (or null)
+  if (isFirebaseConfigured) return undefined; // still loading
+  const found = members.find((m) => m.memberId === memberId);
+  return found && found.status === "approved" ? found : null;
 }
 
 /* ------------------------------------------------------------------ */

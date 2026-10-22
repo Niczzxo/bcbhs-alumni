@@ -159,8 +159,33 @@ export function useContent(): ContentContextValue {
   return ctx;
 }
 
+function emptyContent(): DemoContent {
+  /* Live mode starts empty so the public site never flashes demo
+     placeholders on first paint — Firestore snapshots fill it in. */
+  return {
+    events: [],
+    gallery: [],
+    committee: [],
+    announcements: [],
+    jobs: [],
+    bloodRequests: [],
+    polls: [],
+    pollVotes: [],
+    stories: [],
+    businesses: [],
+    wallPhotos: [],
+    mentors: [],
+    fundDonors: [],
+    fundInfo: DEFAULT_FUND_INFO,
+    batchLinks: [],
+    siteContent: DEFAULT_SITE_CONTENT,
+  };
+}
+
 export function ContentProvider({ children }: { children: ReactNode }) {
-  const [content, setContent] = useState<DemoContent>(seedContent);
+  const [content, setContent] = useState<DemoContent>(() =>
+    isFirebaseConfigured ? emptyContent() : seedContent(),
+  );
   const [loading, setLoading] = useState(true);
   const persistArmed = useRef(false);
 
@@ -393,8 +418,14 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       const { collection: col, doc, addDoc, updateDoc, deleteDoc } = await import(
         "firebase/firestore"
       );
-      if (op === "add") await addDoc(col(db, collection), data);
-      else if (op === "update" && id) await updateDoc(doc(db, collection, id), data!);
+      /* Firestore rejects payloads containing `undefined` values — one
+       * unset optional form field would fail the whole write. Strip
+       * them centrally so every collection/form is safe. */
+      const clean = data
+        ? Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined))
+        : data;
+      if (op === "add") await addDoc(col(db, collection), clean);
+      else if (op === "update" && id) await updateDoc(doc(db, collection, id), clean!);
       else if (op === "remove" && id) await deleteDoc(doc(db, collection, id));
     },
     [],

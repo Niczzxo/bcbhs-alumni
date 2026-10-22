@@ -43,8 +43,15 @@ export default function DirectoryPage() {
     (async () => {
       try {
         const { collection, query, where, limit, getDocs } = await import("firebase/firestore");
+        /* Both rule-checked fields must be constrained — Firestore
+           denies a query whose results it cannot prove readable. */
         const snap = await getDocs(
-          query(collection(db, "users"), where("guestVisible", "==", true), limit(GUEST_PREVIEW_COUNT * 2))
+          query(
+            collection(db, "users"),
+            where("guestVisible", "==", true),
+            where("status", "==", "approved"),
+            limit(GUEST_PREVIEW_COUNT * 2),
+          )
         );
         const list = snap.docs
           .map((d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) }))
