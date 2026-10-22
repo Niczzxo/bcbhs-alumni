@@ -156,9 +156,6 @@ function CardFront({ member }: { member: UserProfile }) {
           </div>
 
           <div className="flex-1" />
-          <p className="mt-[1.5cqw] text-[2.1cqw] font-bold uppercase tracking-[0.3em] text-[#f0cd7e]/80">
-            ✓ Verified Member
-          </p>
         </div>
       </div>
     </CardShell>
