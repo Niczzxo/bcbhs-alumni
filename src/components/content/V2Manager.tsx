@@ -83,6 +83,16 @@ export default function V2Manager() {
 
   if (!user) return null;
   const batchesWithMembers = [...new Set(members.filter((m) => m.status === "approved").map((m) => m.batch))].sort().reverse();
+  /* Batch link self-service (owner's rule, 2026-10-23): the super
+     admin sees every batch; a Batch Rep sees only their OWN batch,
+     so they can post their batch's WhatsApp link without waiting
+     for the super admin. Enforced in firestore.rules too. */
+  const isBatchRep = user?.role === "admin";
+  const visibleBatches = isSuperAdmin
+    ? batchesWithMembers
+    : isBatchRep && user?.batch
+      ? [user.batch]
+      : [];
   const fund = fundForm ?? fundInfo;
 
   return (
@@ -348,14 +358,19 @@ export default function V2Manager() {
       )}
 
       {/* --------------------------- batch links --------------------------- */}
-      {isSuperAdmin && (
+      {(isSuperAdmin || isBatchRep) && (
         <div className={card}>
           <SectionTitle blurb="WhatsApp group invite link per batch, shown on the Batch Groups page.">
             Batch WhatsApp Links
           </SectionTitle>
+          {!isSuperAdmin && (
+            <p className="mt-3 rounded-xl border border-gold/25 bg-gold/5 px-4 py-2.5 text-xs text-gold-2">
+              As a Batch Rep you manage your own batch only: Batch {user?.batch}. Other batches stay with the super admin.
+            </p>
+          )}
           <div className="mt-4 space-y-3">
-            {batchesWithMembers.length === 0 && <p className="text-sm text-muted">No approved members yet.</p>}
-            {batchesWithMembers.map((batch) => {
+            {visibleBatches.length === 0 && <p className="text-sm text-muted">No approved members yet.</p>}
+            {visibleBatches.map((batch) => {
               const current = batchLinks.find((b) => b.id === batch)?.link ?? "";
               const draft = linkDrafts[batch] ?? current;
               return (

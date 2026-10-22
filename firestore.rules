@@ -244,9 +244,15 @@ service cloud.firestore {
     }
 
     match /batchLinks/{batch} {
-      // Per-batch WhatsApp group links: members read; super admin sets.
+      // Per-batch WhatsApp group links: members read. The super admin
+      // sets any batch; a Batch Rep sets only their OWN batch's link
+      // (owner's rule, 2026-10-23, so reps never wait on the super admin).
       allow read: if signedIn();
-      allow write: if isSuperAdmin();
+      allow write: if isSuperAdmin()
+        || (signedIn()
+          && me().get('role', '') == 'admin'
+          && me().get('status', '') == 'approved'
+          && me().get('batch', '') == batch);
     }
 
     function jobValid() {
