@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
 import DashboardShell, { type DashSection } from "@/components/DashboardShell";
@@ -23,6 +24,22 @@ export default function SuperAdminPage() {
   const { user, members, loading, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember, banMember, unbanMember } = useAuth();
 
   const approved = members.filter((m) => m.status === "approved");
+  /* All Members search (owner's request, 2026-10-23): a name field
+     (quietly also matches email / member ID when pasted) plus a
+     batch picker; both filters combine. */
+  const [memberQuery, setMemberQuery] = useState("");
+  const [memberBatch, setMemberBatch] = useState("");
+  const memberBatches = [...new Set(approved.map((m) => m.batch))].sort().reverse();
+  const shownMembers = approved.filter((m) => {
+    const q = memberQuery.trim().toLowerCase();
+    const nameOk =
+      !q ||
+      m.name.toLowerCase().includes(q) ||
+      m.email.toLowerCase().includes(q) ||
+      (m.memberId ?? "").toLowerCase().includes(q);
+    const batchOk = !memberBatch || m.batch === memberBatch;
+    return nameOk && batchOk;
+  });
   const pending = members.filter((m) => m.status === "pending");
   const banned = members.filter((m) => m.status === "banned");
   const staff = members.filter(
@@ -284,13 +301,54 @@ export default function SuperAdminPage() {
             Banned section until they are unbanned.
           </p>
           <div className="gold-rule mt-4 w-32" />
-          <div className="mt-8 space-y-5">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="relative min-w-56 flex-1 sm:max-w-md">
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted">
+                🔍
+              </span>
+              <input
+                type="search"
+                value={memberQuery}
+                onChange={(e) => setMemberQuery(e.target.value)}
+                placeholder="Search members by name…"
+                aria-label="Search members by name"
+                className="w-full rounded-full border border-ivory/15 bg-ink py-3 pl-11 pr-4 text-sm text-ivory outline-none transition-colors placeholder:text-muted focus:border-gold/60"
+              />
+            </div>
+            <select
+              value={memberBatch}
+              onChange={(e) => setMemberBatch(e.target.value)}
+              aria-label="Search members by batch"
+              className="cursor-pointer rounded-full border border-ivory/15 bg-ink px-4 py-3 text-sm text-ivory outline-none transition-colors focus:border-gold/60"
+            >
+              <option value="" className="bg-ink text-ivory">
+                All batches
+              </option>
+              {memberBatches.map((b) => (
+                <option key={b} value={b} className="bg-ink text-ivory">
+                  Batch {b}
+                </option>
+              ))}
+            </select>
+          </div>
+          {(memberQuery.trim() || memberBatch) && (
+            <p className="mt-3 text-xs text-muted">
+              Showing {shownMembers.length} of {approved.length} members
+            </p>
+          )}
+          <div className="mt-6 space-y-5">
             {approved.length === 0 ? (
               <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
                 {loading ? "Loading members…" : "No approved members yet."}
               </p>
+            ) : shownMembers.length === 0 ? (
+              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
+                {memberQuery.trim()
+                  ? `No member matches “${memberQuery.trim()}”${memberBatch ? ` in Batch ${memberBatch}` : ""}.`
+                  : `No members in Batch ${memberBatch} yet.`}
+              </p>
             ) : (
-              approved.map(renderCard)
+              shownMembers.map(renderCard)
             )}
           </div>
         </section>
