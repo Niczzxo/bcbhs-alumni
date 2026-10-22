@@ -74,6 +74,7 @@ export interface PortalEvent {
   venue: string;
   description: string;
   upcoming: boolean;
+  images?: string[]; // event pictures (compressed data URLs), first one is the cover
 }
 
 export interface CommitteeSeat {

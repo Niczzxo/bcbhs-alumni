@@ -101,9 +101,17 @@ function PhotoPicker({
 
 /* ------------------------------- forms -------------------------------- */
 
+/** How many pictures one event may carry (kept modest: the pictures
+    live inside the event document as data URLs). */
+const MAX_EVENT_IMAGES = 5;
+
 function EventForm({ initial, onDone }: { initial?: PortalEvent; onDone: () => void }) {
   const { addEvent, updateEvent } = useContent();
   const [busy, setBusy] = useState(false);
+  const [imgBusy, setImgBusy] = useState(false);
+  const [imgErr, setImgErr] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [images, setImages] = useState<string[]>(initial?.images ?? []);
   const [f, setF] = useState({
     title: initial?.title ?? "",
     date: initial?.date ?? "",
@@ -114,12 +122,32 @@ function EventForm({ initial, onDone }: { initial?: PortalEvent; onDone: () => v
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setF((p) => ({ ...p, [k]: e.target.value }));
 
+  async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = [...(e.target.files ?? [])].filter((x) => x.type.startsWith("image/"));
+    e.target.value = "";
+    if (!files.length) return;
+    setImgBusy(true);
+    try {
+      const room = MAX_EVENT_IMAGES - images.length;
+      const added: string[] = [];
+      for (const file of files.slice(0, room)) {
+        added.push(await compressImageToDataURL(file, 900, 0.72));
+      }
+      setImages((p) => [...p, ...added]);
+      setImgErr(files.length > room ? `Only ${MAX_EVENT_IMAGES} pictures per event, the rest were skipped.` : "");
+    } catch {
+      setImgErr("Could not process one of those images.");
+    }
+    setImgBusy(false);
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!f.title.trim() || !f.date) return;
     setBusy(true);
-    if (initial) await updateEvent(initial.id, f);
-    else await addEvent(f);
+    const payload = { ...f, images };
+    if (initial) await updateEvent(initial.id, payload);
+    else await addEvent(payload);
     setBusy(false);
     onDone();
   }
@@ -130,6 +158,49 @@ function EventForm({ initial, onDone }: { initial?: PortalEvent; onDone: () => v
       <div><label className={labelCls}>Date *</label><input type="date" className={inputCls} value={f.date} onChange={set("date")} /></div>
       <div><label className={labelCls}>Venue</label><input className={inputCls} value={f.venue} onChange={set("venue")} placeholder="BCBHS School Field" /></div>
       <div className="sm:col-span-2"><label className={labelCls}>Description</label><textarea className={inputCls} rows={3} value={f.description} onChange={set("description")} /></div>
+      <div className="sm:col-span-2">
+        <label className={labelCls}>Event pictures (up to {MAX_EVENT_IMAGES})</label>
+        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={onFiles} />
+        {images.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-3">
+            {images.map((src, i) => (
+              <span key={i} className="group relative block h-20 w-20 overflow-hidden rounded-xl ring-1 ring-gold/40">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt={`Event picture ${i + 1}`} className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setImages((p) => p.filter((_, j) => j !== i))}
+                  aria-label={`Remove picture ${i + 1}`}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-[11px] font-bold text-white transition-colors hover:bg-red-600"
+                >
+                  ×
+                </button>
+                {i === 0 && (
+                  <span className="absolute bottom-0 inset-x-0 bg-black/60 py-0.5 text-center text-[9px] font-bold uppercase tracking-wider text-gold-2">Cover</span>
+                )}
+              </span>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={imgBusy || images.length >= MAX_EVENT_IMAGES}
+          className="flex w-full items-center gap-4 rounded-xl border border-dashed border-ivory/20 bg-ink px-4 py-3 text-left transition-colors hover:border-gold/50 disabled:opacity-60"
+        >
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-ink-3 text-xl text-gold-2">🖼️</span>
+          <span className="text-xs text-muted">
+            {imgBusy
+              ? "Processing…"
+              : images.length >= MAX_EVENT_IMAGES
+                ? `Maximum ${MAX_EVENT_IMAGES} pictures added`
+                : images.length
+                  ? <>Add more pictures, <span className="text-gold-2 underline">tap to choose</span> ({images.length}/{MAX_EVENT_IMAGES})</>
+                  : "Tap to upload pictures, you can choose several at once"}
+          </span>
+        </button>
+        {imgErr && <p className="mt-2 text-xs text-red-300">{imgErr}</p>}
+      </div>
       <label className="flex cursor-pointer items-center gap-3 sm:col-span-2">
         <input type="checkbox" checked={f.upcoming} onChange={() => setF((p) => ({ ...p, upcoming: !p.upcoming }))} className="h-4 w-4 accent-[#d4a94e]" />
         <span className="text-sm text-ivory/90">Upcoming event</span>
