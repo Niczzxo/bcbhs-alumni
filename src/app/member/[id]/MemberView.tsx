@@ -20,10 +20,15 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
   const { user, loading } = useAuth();
   const { openAuthModal } = useAuthModal();
   const isOwn = !!user && !!member && user.id === member.id;
-  /* The official ID card carries the member's full details (photo,
-     contact, email, DOB), so it is rendered for approved members
-     only. Guests and pending accounts get the locked face instead. */
-  const canViewCard = user?.status === "approved";
+  /* The official ID card belongs to its owner alone (owner's rule,
+     2026-10-23): only the member themselves may view their card, so
+     nobody else can copy or misuse it. Everyone else, guests,
+     pending accounts and even other approved members, gets the
+     locked face instead. */
+  const canViewCard = isOwn && user?.status === "approved";
+  /* WhatsApp contact follows its own rule: approved members may
+     contact each other; it is NOT tied to card ownership. */
+  const canContact = user?.status === "approved";
 
   const verifyUrl =
     typeof window !== "undefined"
@@ -76,7 +81,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                   <Link href="/directory" className="rounded-full border border-gold/40 px-6 py-3 text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10">
                     Back to Directory
                   </Link>
-                  {member.whatsapp && canViewCard && <WhatsAppButton whatsapp={member.whatsapp} labeled />}
+                  {member.whatsapp && canContact && <WhatsAppButton whatsapp={member.whatsapp} labeled />}
                   {isOwn && (
                     <Link href="/profile/edit" className="rounded-full border border-ivory/15 px-6 py-3 text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory">
                       Edit profile
@@ -101,7 +106,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                     <p className="mt-4 text-center text-xs leading-relaxed text-muted">
                       {isOwn
                         ? "Your official ID card appears here once your registration is approved."
-                        : "The official ID card holds the member's full details, so it is visible to approved members only."}
+                        : "Only the card owner can view their official ID card, so it stays protected from misuse."}
                     </p>
                     {!user && (
                       <button

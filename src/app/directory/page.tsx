@@ -19,7 +19,13 @@ const inputCls =
 /** How many picked members a logged-out guest may preview. */
 const GUEST_PREVIEW_COUNT = 6;
 
-/** Searchable / filterable alumni directory. Guests see an admin-picked preview. */
+/**
+ * The Alumni Directory lists POSITION HOLDERS only (owner's rule,
+ * 2026-10-23): alumni who hold an official position in the association.
+ * Plain members are NOT listed here; the full member list lives on
+ * /members and is visible to approved members only. Guests see the
+ * admin-picked (guestVisible) position holders as a preview.
+ */
 export default function DirectoryPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -73,9 +79,16 @@ export default function DirectoryPage() {
     return approvedMembers.filter((m) => m.guestVisible).slice(0, GUEST_PREVIEW_COUNT);
   }, [isGuest, approvedMembers, guestMembers]);
 
+  /* Position holders only: an official position assigned by the super
+     admin is what puts an alumnus in this directory. */
+  const holders = useMemo(
+    () => members.filter((m) => !!m.position && m.position.trim() !== ""),
+    [members],
+  );
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return members.filter((m) => {
+    return holders.filter((m) => {
       if (needle && !`${m.name} ${m.company ?? ""}`.toLowerCase().includes(needle)) return false;
       if (batch && m.batch !== batch) return false;
       if (district && (district === "Abroad" ? !m.isAbroad : m.district !== district)) return false;
@@ -83,7 +96,7 @@ export default function DirectoryPage() {
       if (blood && m.bloodGroup !== blood) return false;
       return true;
     });
-  }, [members, q, batch, district, profession, blood]);
+  }, [holders, q, batch, district, profession, blood]);
 
   const clear = () => { setQ(""); setBatch(""); setDistrict(""); setProfession(""); setBlood(""); };
 
@@ -96,8 +109,8 @@ export default function DirectoryPage() {
           title={<>Alumni <span className="text-gold-gradient">Directory</span></>}
           subtitle={
             isGuest
-              ? "A preview of our community, log in to search every verified member."
-              : `${members.length} verified members, search by name, batch, district, profession or blood group.`
+              ? "The alumni who hold official positions in the association. Log in as a member to browse every registered alumnus."
+              : `${holders.length} alumni hold official positions. Search by name, batch, district, profession or blood group. Every registered member is on the Members page.`
           }
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
@@ -128,13 +141,19 @@ export default function DirectoryPage() {
 
           {!isGuest && (
             <p className="mt-8 text-sm text-muted">
-              Showing <span className="font-semibold text-gold-2">{filtered.length}</span> of {members.length} members
+              Showing <span className="font-semibold text-gold-2">{filtered.length}</span> of {holders.length} position holders
             </p>
           )}
           {filtered.length === 0 ? (
             <div className="mt-8 rounded-3xl border border-ivory/10 bg-ink-2 p-14 text-center">
-              <p className="font-display text-xl font-bold text-ivory">No members match your filters</p>
-              <p className="mt-2 text-sm text-muted">Try widening the search.</p>
+              <p className="font-display text-xl font-bold text-ivory">
+                {holders.length === 0 ? "No position holders yet" : "No position holders match your filters"}
+              </p>
+              <p className="mt-2 text-sm text-muted">
+                {holders.length === 0
+                  ? "Alumni appear here once the super admin assigns them an official position."
+                  : "Try widening the search."}
+              </p>
             </div>
           ) : (
             <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -144,13 +163,13 @@ export default function DirectoryPage() {
           {isGuest && (
             <Reveal className="mt-12 text-center">
               <button
-                onClick={() => router.push("/login?next=/directory")}
+                onClick={() => router.push("/login?next=/members")}
                 className="rounded-full border border-gold/40 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:scale-105 hover:bg-gold/10 hover:shadow-[0_0_30px_rgba(212,169,78,0.25)]"
               >
-                See more directory members
+                Browse all members
               </button>
               <p className="mt-4 text-xs text-muted">
-                Log in to search the full verified directory.
+                The full member list is visible to logged-in members only.
               </p>
             </Reveal>
           )}

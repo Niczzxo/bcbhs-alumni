@@ -43,6 +43,7 @@ export const PUBLIC_NAV_LINKS = [
 export const MEMBER_NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Memories", href: "/memories" },
+  { label: "Members", href: "/members" },
   { label: "Gallery", href: "/gallery" },
   { label: "Events", href: "/events" },
   { label: "Contacts", href: "/contact" },
