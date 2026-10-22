@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
-import IdCard from "@/components/IdCard";
+import IdCard, { CardDownloadButton } from "@/components/IdCard";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
 
@@ -57,12 +57,11 @@ export default function IdCardPage() {
                 <IdCard member={user} verifyUrl={verifyUrl} />
               </div>
               <div className="mt-8 flex flex-wrap justify-center gap-4 print:hidden">
-                <button
-                  onClick={() => window.print()}
+                <CardDownloadButton
+                  member={user}
+                  verifyUrl={verifyUrl}
                   className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-8 py-3 text-sm font-bold uppercase tracking-widest text-ink"
-                >
-                  🖨 Print card
-                </button>
+                />
                 <Link
                   href={`/verify/${user.memberId}`}
                   className="rounded-full border border-gold/40 px-8 py-3 text-sm font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10"

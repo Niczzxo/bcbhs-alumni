@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Reveal from "./Reveal";
 import { useAuthModal } from "./AuthModal";
-import IdCard from "./IdCard";
+import IdCard, { CardDownloadButton } from "./IdCard";
 import { useAuth } from "@/lib/auth-context";
 import type { UserProfile } from "@/lib/types";
 
@@ -124,9 +124,7 @@ export default function IdCardCta() {
                 <Link href="/id-card" className={GOLD_BUTTON}>
                   View My ID Card
                 </Link>
-                <button onClick={() => window.print()} className={GHOST_BUTTON}>
-                  🖨 Print Card
-                </button>
+                <CardDownloadButton member={user} verifyUrl={verifyUrl} className={GHOST_BUTTON} />
                 <Link href="/profile/edit" className={GHOST_BUTTON}>
                   Edit Profile
                 </Link>
@@ -201,6 +199,7 @@ export default function IdCardCta() {
             <IdCard
               member={TEASER_MEMBER}
               verifyUrl="https://bcbhs-alumni-niczzxos-projects.vercel.app/verify/BCBHS-20XX-0000"
+              lockBack
             />
           )}
         </Reveal>

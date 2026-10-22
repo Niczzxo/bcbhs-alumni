@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import { toPng } from "html-to-image";
 import DottedQr from "./DottedQr";
 import type { UserProfile } from "@/lib/types";
 import { SITE_EMAIL } from "@/lib/site";
@@ -311,12 +312,53 @@ function CardBack({ verifyUrl }: { verifyUrl: string }) {
   );
 }
 
+/* Locked back — shown to guests on the homepage teaser: the real back
+ * (verification QR, authorized signature, contacts) is members-only,
+ * so a signed-out visitor who flips the sample card meets this face
+ * instead of the card's details. */
+function LockedBack() {
+  return (
+    <CardShell>
+      <div className="relative h-full w-full">
+        <div className="absolute inset-0 bg-[#07142f]" />
+        <div className="absolute inset-0 bg-[radial-gradient(62%_46%_at_50%_44%,rgba(46,84,168,0.35)_0%,rgba(46,84,168,0)_70%)]" />
+        <div className="pointer-events-none absolute inset-[8px] rounded-[12px] border border-[#d4a94e]/50" />
+        <div className="absolute inset-[8px] flex flex-col items-center justify-center overflow-hidden rounded-[12px] px-[8cqw] text-center">
+          <span className="relative block h-[15cqw] w-[15cqw] overflow-hidden rounded-full ring-2 ring-[#d4a94e]">
+            <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
+          </span>
+          <p className="font-display mt-[4cqw] text-[5.6cqw] font-extrabold tracking-[0.14em] text-white">
+            BCBHS <span className="text-gold-gradient">ALUMNI</span>
+          </p>
+          <span className="mt-[7cqw] flex h-[13cqw] w-[13cqw] items-center justify-center rounded-full border border-[#d4a94e]/60 bg-[#d4a94e]/10">
+            <svg viewBox="0 0 24 24" className="h-[6.5cqw] w-[6.5cqw]" fill="none" stroke="#e9c766" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
+              <rect x="4.5" y="10" width="15" height="9.5" rx="2" />
+              <path d="M8 10V7a4 4 0 1 1 8 0v3" />
+              <circle cx="12" cy="14.8" r="1.4" fill="#e9c766" stroke="none" />
+            </svg>
+          </span>
+          <p className="mt-[4cqw] text-[3.6cqw] font-extrabold uppercase tracking-[0.3em] text-[#f0cd7e]">
+            Members Only
+          </p>
+          <p className="mt-[3cqw] max-w-[68cqw] text-[3cqw] leading-relaxed text-white/60">
+            The back of the card — with its verification QR — is visible to
+            approved members only. Log in or register to get yours.
+          </p>
+        </div>
+      </div>
+    </CardShell>
+  );
+}
+
 export default function IdCard({
   member,
   verifyUrl,
+  lockBack = false,
 }: {
   member: UserProfile;
   verifyUrl: string;
+  /** Guests see a locked back instead of the card's real back side. */
+  lockBack?: boolean;
 }) {
   const [flipped, setFlipped] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -337,7 +379,7 @@ export default function IdCard({
             <CardFront member={member} />
           </div>
           <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            <CardBack verifyUrl={verifyUrl} />
+            {lockBack ? <LockedBack /> : <CardBack verifyUrl={verifyUrl} />}
           </div>
         </div>
         <button
@@ -358,11 +400,65 @@ export default function IdCard({
               <CardFront member={member} />
             </div>
             <div className="h-[85.6mm] w-[53.98mm]">
-              <CardBack verifyUrl={verifyUrl} />
+              {lockBack ? <LockedBack /> : <CardBack verifyUrl={verifyUrl} />}
             </div>
           </div>,
           document.body,
         )}
     </div>
+  );
+}
+
+/**
+ * Download button — saves the member's card as one high-resolution
+ * PNG (front stacked over back) instead of sending it to a printer.
+ * The two faces are rendered once more in an off-screen stage (real
+ * layout, just parked outside the viewport) purely as the capture
+ * source; html-to-image snapshots that stage at 3.5×.
+ */
+export function CardDownloadButton({
+  member,
+  verifyUrl,
+  className = "",
+}: {
+  member: UserProfile;
+  verifyUrl: string;
+  className?: string;
+}) {
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  const download = async () => {
+    const stage = stageRef.current;
+    if (!stage || busy) return;
+    setBusy(true);
+    try {
+      const dataUrl = await toPng(stage, { pixelRatio: 3.5, cacheBust: true });
+      const a = document.createElement("a");
+      a.download = `BCBHS-ID-${member.memberId ?? "card"}.png`;
+      a.href = dataUrl;
+      a.click();
+    } catch {
+      /* capture failed (exotic browser) — the on-screen card remains */
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <button onClick={download} disabled={busy} className={className}>
+        {busy ? "Preparing…" : "⬇ Download Card"}
+      </button>
+      {/* off-screen capture stage — laid out for real, never seen.
+          The parking wrapper carries the off-screen position so the
+          captured node itself stays position-free for html-to-image. */}
+      <div aria-hidden className="pointer-events-none fixed left-[-10000px] top-0">
+        <div ref={stageRef} className="flex w-[340px] flex-col items-center gap-4">
+          <CardFront member={member} />
+          <CardBack verifyUrl={verifyUrl} />
+        </div>
+      </div>
+    </>
   );
 }

@@ -42,8 +42,8 @@ export default function Footer() {
   const { user } = useAuth();
   return (
     <footer className="border-t border-gold/20 bg-[#070b1c]">
-      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-16">
-        <div className="grid gap-9 md:grid-cols-3 md:gap-12">
+      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-12">
+        <div className="grid gap-9 md:grid-cols-3 md:gap-10">
           {/* Brand + affiliation */}
           <div>
             <div className="flex items-center gap-4">
@@ -71,7 +71,7 @@ export default function Footer() {
           {/* Quick links */}
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold">Explore</p>
-            <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-1">
+            <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
               {NAV_LINKS.map((l) => (
                 <li key={l.label}>
                   <Link href={l.href} className="text-sm text-muted transition-colors hover:text-gold-2">
