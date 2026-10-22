@@ -228,8 +228,23 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const { collection, doc, onSnapshot } = await import("firebase/firestore");
+        /* Loading stays true until every subscription has delivered
+           its first snapshot (or errored, e.g. member-only collections
+           for a guest), with a hard fallback, so pages can show a real
+           loading state instead of flashing empty copy like "No photos
+           yet" while the first fetch is in flight (perf fix, 2026-10-23). */
+        const TOTAL_SUBS = 16;
+        let arrived = 0;
+        const markArrived = () => {
+          arrived += 1;
+          if (arrived >= TOTAL_SUBS && !cancelled) setLoading(false);
+        };
+        const fallback = setTimeout(() => {
+          if (!cancelled) setLoading(false);
+        }, 6000);
         const unsubs = [
           onSnapshot(collection(db, "events"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -237,6 +252,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "gallery"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -244,6 +260,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "committee"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -251,6 +268,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "announcements"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -261,6 +279,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "jobs"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -271,6 +290,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "requests"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -281,6 +301,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "polls"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -288,6 +309,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "pollVotes"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -298,6 +320,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "stories"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -308,6 +331,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "businesses"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -318,6 +342,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "wallPhotos"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -328,6 +353,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "mentors"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -338,6 +364,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "fundDonors"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -348,6 +375,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "batchLinks"), (snap) => {
+            markArrived();
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -358,16 +386,20 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(doc(db, "site", "fund"), (snap) => {
+            markArrived();
             if (cancelled || !snap.exists()) return;
             setContent((p) => ({ ...p, fundInfo: { ...DEFAULT_FUND_INFO, ...(snap.data() as FundInfo) } }));
           }),
           onSnapshot(doc(db, "site", "content"), (snap) => {
+            markArrived();
             if (cancelled || !snap.exists()) return;
             setContent((p) => ({ ...p, siteContent: snap.data() as SiteContent }));
           }),
         ];
-        setLoading(false);
-        return () => unsubs.forEach((u) => u());
+        return () => {
+          clearTimeout(fallback);
+          unsubs.forEach((u) => u());
+        };
       } catch {
         setLoading(false);
       }

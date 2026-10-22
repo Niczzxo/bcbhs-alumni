@@ -6,6 +6,7 @@ import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import { useLeadership } from "@/lib/leadership";
+import { useContent } from "@/lib/content-context";
 
 /**
  * Alumni committee / leadership page. Position holders appear
@@ -14,6 +15,7 @@ import { useLeadership } from "@/lib/leadership";
  */
 export default function CommitteePage() {
   const leaders = useLeadership();
+  const { loading } = useContent();
   return (
     <>
       <Navbar />
@@ -26,7 +28,7 @@ export default function CommitteePage() {
         <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
           {leaders.length === 0 ? (
             <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
-              Committee seats will be announced soon.
+              {loading ? "Loading the committee…" : "Committee seats will be announced soon."}
             </p>
           ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

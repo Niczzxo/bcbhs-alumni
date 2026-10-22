@@ -22,7 +22,7 @@ interface Album {
  * its photos, and clicking a photo opens it full-screen.
  */
 export default function GalleryPage() {
-  const { gallery } = useContent();
+  const { gallery, loading } = useContent();
   const [albumName, setAlbumName] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
 
@@ -79,7 +79,7 @@ export default function GalleryPage() {
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           {gallery.length === 0 ? (
             <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
-              No photos yet, check back soon.
+              {loading ? "Loading the gallery…" : "No photos yet, check back soon."}
             </p>
           ) : !album ? (
             /* ------------------------- album covers ------------------------ */

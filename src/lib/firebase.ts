@@ -6,7 +6,13 @@
 /* ------------------------------------------------------------------ */
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  type Firestore,
+} from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -31,7 +37,20 @@ if (isFirebaseConfigured) {
   // Reuse the app across hot-reloads / serverless invocations.
   app = getApps().length > 0 ? getApps()[0]! : initializeApp(firebaseConfig);
   auth = getAuth(app);
-  db = getFirestore(app);
+  /* Persistent local cache (perf, 2026-10-23): repeat visits and
+     refreshes paint content from IndexedDB instead of re-downloading
+     every collection (the gallery alone is megabytes of data URLs).
+     Falls back to a plain instance where persistence is unavailable
+     (private mode, already-initialized app during hot reload). */
+  try {
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+  } catch {
+    db = getFirestore(app);
+  }
   storage = getStorage(app);
 
   /* Firebase App Check, attests that requests come from this genuine web

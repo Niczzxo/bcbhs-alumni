@@ -24,7 +24,7 @@ function MemberPhone({ userId }: { userId: string }) {
  * community features each open their own work area on click.
  */
 export default function AdminPage() {
-  const { user, members, approveMember, rejectMember, banMember, unbanMember, setPosition, setGuestVisible, hasPermission } = useAuth();
+  const { user, members, loading, approveMember, rejectMember, banMember, unbanMember, setPosition, setGuestVisible, hasPermission } = useAuth();
   const canApprove = hasPermission("approve_members");
   /* Ban rides on the approval permission (owner's rule, 2026-10-23):
      whoever may approve members may also ban and unban them. */
@@ -58,7 +58,7 @@ export default function AdminPage() {
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {pending.length === 0 && (
               <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted md:col-span-2">
-                All caught up, no pending registrations. 🎉
+                {loading ? "Loading registrations…" : "All caught up, no pending registrations. 🎉"}
               </p>
             )}
             {pending.map((m, i) => (

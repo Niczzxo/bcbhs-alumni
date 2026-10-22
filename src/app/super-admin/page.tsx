@@ -17,7 +17,7 @@ import type { MemberRole, UserProfile } from "@/lib/types";
  * click opens one sector's work area instead of one endless page.
  */
 export default function SuperAdminPage() {
-  const { user, members, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember, banMember, unbanMember } = useAuth();
+  const { user, members, loading, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember, banMember, unbanMember } = useAuth();
 
   const approved = members.filter((m) => m.status === "approved");
   const pending = members.filter((m) => m.status === "pending");
@@ -76,7 +76,7 @@ export default function SuperAdminPage() {
           <div className="gold-rule mt-4 w-32" />
           {pending.length === 0 ? (
             <p className="mt-8 rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
-              All caught up, no pending registrations. 🎉
+              {loading ? "Loading registrations…" : "All caught up, no pending registrations. 🎉"}
             </p>
           ) : (
             <div className="mt-8 grid gap-4 md:grid-cols-2">

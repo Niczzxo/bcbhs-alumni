@@ -4,6 +4,7 @@ import Link from "next/link";
 import Reveal from "./Reveal";
 import { Avatar } from "./MemberCard";
 import { useLeadership } from "@/lib/leadership";
+import { useContent } from "@/lib/content-context";
 
 /* Shown only until real seats are added from the dashboard. */
 const PLACEHOLDER_SEATS = [
@@ -22,6 +23,7 @@ const PLACEHOLDER_SEATS = [
  */
 export default function Committee() {
   const leaders = useLeadership();
+  const { loading } = useContent();
   const hasSeats = leaders.length > 0;
 
   return (
@@ -59,6 +61,12 @@ export default function Committee() {
                   </p>
                 </article>
               </Reveal>
+            ))}
+          </div>
+        ) : loading ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4" aria-label="Loading the committee">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-56 animate-pulse rounded-3xl border border-gold/15 bg-ink" />
             ))}
           </div>
         ) : (

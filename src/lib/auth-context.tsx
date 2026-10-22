@@ -51,6 +51,7 @@ interface AuthContextValue {
   isDemo: boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
   register: (input: RegisterInput) => Promise<{ ok: boolean; error?: string }>;
   approveMember: (id: string) => Promise<void>;
   rejectMember: (id: string) => Promise<void>;
@@ -95,6 +96,23 @@ const DEMO_USER_KEY = "bcbhs-demo-user-id";
  * session in the background. Display-only, Firestore rules still
  * guard every read and write server-side. */
 const AUTH_CACHE_KEY = "bcbhs-auth-cache-v1";
+/* The last verified member list for the cached profile's account, so
+ * member-driven pages paint instantly on reload instead of waiting
+ * for the full users fetch (perf, 2026-10-23). Keyed by uid: a
+ * different account never sees another account's cached list. */
+const MEMBERS_CACHE_KEY = "bcbhs-members-cache-v1";
+
+function readCachedMembers(uid: string): UserProfile[] | null {
+  try {
+    const raw = window.localStorage.getItem(MEMBERS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { uid?: string; members?: UserProfile[] };
+    if (!parsed || parsed.uid !== uid || !Array.isArray(parsed.members)) return null;
+    return parsed.members;
+  } catch {
+    return null;
+  }
+}
 
 /* Layout effects run before the browser paints, used for the cache
  * hydration below so the very first visible frame is already correct.
@@ -185,6 +203,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (cached) {
       setUser(cached);
       setLoading(false);
+      const cachedMembers = readCachedMembers(cached.id);
+      if (cachedMembers) setMembers(cachedMembers);
     }
   }, []);
 
@@ -200,11 +220,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       if (user) window.localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(user));
-      else window.localStorage.removeItem(AUTH_CACHE_KEY);
+      else {
+        window.localStorage.removeItem(AUTH_CACHE_KEY);
+        window.localStorage.removeItem(MEMBERS_CACHE_KEY);
+      }
     } catch {
       /* storage unavailable, reloads simply fall back to the network */
     }
   }, [user]);
+
+  /* Keep the member-list cache in step for the signed-in account. */
+  useEffect(() => {
+    if (!isFirebaseConfigured || !user || members.length === 0) return;
+    try {
+      window.localStorage.setItem(
+        MEMBERS_CACHE_KEY,
+        JSON.stringify({ uid: user.id, members }),
+      );
+    } catch {
+      /* storage full / unavailable, the list simply refetches next time */
+    }
+  }, [user, members]);
 
   /* Live-mode auth subscription. */
   useEffect(() => {
@@ -219,6 +255,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         try {
           if (fbUser) {
+            /* Start the approved-members query NOW, in parallel with
+             * the own-profile fetch (perf, 2026-10-23): for regular
+             * members it IS the final list, so member pages stop
+             * waiting a whole extra serial round trip. Staff upgrade
+             * to the full collection once their role is known. */
+            const approvedPromise = getDocs(
+              query(collection(liveDb, "users"), where("status", "==", "approved")),
+            ).catch(() => null);
             /* Resolve the visitor's OWN profile first and end the
              * loading state immediately, the member list (needed by
              * the directory and dashboards) loads right after, so a
@@ -241,10 +285,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const isStaff = own?.role === "admin" || own?.role === "super_admin";
             const snapList = isStaff
               ? await getDocs(collection(liveDb, "users"))
-              : await getDocs(
-                  query(collection(liveDb, "users"), where("status", "==", "approved")),
-                );
-            if (!cancelled) {
+              : await approvedPromise;
+            if (!cancelled && snapList) {
               const list = snapList.docs.map(
                 (d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) }) as UserProfile,
               );
@@ -302,6 +344,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [members],
   );
+
+  /* Password recovery (owner's request, 2026-10-23): Firebase emails
+     a reset link; following it lets the member set a new password.
+     In demo mode any password works, so there is nothing to reset. */
+  const resetPassword = useCallback(async (email: string) => {
+    if (!isFirebaseConfigured || !auth) return { ok: true };
+    try {
+      const { sendPasswordResetEmail } = await import("firebase/auth");
+      await sendPasswordResetEmail(auth, email.trim());
+      return { ok: true };
+    } catch {
+      return {
+        ok: false,
+        error: "Could not send the reset email. Check the email address and try again.",
+      };
+    }
+  }, []);
 
   const logout = useCallback(async () => {
     if (isFirebaseConfigured && auth) {
@@ -595,6 +654,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isDemo: !isFirebaseConfigured,
       login,
       logout,
+      resetPassword,
       register,
       approveMember,
       rejectMember,
@@ -609,7 +669,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, logout, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, setGuestVisible, updateProfile, hasPermission],
+    [user, members, loading, login, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, setGuestVisible, updateProfile, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -415,7 +415,7 @@ function AnnouncementForm({ initial, onDone }: { initial?: AnnouncementItem; onD
 export default function ContentManager({ kind }: { kind: ContentKind }) {
   const meta = KIND_META[kind];
   const {
-    events, gallery, committee, announcements,
+    events, gallery, committee, announcements, loading,
     removeEvent, removePhoto, removeSeat, removeAnnouncement,
   } = useContent();
   const [adding, setAdding] = useState(false);
@@ -479,7 +479,7 @@ export default function ContentManager({ kind }: { kind: ContentKind }) {
       <div className="mt-6 space-y-3">
         {items.length === 0 && !adding && (
           <p className="rounded-2xl border border-dashed border-ivory/15 p-6 text-center text-sm text-muted">
-            Nothing here yet, add the first one.
+            {loading ? "Loading…" : "Nothing here yet, add the first one."}
           </p>
         )}
         {items.map((it) => (

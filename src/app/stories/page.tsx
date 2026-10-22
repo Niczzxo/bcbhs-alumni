@@ -9,7 +9,7 @@ import { useContent } from "@/lib/content-context";
 
 /** Hall of Fame, success stories of notable BCBHS alumni. */
 export default function StoriesPage() {
-  const { stories } = useContent();
+  const { stories, loading } = useContent();
   const sorted = [...stories].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return (
@@ -23,7 +23,7 @@ export default function StoriesPage() {
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           {sorted.length === 0 ? (
-            <p className="text-center text-sm text-muted">The first stories are being written, check back soon.</p>
+            <p className="text-center text-sm text-muted">{loading ? "Loading stories…" : "The first stories are being written, check back soon."}</p>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {sorted.map((s, i) => (

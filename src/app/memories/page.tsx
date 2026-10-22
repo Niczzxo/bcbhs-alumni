@@ -14,7 +14,7 @@ const PREVIEW_COUNT = 6;
 
 /** Memories & Souvenirs, the full memory wall. */
 export default function MemoriesPage() {
-  const { gallery } = useContent();
+  const { gallery, loading } = useContent();
   const { user } = useAuth();
   const router = useRouter();
   const isGuest = !user;
@@ -41,7 +41,7 @@ export default function MemoriesPage() {
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           {photos.length === 0 ? (
             <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
-              No memories yet, check back soon.
+              {loading ? "Loading memories…" : "No memories yet, check back soon."}
             </p>
           ) : (
             <div className="space-y-5">
