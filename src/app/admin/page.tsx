@@ -2,6 +2,7 @@
 
 import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
+import DashboardShell, { type DashSection } from "@/components/DashboardShell";
 import { Avatar } from "@/components/MemberCard";
 import { useAuth } from "@/lib/auth-context";
 import { ROLE_META, POSITIONS } from "@/lib/types";
@@ -17,7 +18,11 @@ function MemberPhone({ userId }: { userId: string }) {
   return <span> · {phone}</span>;
 }
 
-/** Admin panel, approval queue + approved members. */
+/**
+ * Admin panel. Every sector lives in the sidebar (owner's rule,
+ * 2026-10-23): approvals, members, each content kind and the
+ * community features each open their own work area on click.
+ */
 export default function AdminPage() {
   const { members, approveMember, rejectMember, setPosition, setGuestVisible, hasPermission } = useAuth();
   const canApprove = hasPermission("approve_members");
@@ -26,27 +31,29 @@ export default function AdminPage() {
   const pending = members.filter((m) => m.status === "pending");
   const approved = members.filter((m) => m.status === "approved");
 
-  const contentSections: { kind: ContentKind; perm: string }[] = (
+  const contentSections: { kind: ContentKind; perm: string; label: string }[] = (
     [
-      { kind: "events", perm: "manage_events" },
-      { kind: "announcements", perm: "post_announcements" },
-      { kind: "gallery", perm: "manage_gallery" },
-      { kind: "committee", perm: "manage_committee" },
-    ] as { kind: ContentKind; perm: string }[]
+      { kind: "events", perm: "manage_events", label: "Events" },
+      { kind: "announcements", perm: "post_announcements", label: "Announcements" },
+      { kind: "gallery", perm: "manage_gallery", label: "Gallery" },
+      { kind: "committee", perm: "manage_committee", label: "Committee" },
+    ] as { kind: ContentKind; perm: string; label: string }[]
   ).filter((s) => hasPermission(s.perm));
 
-  return (
-    <RequireRole role="admin" eyebrow="Administration" title={<>Admin <span className="text-gold-gradient">Panel</span></>}>
-      <div className="grid gap-10 lg:grid-cols-2">
-        {/* Approval queue */}
+  const sections: DashSection[] = [
+    {
+      key: "approvals",
+      label: "Approvals",
+      badge: pending.length,
+      content: (
         <section>
           <h2 className="font-display text-xl font-bold text-ivory">
             Pending approvals <span className="text-gold-2">({pending.length})</span>
           </h2>
           <div className="gold-rule mt-3 w-28" />
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {pending.length === 0 && (
-              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
+              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted md:col-span-2">
                 All caught up, no pending registrations. 🎉
               </p>
             )}
@@ -85,14 +92,19 @@ export default function AdminPage() {
             ))}
           </div>
         </section>
-
-        {/* Approved members */}
+      ),
+    },
+    {
+      key: "members",
+      label: "Members",
+      badge: approved.length,
+      content: (
         <section>
           <h2 className="font-display text-xl font-bold text-ivory">
             Approved members <span className="text-gold-2">({approved.length})</span>
           </h2>
           <div className="gold-rule mt-3 w-28" />
-          <div className="mt-6 max-h-[560px] space-y-3 overflow-y-auto pr-1">
+          <div className="mt-6 space-y-3">
             {approved.map((m) => (
               <div key={m.id} className="rounded-2xl border border-ivory/10 bg-ink-2 px-4 py-3">
                 <div className="flex items-center gap-3">
@@ -159,29 +171,31 @@ export default function AdminPage() {
             )}
           </div>
         </section>
-      </div>
-
-      {/* Content sections the staff member is permitted to manage */}
-      {contentSections.length > 0 && (
-        <div className="mt-14">
-          <h2 className="font-display text-2xl font-bold text-ivory">Content management</h2>
+      ),
+    },
+    ...contentSections.map((s) => ({
+      key: s.kind,
+      label: s.label,
+      content: <ContentManager kind={s.kind} />,
+    })),
+    {
+      key: "community",
+      label: "Community",
+      content: (
+        <div>
+          <h2 className="font-display text-2xl font-bold text-ivory">Community features</h2>
           <div className="gold-rule mt-4 w-32" />
-          <div className="mt-8 grid gap-6 xl:grid-cols-2">
-            {contentSections.map((s) => (
-              <ContentManager key={s.kind} kind={s.kind} />
-            ))}
+          <div className="mt-8">
+            <V2Manager />
           </div>
         </div>
-      )}
+      ),
+    },
+  ];
 
-      {/* Community features (v2.0), sections self-gate by permission */}
-      <div className="mt-14">
-        <h2 className="font-display text-2xl font-bold text-ivory">Community features</h2>
-        <div className="gold-rule mt-4 w-32" />
-        <div className="mt-8">
-          <V2Manager />
-        </div>
-      </div>
+  return (
+    <RequireRole role="admin" eyebrow="Administration" title={<>Admin <span className="text-gold-gradient">Panel</span></>}>
+      <DashboardShell sections={sections} />
     </RequireRole>
   );
 }
