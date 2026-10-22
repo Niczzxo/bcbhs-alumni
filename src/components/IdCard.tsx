@@ -16,8 +16,9 @@ import { SITE_EMAIL } from "@/lib/site";
  * serif member name, admin-assigned position badge, and a glass details
  * register: Member ID, Passing Year, Blood Group, Department,
  * Date of Birth, Contact, Email, Profession.
- * BACK ("Association Crest" — the approved print design): flat deep
- * navy with a single-line gold frame, graduation cap + BCBHS wordmark,
+ * BACK ("Association Crest" — the approved print design): the front's
+ * own navy sunburst background with a single-line gold frame,
+ * graduation cap + BCBHS wordmark,
  * the dotted QR (logo-palette dots, original logo badge at centre) on
  * a slim gold-rimmed white plate, SCAN ME pill, authorized signature
  * panel, contact rows, and the family motto.
@@ -245,11 +246,10 @@ function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: st
   return (
     <CardShell>
       <div className="relative h-full w-full">
-        {/* flat deep navy + a soft glow behind the QR plate */}
-        <div className="absolute inset-0 bg-[#07142f]" />
-        <div className="absolute inset-0 bg-[radial-gradient(62%_46%_at_50%_44%,rgba(46,84,168,0.4)_0%,rgba(46,84,168,0)_70%)]" />
+        {/* same background as the front — navy radial + sunburst */}
+        <CardBackground />
         {/* single-line gold frame — same as the front side */}
-        <div className="pointer-events-none absolute inset-[8px] rounded-[12px] border border-[#d4a94e]/50" />
+        <div className="pointer-events-none absolute inset-[8px] rounded-[12px] border border-[#d4a94e]/40" />
 
         <div className="absolute inset-[8px] flex flex-col items-center overflow-hidden rounded-[12px] px-[6cqw] pb-[3.2cqw] pt-[3.4cqw] text-center [&>*]:shrink-0">
           <CapIcon />
@@ -317,9 +317,8 @@ function LockedBack() {
   return (
     <CardShell>
       <div className="relative h-full w-full">
-        <div className="absolute inset-0 bg-[#07142f]" />
-        <div className="absolute inset-0 bg-[radial-gradient(62%_46%_at_50%_44%,rgba(46,84,168,0.35)_0%,rgba(46,84,168,0)_70%)]" />
-        <div className="pointer-events-none absolute inset-[8px] rounded-[12px] border border-[#d4a94e]/50" />
+        <CardBackground />
+        <div className="pointer-events-none absolute inset-[8px] rounded-[12px] border border-[#d4a94e]/40" />
         <div className="absolute inset-[8px] flex flex-col items-center justify-center overflow-hidden rounded-[12px] px-[8cqw] text-center">
           <span className="relative block h-[15cqw] w-[15cqw] overflow-hidden rounded-full ring-2 ring-[#d4a94e]">
             <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
