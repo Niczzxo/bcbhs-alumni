@@ -122,6 +122,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
      resolves, and a member whose list query was denied would keep
      seeing them. Demo data belongs to demo mode only. */
   const [members, setMembers] = useState<UserProfile[]>(isFirebaseConfigured ? [] : DEMO_USERS);
+  const membersRef = useRef<UserProfile[]>(members);
+  useEffect(() => {
+    membersRef.current = members;
+  }, [members]);
   const [loading, setLoading] = useState(true);
   /* Skips the persist effect's first run per mount: the rehydrate effect
      above calls setMembers asynchronously, so persisting on the very first
@@ -424,21 +428,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [members]);
 
   const setPermissions = useCallback(async (id: string, permissions: string[]) => {
-    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, permissions } : m)));
-    setUser((u) => (u && u.id === id ? { ...u, permissions } : u));
+    /* Customizing an EDITOR also flips permissionsCustom, so their
+       toggled list (not the standard bundle) governs from now on. */
+    const target = membersRef.current.find((m) => m.id === id);
+    const isEditor = target?.role === "editor";
+    const patch = isEditor ? { permissions, permissionsCustom: true } : { permissions };
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+    setUser((u) => (u && u.id === id ? { ...u, ...patch } : u));
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
-    await updateDoc(doc(db, "users", id), { permissions }).catch(() => undefined);
+    await updateDoc(doc(db, "users", id), patch).catch(() => undefined);
   }, []);
 
   const setRole = useCallback(async (id: string, role: UserProfile["role"]) => {
-    setMembers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, role, permissions: role === "member" ? [] : m.permissions } : m)),
-    );
-    setUser((u) => (u && u.id === id ? { ...u, role } : u));
+    /* A fresh editor starts on the standard bundle: clear any old
+       list and the custom flag whenever the editor role is (re)given. */
+    const patch =
+      role === "editor"
+        ? { role, permissions: [] as string[], permissionsCustom: false }
+        : role === "member"
+          ? { role, permissions: [] as string[] }
+          : { role };
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+    setUser((u) => (u && u.id === id ? { ...u, ...patch } : u));
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
-    await updateDoc(doc(db, "users", id), { role }).catch(() => undefined);
+    await updateDoc(doc(db, "users", id), patch).catch(() => undefined);
   }, []);
 
   const setPosition = useCallback(async (id: string, position: string) => {
@@ -470,7 +485,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user.role === "super_admin") return true;
       if (user.role === "admin") return user.permissions.includes(perm);
       if (user.role === "editor")
-        return (EDITOR_PERMISSIONS as readonly string[]).includes(perm);
+        /* Editors start on the standard bundle; once the super admin
+           customizes an editor (permissionsCustom), their own toggled
+           list governs, exactly like a Batch Rep's (owner's rule,
+           2026-10-23). */
+        return user.permissionsCustom
+          ? user.permissions.includes(perm)
+          : (EDITOR_PERMISSIONS as readonly string[]).includes(perm);
       return false;
     },
     [user],

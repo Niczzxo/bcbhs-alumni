@@ -90,7 +90,7 @@ export default function V2Manager() {
       {/* ------------------------- blood requests ------------------------- */}
       <div className={card}>
         <SectionTitle blurb="Urgent requests posted by members. Mark resolved once the blood is managed.">
-          🩸 Blood Requests ({bloodRequests.filter((r) => !r.resolved).length} active)
+          Blood Requests ({bloodRequests.filter((r) => !r.resolved).length} active)
         </SectionTitle>
         <div className="mt-4 space-y-3">
           {bloodRequests.length === 0 && <p className="text-sm text-muted">No requests posted yet.</p>}
@@ -120,7 +120,7 @@ export default function V2Manager() {
       {canContent && (
         <div className={card}>
           <SectionTitle blurb="Create a poll, members vote on the Polls page, one vote each.">
-            🗳️ Polls & Voting
+            Polls & Voting
           </SectionTitle>
           <div className="mt-4 space-y-3">
             <div>
@@ -169,7 +169,7 @@ export default function V2Manager() {
       {canContent && (
         <div className={card}>
           <SectionTitle blurb="Celebrate notable alumni on the Success Stories page.">
-            🏆 Hall of Fame
+            Hall of Fame
           </SectionTitle>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <input className={inputCls} placeholder="Name" value={storyForm.name} onChange={(e) => setStoryForm({ ...storyForm, name: e.target.value })} />
@@ -212,7 +212,7 @@ export default function V2Manager() {
       {/* ------------------------- businesses / mentors ------------------------- */}
       <div className={card}>
         <SectionTitle blurb="Moderate member-submitted listings.">
-          🏪 Businesses & 🎓 Mentors
+          Businesses & Mentors
         </SectionTitle>
         <div className="mt-4 space-y-2">
           {businesses.length === 0 && mentors.length === 0 && (
@@ -226,7 +226,7 @@ export default function V2Manager() {
           ))}
           {mentors.map((m) => (
             <div key={m.id} className="flex items-center justify-between gap-3 rounded-2xl border border-ivory/10 bg-ink px-4 py-3">
-              <p className="text-sm text-ivory">🎓 {m.name} <span className="text-xs text-muted">· {m.expertise}</span></p>
+              <p className="text-sm text-ivory">{m.name} <span className="text-xs text-muted">· {m.expertise}</span></p>
               <button className={btnDanger} onClick={() => removeMentor(m.id)}>Remove</button>
             </div>
           ))}
@@ -237,7 +237,7 @@ export default function V2Manager() {
       {isSuperAdmin && (
         <div className={card}>
           <SectionTitle blurb="Super-admin only. Old school photos for the Memory Wall.">
-            🖼️ Memory Wall
+            Memory Wall
           </SectionTitle>
           <div className="mt-4 space-y-3">
             <div className="flex items-center gap-2">
@@ -278,7 +278,7 @@ export default function V2Manager() {
       {(isSuperAdmin || canContent) && (
         <div className={card}>
           <SectionTitle blurb="Scholarship & Donation Fund, totals, bKash number and the honour roll.">
-            🤲 Scholarship Fund
+            Scholarship Fund
           </SectionTitle>
           {isSuperAdmin && (
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -351,7 +351,7 @@ export default function V2Manager() {
       {isSuperAdmin && (
         <div className={card}>
           <SectionTitle blurb="WhatsApp group invite link per batch, shown on the Batch Groups page.">
-            👥 Batch WhatsApp Links
+            Batch WhatsApp Links
           </SectionTitle>
           <div className="mt-4 space-y-3">
             {batchesWithMembers.length === 0 && <p className="text-sm text-muted">No approved members yet.</p>}

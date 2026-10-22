@@ -194,7 +194,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <RequireRole role="admin" eyebrow="Administration" title={<>Admin <span className="text-gold-gradient">Panel</span></>}>
+    <RequireRole role="admin" eyebrow="Batch Representatives" title={<>Batch Rep <span className="text-gold-gradient">Panel</span></>}>
       <DashboardShell sections={sections} />
     </RequireRole>
   );

@@ -24,7 +24,7 @@ export default function FundPage() {
       <main className="bg-ink">
         <PageHero
           eyebrow="Give back, lift up"
-          title={<>Scholarship &amp; <span className="text-gold-gradient">Donation Fund</span> 🤲</>}
+          title={<>Scholarship &amp; <span className="text-gold-gradient">Donation Fund</span></>}
           subtitle="No BCBHSian should drop out for want of money. The alumni family stands beside its students, quietly, quickly, with dignity."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">

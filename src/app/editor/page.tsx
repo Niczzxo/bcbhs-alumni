@@ -39,7 +39,7 @@ export default function EditorPage() {
             This is your own workspace. Use the sidebar to jump between sectors, each one opens
             its own work area where you can add, edit or remove content, and everything updates
             on the public site right away. Member approvals, official positions and roles are
-            handled from the admin panels, so they do not appear here.
+            handled from the Batch Rep and Super Admin panels, so they do not appear here.
           </p>
           {kinds.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2">

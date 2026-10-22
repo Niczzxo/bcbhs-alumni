@@ -46,7 +46,7 @@ export default function RequireRole({
       : isSuperAdmin || user?.role === role;
 
   const roleLabel =
-    role === "super_admin" ? "the super admin" : role === "editor" ? "editors" : "administrators";
+    role === "super_admin" ? "the super admin" : role === "editor" ? "editors" : "batch representatives";
 
   useEffect(() => {
     if (graceOver && !user) router.replace("/login");

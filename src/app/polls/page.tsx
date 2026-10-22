@@ -27,7 +27,7 @@ export default function PollsPage() {
       <main className="bg-ink">
         <PageHero
           eyebrow="Your voice matters"
-          title={<>Polls &amp; <span className="text-gold-gradient">Voting</span> 🗳️</>}
+          title={<>Polls &amp; <span className="text-gold-gradient">Voting</span></>}
           subtitle="Association decisions, reunion plans, community questions, vote and see the results live."
         />
         <div className="mx-auto max-w-4xl px-5 py-12 sm:px-8">

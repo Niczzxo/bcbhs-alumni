@@ -18,7 +18,7 @@ export default function StoriesPage() {
       <main className="bg-ink">
         <PageHero
           eyebrow="Hall of Fame"
-          title={<>Success <span className="text-gold-gradient">Stories</span> 🏆</>}
+          title={<>Success <span className="text-gold-gradient">Stories</span></>}
           subtitle="BCBHSians who make us proud, in service, business, academia and beyond. Their journeys light the way for every junior."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">

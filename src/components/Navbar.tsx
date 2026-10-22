@@ -48,7 +48,7 @@ export default function Navbar() {
       : user?.role === "editor"
         ? "/editor"
         : "/id-card";
-  const dashboardLabel = isSuperAdmin ? "Super Admin" : user?.role === "editor" ? "Editor" : "Admin";
+  const dashboardLabel = isSuperAdmin ? "Super Admin" : user?.role === "editor" ? "Editor" : "Batch Rep";
 
   /** Verified (approved) members get the members menu; everyone else the public menu. */
   const isVerifiedMember =

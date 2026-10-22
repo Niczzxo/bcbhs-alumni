@@ -65,7 +65,7 @@ export default function MentorshipPage() {
       <main className="bg-ink">
         <PageHero
           eyebrow="Seniors guide juniors"
-          title={<>Mentorship <span className="text-gold-gradient">Program</span> 🎓</>}
+          title={<>Mentorship <span className="text-gold-gradient">Program</span></>}
           subtitle="Stuck on studies, admissions or your first job? A BCBHS senior has walked that road, reach out, they are happy to help."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">

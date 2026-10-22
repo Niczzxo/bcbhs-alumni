@@ -29,9 +29,9 @@ export const ROLE_META: Record<
     blurb: "Content staff, manages events, gallery, announcements & committee. No member approvals.",
   },
   admin: {
-    label: "Admin",
+    label: "Batch Rep",
     badge: "bg-ivory/10 text-ivory",
-    blurb: "Administrator, only what the super admin explicitly grants.",
+    blurb: "Batch Representative, only what the super admin explicitly grants.",
   },
   super_admin: {
     label: "Super Admin",
@@ -62,7 +62,8 @@ export interface UserProfile {
   dob?: string; // Date of birth, ISO YYYY-MM-DD, shown on the ID card
   status: MemberStatus;
   role: MemberRole;
-  permissions: string[]; // granular admin permissions
+  permissions: string[]; // granular permissions, granted per person by the super admin
+  permissionsCustom?: boolean; // editors: true once the super admin customized this editor's permissions (until then the standard editor bundle applies)
   memberId?: string; // e.g. "BCBHS-2015-0001", assigned on approval
   createdAt: string; // ISO date
 }

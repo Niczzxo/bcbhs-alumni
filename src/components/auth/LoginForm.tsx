@@ -94,7 +94,7 @@ export default function LoginForm({
           <div className="mt-4 grid gap-3">
             {[
               { label: "Super Admin", email: "superadmin@bcbhs-alumni.org" },
-              { label: "Admin", email: "admin@bcbhs-alumni.org" },
+              { label: "Batch Rep", email: "admin@bcbhs-alumni.org" },
               { label: "Member", email: "tanvir.ahmed@example.com" },
             ].map((r) => (
               <button

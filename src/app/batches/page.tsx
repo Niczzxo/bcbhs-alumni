@@ -41,7 +41,7 @@ export default function BatchesPage() {
       <main className="bg-ink">
         <PageHero
           eyebrow="Every batch, one family"
-          title={<>Batch <span className="text-gold-gradient">Groups</span> 👥</>}
+          title={<>Batch <span className="text-gold-gradient">Groups</span></>}
           subtitle="Find your own batch's corner of the family, member counts, donors, and the batch WhatsApp group."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
@@ -99,7 +99,7 @@ export default function BatchesPage() {
                     </p>
                   )}
                   {user.batch === b.batch && (
-                    <p className="mt-3 text-center text-xs font-semibold text-emerald-300">⭐ This is your batch</p>
+                    <p className="mt-3 text-center text-xs font-semibold text-emerald-300">This is your batch</p>
                   )}
                 </Reveal>
               ))}

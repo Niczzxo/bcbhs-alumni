@@ -24,10 +24,18 @@ export default function SuperAdminPage() {
   const admins = members.filter((m) => m.role === "admin" || m.role === "super_admin");
   const editors = members.filter((m) => m.role === "editor");
 
+  /* The permissions a person effectively holds: a Batch Rep's own
+     toggled list; an editor's toggled list once customized, and the
+     standard editor bundle until then. Toggles start from THIS list,
+     so customizing an editor never loses the bundle by accident. */
+  const effectivePerms = (m: UserProfile): string[] =>
+    m.role === "editor" && !m.permissionsCustom ? [...EDITOR_PERMISSIONS] : m.permissions;
+
   const togglePerm = (m: UserProfile, key: string) => {
-    const next = m.permissions.includes(key)
-      ? m.permissions.filter((p) => p !== key)
-      : [...m.permissions, key];
+    const base = effectivePerms(m);
+    const next = base.includes(key)
+      ? base.filter((p) => p !== key)
+      : [...base, key];
     setPermissions(m.id, next);
   };
 
@@ -45,7 +53,7 @@ export default function SuperAdminPage() {
           {[
             ["Approved members", approved.length],
             ["Pending approvals", pending.length],
-            ["Admins", admins.length],
+            ["Batch Reps", admins.length],
             ["Editors", editors.length],
           ].map(([label, value], i) => (
             <Reveal key={label as string} delay={i * 0.07} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6 text-center">
@@ -99,8 +107,9 @@ export default function SuperAdminPage() {
         <section>
           <h2 className="font-display text-2xl font-bold text-ivory">Role & access control</h2>
           <p className="mt-2 text-sm text-muted">
-            Give anyone any role, member, editor, admin or super admin. Editors always carry the
-            content permissions below; admins get exactly what you toggle. Super admin always has full access.
+            Give anyone any role, member, editor, batch rep or super admin. Batch reps and editors
+            each get exactly the permissions you toggle below; a new editor starts with the standard
+            content bundle until you customize them. Super admin always has full access.
           </p>
           <div className="gold-rule mt-4 w-32" />
           <div className="mt-8 space-y-5">
@@ -181,41 +190,34 @@ export default function SuperAdminPage() {
                   <p className="mt-1.5 text-[11px] text-muted/70">
                     Official positions are manually verified, allow up to 7 days.
                   </p>
-                  {m.role === "editor" && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {PERMISSIONS.filter((p) =>
-                        (EDITOR_PERMISSIONS as readonly string[]).includes(p.key),
-                      ).map((p) => (
-                        <span
-                          key={p.key}
-                          title={p.hint}
-                          className="rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold text-sky-300"
-                        >
-                          ✓ {p.label}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {m.role === "admin" && (
-                    <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                      {PERMISSIONS.map((p) => {
-                        const on = m.permissions.includes(p.key);
-                        return (
-                          <button
-                            key={p.key}
-                            onClick={() => togglePerm(m, p.key)}
-                            className={`rounded-2xl border p-4 text-left transition-all ${on ? "border-gold/60 bg-gold/10" : "border-ivory/10 bg-ink hover:border-gold/30"}`}
-                          >
-                            <p className="flex items-center justify-between text-sm font-semibold text-ivory">
-                              {p.label}
-                              <span className={`ml-2 inline-block h-5 w-9 shrink-0 rounded-full p-0.5 transition-colors ${on ? "bg-gold" : "bg-ivory/20"}`}>
-                                <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${on ? "translate-x-4" : ""}`} />
-                              </span>
-                            </p>
-                            <p className="mt-1 text-xs text-muted">{p.hint}</p>
-                          </button>
-                        );
-                      })}
+                  {(m.role === "admin" || m.role === "editor") && (
+                    <div className="mt-5">
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {PERMISSIONS.map((p) => {
+                          const on = effectivePerms(m).includes(p.key);
+                          return (
+                            <button
+                              key={p.key}
+                              onClick={() => togglePerm(m, p.key)}
+                              className={`rounded-2xl border p-4 text-left transition-all ${on ? "border-gold/60 bg-gold/10" : "border-ivory/10 bg-ink hover:border-gold/30"}`}
+                            >
+                              <p className="flex items-center justify-between text-sm font-semibold text-ivory">
+                                {p.label}
+                                <span className={`ml-2 inline-block h-5 w-9 shrink-0 rounded-full p-0.5 transition-colors ${on ? "bg-gold" : "bg-ivory/20"}`}>
+                                  <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${on ? "translate-x-4" : ""}`} />
+                                </span>
+                              </p>
+                              <p className="mt-1 text-xs text-muted">{p.hint}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {m.role === "editor" && !m.permissionsCustom && (
+                        <p className="mt-3 text-[11px] text-muted/70">
+                          This editor is on the standard bundle (events, gallery, announcements, committee).
+                          Flip any switch to customize this editor individually.
+                        </p>
+                      )}
                     </div>
                   )}
                 </Reveal>

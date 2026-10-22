@@ -98,7 +98,7 @@ export default function BloodDonorsPage() {
       <main className="bg-ink">
         <PageHero
           eyebrow="Donate blood, save life"
-          title={<>Blood <span className="text-gold-gradient">Donor Network</span> 🩸</>}
+          title={<>Blood <span className="text-gold-gradient">Donor Network</span></>}
           subtitle="In an emergency, every minute counts. Find a verified alumni donor near you."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">

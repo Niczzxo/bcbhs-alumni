@@ -18,7 +18,7 @@ export default function MemoryWallPage() {
       <main className="bg-ink">
         <PageHero
           eyebrow="Down memory lane"
-          title={<>Memory <span className="text-gold-gradient">Wall</span> 🖼️</>}
+          title={<>Memory <span className="text-gold-gradient">Wall</span></>}
           subtitle="Old photos, golden days. The classrooms, the field, the friends, the school as we remember it."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">

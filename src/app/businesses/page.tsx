@@ -81,7 +81,7 @@ export default function BusinessesPage() {
       <main className="bg-ink">
         <PageHero
           eyebrow="Support our own"
-          title={<>Business <span className="text-gold-gradient">Directory</span> 🏪</>}
+          title={<>Business <span className="text-gold-gradient">Directory</span></>}
           subtitle="Shops, services and startups run by BCBHS alumni. When you buy from a brother, the whole family grows."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
