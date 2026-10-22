@@ -271,7 +271,7 @@ export const DEMO_EVENTS: PortalEvent[] = [
     date: "2026-12-25",
     venue: "BCBHS School Field, Bogura",
     description:
-      "The biggest gathering of BCBHSians yet — cultural program, dinner, and the annual general meeting under one sky.",
+      "The biggest gathering of BCBHSians yet, cultural program, dinner, and the annual general meeting under one sky.",
     upcoming: true,
   },
   {
@@ -280,7 +280,7 @@ export const DEMO_EVENTS: PortalEvent[] = [
     date: "2026-03-18",
     venue: "Bogura Cantonment Community Hall",
     description:
-      "An evening of togetherness during Ramadan — alumni, teachers, and families welcome.",
+      "An evening of togetherness during Ramadan, alumni, teachers, and families welcome.",
     upcoming: true,
   },
   {
@@ -298,7 +298,7 @@ export const DEMO_EVENTS: PortalEvent[] = [
     date: "2024-12-27",
     venue: "BCBHS School Field, Bogura",
     description:
-      "Over 400 alumni joined the 2024 reunion — a day of memories, music, and renewed friendships.",
+      "Over 400 alumni joined the 2024 reunion, a day of memories, music, and renewed friendships.",
     upcoming: false,
   },
   {
@@ -353,7 +353,7 @@ export const DEMO_GALLERY: GalleryPhoto[] = [
   {
     id: "g-1",
     src: "/images/school.jpg",
-    caption: "The campus — home of a thousand memories",
+    caption: "The campus, home of a thousand memories",
     createdAt: "2024-01-15T00:00:00.000Z",
   },
 ];
@@ -364,14 +364,14 @@ export const DEMO_ANNOUNCEMENTS: AnnouncementItem[] = [
   {
     id: "a-1",
     title: "Grand Reunion 2026 announced",
-    body: "Mark your calendars — December 25, 2026 at the BCBHS School Field. Registration opens soon.",
+    body: "Mark your calendars, December 25, 2026 at the BCBHS School Field. Registration opens soon.",
     createdAt: "2026-10-01T00:00:00.000Z",
   },
 ];
 
 /* ------------------------- job board (placeholder) --------------------- */
 /* TODO: move to Firestore `jobs` collection. Only signed-in members may  */
-/* read/write — see firestore.rules.                                      */
+/* read/write, see firestore.rules.                                      */
 
 export const DEMO_JOBS: JobPost[] = [
   {
@@ -437,7 +437,7 @@ export const DEMO_BLOOD_REQUESTS: BloodRequest[] = [
     hospital: "Shaheed Ziaur Rahman Medical College, Bogura",
     district: "Bogura",
     contact: "01712345678",
-    note: "Urgent — surgery scheduled tomorrow morning.",
+    note: "Urgent, surgery scheduled tomorrow morning.",
     postedBy: "u-1",
     posterName: "Tanvir Ahmed",
     createdAt: "2026-10-20T00:00:00.000Z",
@@ -467,7 +467,7 @@ export const DEMO_STORIES: SuccessStory[] = [
     batch: "2015",
     title: "Software Engineer · Brain Station 23",
     story:
-      "From the back benches of BCBHS to building fintech used by millions — Tanvir credits the discipline of cantonment school life for his work ethic, and now mentors junior alumni entering tech.",
+      "From the back benches of BCBHS to building fintech used by millions, Tanvir credits the discipline of cantonment school life for his work ethic, and now mentors junior alumni entering tech.",
     createdAt: "2026-10-10T00:00:00.000Z",
   },
 ];
@@ -482,7 +482,7 @@ export const DEMO_BUSINESSES: Business[] = [
     category: "IT & Electronics",
     district: "Bogura",
     description:
-      "Sales and servicing of laptops, desktops and accessories. Special discount for BCBHS alumni — just show your alumni ID card.",
+      "Sales and servicing of laptops, desktops and accessories. Special discount for BCBHS alumni, just show your alumni ID card.",
     whatsapp: "01712345678",
     createdAt: "2026-10-09T00:00:00.000Z",
   },
@@ -492,7 +492,7 @@ export const DEMO_WALL: WallPhoto[] = [
   {
     id: "w-1",
     url: "/images/school.jpg",
-    caption: "The school building — where it all began",
+    caption: "The school building, where it all began",
     year: "2010",
     createdAt: "2026-10-01T00:00:00.000Z",
   },

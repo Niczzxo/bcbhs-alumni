@@ -1,17 +1,17 @@
 /* ------------------------------------------------------------------ */
 /*  Site-wide placeholder data.                                        */
-/*  These values are stand-ins ONLY — they will be wired to Firebase   */
+/*  These values are stand-ins ONLY, they will be wired to Firebase   */
 /*  (Firestore) once the backend is set up.                            */
 /* ------------------------------------------------------------------ */
 
 export const PLACEHOLDER_STATS = {
-  /** Total registered alumni — TODO: read from Firestore `members` count */
+  /** Total registered alumni, TODO: read from Firestore `members` count */
   totalMembers: 1200,
-  /** Alumni currently living abroad — TODO: query members by country */
+  /** Alumni currently living abroad, TODO: query members by country */
   membersAbroad: 150,
-  /** Batches represented — TODO: derive from member batch fields */
+  /** Batches represented, TODO: derive from member batch fields */
   batches: 25,
-  /** Reunions & events held — TODO: read from Firestore `events` count */
+  /** Reunions & events held, TODO: read from Firestore `events` count */
   eventsHeld: 12,
 };
 
@@ -29,7 +29,7 @@ export const NAV_LINKS = [
   { label: "Scholarship Fund", href: "/fund" },
 ];
 
-/** Public navbar — visitors who are not verified members. */
+/** Public navbar, visitors who are not verified members. */
 export const PUBLIC_NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Memories", href: "/memories" },

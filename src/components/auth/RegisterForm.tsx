@@ -7,7 +7,7 @@ import { compressImageToDataURL } from "@/lib/image";
 import { BLOOD_GROUPS, BD_DISTRICTS, BATCH_YEARS, DEPARTMENTS } from "@/lib/types";
 import { inputCls, labelCls } from "./ui";
 
-/** Shared registration form — used by the /register page and the auth modal. */
+/** Shared registration form, used by the /register page and the auth modal. */
 export default function RegisterForm({
   onSuccess,
   onSwitchToLogin,
@@ -63,7 +63,7 @@ export default function RegisterForm({
       setPhotoURL(dataUrl);
       setError("");
     } catch {
-      setError("Could not process that photo — try another image.");
+      setError("Could not process that photo, try another image.");
     }
     setPhotoBusy(false);
   }
@@ -86,7 +86,7 @@ export default function RegisterForm({
     <form onSubmit={onSubmit}>
       {isDemo && (
         <p className="mb-6 rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-xs text-gold-2">
-          Demo mode — your registration is stored locally and appears in the admin approval queue.
+          Demo mode, your registration is stored locally and appears in the admin approval queue.
         </p>
       )}
       <div className="grid gap-5 sm:grid-cols-2">
@@ -184,7 +184,7 @@ export default function RegisterForm({
               {photoBusy ? (
                 "Processing photo…"
               ) : photoURL ? (
-                <>Photo added ✓ — <span className="text-gold-2 underline">tap to change</span></>
+                <>Photo added ✓, <span className="text-gold-2 underline">tap to change</span></>
               ) : (
                 <>Tap to upload your photo (JPG/PNG). It appears on your profile, directory card and ID card.</>
               )}

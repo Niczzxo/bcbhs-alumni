@@ -12,7 +12,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import { useMember } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
 
-/** Public alumni profile — consumes the route-params promise via `use()`. */
+/** Public alumni profile, consumes the route-params promise via `use()`. */
 export default function MemberView({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const member = useMember(decodeURIComponent(id));
@@ -56,9 +56,9 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                 <dl className="grid gap-5 sm:grid-cols-2">
                   {[
                     ["Location", member.isAbroad ? `${member.country ?? "Abroad"} 🌍` : member.district],
-                    ["Profession", member.profession ?? "—"],
-                    ["Organization", member.company ?? "—"],
-                    ["Blood group", member.isDonor ? `${member.bloodGroup ?? "—"} · donor 🩸` : (member.bloodGroup ?? "—")],
+                    ["Profession", member.profession ?? "-"],
+                    ["Organization", member.company ?? "-"],
+                    ["Blood group", member.isDonor ? `${member.bloodGroup ?? "-"} · donor 🩸` : (member.bloodGroup ?? "-")],
                   ].map(([k, v]) => (
                     <div key={k}>
                       <dt className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted">{k}</dt>

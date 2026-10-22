@@ -1,7 +1,7 @@
 /* ------------------------------------------------------------------ */
 /*  Public ID-card verification registry (`verify/{memberId}`).       */
 /*                                                                     */
-/*  The /verify page is public — anyone scanning a card QR lands      */
+/*  The /verify page is public, anyone scanning a card QR lands      */
 /*  there, usually signed out. Firestore rules only let guests read   */
 /*  `users` docs that are BOTH approved and guestVisible, and a       */
 /*  memberId lookup cannot prove either condition, so the query is    */
@@ -44,7 +44,7 @@ export async function syncVerifyDoc(db: Firestore | null, m: UserProfile): Promi
     const { doc, setDoc } = await import("firebase/firestore");
     await setDoc(doc(db, "verify", rec.memberId), rec);
   } catch {
-    /* best effort — VerifySync reconciles on the next staff visit */
+    /* best effort, VerifySync reconciles on the next staff visit */
   }
 }
 
@@ -55,6 +55,6 @@ export async function removeVerifyDoc(db: Firestore | null, memberId?: string | 
     const { doc, deleteDoc } = await import("firebase/firestore");
     await deleteDoc(doc(db, "verify", memberId));
   } catch {
-    /* best effort — VerifySync reconciles on the next staff visit */
+    /* best effort, VerifySync reconciles on the next staff visit */
   }
 }

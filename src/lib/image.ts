@@ -28,7 +28,7 @@ export function compressImageToDataURL(
           reject(new Error("Canvas not supported"));
           return;
         }
-        // JPEG has no alpha — paint a light backdrop for transparent PNGs.
+        // JPEG has no alpha, paint a light backdrop for transparent PNGs.
         ctx.fillStyle = "#f5efe0";
         ctx.fillRect(0, 0, w, h);
         ctx.drawImage(img, 0, 0, w, h);

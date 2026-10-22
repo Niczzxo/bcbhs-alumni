@@ -6,7 +6,7 @@ import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { useContent } from "@/lib/content-context";
 
-/** Scholarship & Donation Fund — support students and alumni families. */
+/** Scholarship & Donation Fund, support students and alumni families. */
 export default function FundPage() {
   const { fundInfo, fundDonors } = useContent();
   const donors = [...fundDonors].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -25,7 +25,7 @@ export default function FundPage() {
         <PageHero
           eyebrow="Give back, lift up"
           title={<>Scholarship &amp; <span className="text-gold-gradient">Donation Fund</span> 🤲</>}
-          subtitle="No BCBHSian should drop out for want of money. The alumni family stands beside its students — quietly, quickly, with dignity."
+          subtitle="No BCBHSian should drop out for want of money. The alumni family stands beside its students, quietly, quickly, with dignity."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -59,14 +59,14 @@ export default function FundPage() {
                   </p>
                   <p className="mt-4 text-xs leading-relaxed text-muted/80">
                     After sending, inform any committee member so your name can be added to the
-                    honour roll below. Anonymous donors are respected — tell us if you prefer not
+                    honour roll below. Anonymous donors are respected, tell us if you prefer not
                     to be listed.
                   </p>
                 </>
               ) : (
                 <p className="mt-4 text-sm leading-relaxed text-muted">
                   Donation channels are being set up. Please contact any committee member to
-                  contribute — your generosity will be recorded on the honour roll.
+                  contribute, your generosity will be recorded on the honour roll.
                 </p>
               )}
             </Reveal>

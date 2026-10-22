@@ -10,7 +10,7 @@ import { useAuth } from "@/lib/auth-context";
 import { PERMISSIONS, EDITOR_PERMISSIONS, ROLE_META, POSITIONS } from "@/lib/types";
 import type { MemberRole, UserProfile } from "@/lib/types";
 
-/** Super admin — full control: roles, granular permissions, stats. */
+/** Super admin, full control: roles, granular permissions, stats. */
 export default function SuperAdminPage() {
   const { user, members, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember } = useAuth();
 
@@ -52,7 +52,7 @@ export default function SuperAdminPage() {
       <section className="mt-14">
         <h2 className="font-display text-2xl font-bold text-ivory">Role & access control</h2>
         <p className="mt-2 text-sm text-muted">
-          Give anyone any role — member, editor, admin or super admin. Editors always carry the
+          Give anyone any role, member, editor, admin or super admin. Editors always carry the
           content permissions below; admins get exactly what you toggle. Super admin always has full access.
         </p>
         <div className="gold-rule mt-4 w-32" />
@@ -91,7 +91,7 @@ export default function SuperAdminPage() {
                   )}
                 </div>
                 <p className="mt-2 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
-                {/* Official position — picked from the association's list;
+                {/* Official position, picked from the association's list;
                     the chosen value is what prints on the member's ID card */}
                 <div className="mt-3 flex flex-wrap items-center gap-3">
                   <label className="text-[11px] font-bold uppercase tracking-widest text-muted">
@@ -104,7 +104,7 @@ export default function SuperAdminPage() {
                     className="w-56 cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
                   >
                     <option value="" className="bg-ink text-ivory">
-                      — No position —
+                     , No position
                     </option>
                     {m.position && !POSITIONS.includes(m.position) && (
                       <option value={m.position} className="bg-ink text-ivory">
@@ -134,7 +134,7 @@ export default function SuperAdminPage() {
                   </label>
                 </div>
                 <p className="mt-1.5 text-[11px] text-muted/70">
-                  Official positions are manually verified — allow up to 7 days.
+                  Official positions are manually verified, allow up to 7 days.
                 </p>
                 {m.role === "editor" && (
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -182,7 +182,7 @@ export default function SuperAdminPage() {
       <section className="mt-14">
         <h2 className="font-display text-2xl font-bold text-ivory">Content management</h2>
         <p className="mt-2 text-sm text-muted">
-          Add, edit or remove events, gallery photos, committee seats and announcements — live on the site instantly.
+          Add, edit or remove events, gallery photos, committee seats and announcements, live on the site instantly.
         </p>
         <div className="gold-rule mt-4 w-32" />
         <div className="mt-8 grid gap-6 xl:grid-cols-2">
@@ -197,7 +197,7 @@ export default function SuperAdminPage() {
       <section className="mt-14">
         <h2 className="font-display text-2xl font-bold text-ivory">Community features</h2>
         <p className="mt-2 text-sm text-muted">
-          Blood requests, polls, hall of fame, memory wall, fund and batch groups — managed here, live instantly.
+          Blood requests, polls, hall of fame, memory wall, fund and batch groups, managed here, live instantly.
         </p>
         <div className="gold-rule mt-4 w-32" />
         <div className="mt-8">

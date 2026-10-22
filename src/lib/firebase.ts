@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------ */
 /*  Firebase client setup.                                             */
-/*  All config comes from environment variables — see .env.example.    */
+/*  All config comes from environment variables, see .env.example.    */
 /*  Values here are intentionally empty placeholders; the portal runs  */
 /*  fully client-side-rendered until real credentials are provided.    */
 /* ------------------------------------------------------------------ */
@@ -34,7 +34,7 @@ if (isFirebaseConfigured) {
   db = getFirestore(app);
   storage = getStorage(app);
 
-  /* Firebase App Check — attests that requests come from this genuine web
+  /* Firebase App Check, attests that requests come from this genuine web
    * app, blocking API abuse from bots and foreign apps. Requires
    * NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_KEY; skipped silently without it. */
   const recaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_KEY;
@@ -47,11 +47,11 @@ if (isFirebaseConfigured) {
             isTokenAutoRefreshEnabled: true,
           });
         } catch {
-          /* App Check unavailable (e.g. unsupported browser) — app still works */
+          /* App Check unavailable (e.g. unsupported browser), app still works */
         }
       })
       .catch(() => {
-        /* firebase/app-check failed to load — app still works */
+        /* firebase/app-check failed to load, app still works */
       });
   }
 }

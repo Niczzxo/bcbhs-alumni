@@ -14,7 +14,7 @@ import { JOB_TYPES, type JobPost } from "@/lib/types";
 import { jobWhatsappLink, normalizeWhatsAppNumber } from "@/lib/whatsapp";
 
 /**
- * Job Board — only registered (signed-in) members may view or post.
+ * Job Board, only registered (signed-in) members may view or post.
  * Any member can post a circular; every card carries a WhatsApp button
  * that opens a chat with the poster, pre-filled with a job inquiry.
  */
@@ -131,7 +131,7 @@ function JobCard({
               expired ? "text-red-400" : left !== null && left <= 7 ? "text-gold-2" : "text-muted"
             }`}
           >
-            🗓 {expired ? "Application closed" : `Apply by ${formatDate(job.deadline)}${left === 0 ? " — today!" : left !== null && left > 0 ? ` (${left}d left)` : ""}`}
+            🗓 {expired ? "Application closed" : `Apply by ${formatDate(job.deadline)}${left === 0 ? ", today!" : left !== null && left > 0 ? ` (${left}d left)` : ""}`}
           </p>
         )}
 
@@ -300,7 +300,7 @@ export default function JobsPage() {
         <PageHero
           eyebrow="Careers & referrals"
           title={<>Job <span className="text-gold-gradient">Board</span></>}
-          subtitle="Circulars posted by fellow alumni — juniors find seniors, seniors refer juniors. One tap opens a WhatsApp chat with the poster."
+          subtitle="Circulars posted by fellow alumni, juniors find seniors, seniors refer juniors. One tap opens a WhatsApp chat with the poster."
         />
 
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
@@ -378,7 +378,7 @@ export default function JobsPage() {
                   <p className="font-display text-xl font-bold text-ivory">No circulars yet</p>
                   <p className="mt-2 text-sm text-muted">
                     {query || typeFilter !== "All" || mineOnly
-                      ? "Nothing matches your filters — try clearing them."
+                      ? "Nothing matches your filters, try clearing them."
                       : "Be the first to share an opportunity with your juniors."}
                   </p>
                 </div>

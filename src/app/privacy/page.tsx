@@ -16,7 +16,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/** Privacy Policy — prepared in accordance with the laws of Bangladesh. */
+/** Privacy Policy, prepared in accordance with the laws of Bangladesh. */
 export default function PrivacyPage() {
   return (
     <>
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
               Effective date: <span className="font-semibold text-ivory/90">October 15, 2026</span>.
               This Privacy Policy applies to the BCBHS Alumni Portal
               (bcbhs-alumni-niczzxos-projects.vercel.app), operated by the BCBHS Alumni Association
-              (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) — a voluntary alumni community based in
+              (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;), a voluntary alumni community based in
               Bogura, Bangladesh. It is prepared in accordance with the laws of Bangladesh, including the
               Information and Communication Technology Act, 2006 and the Cyber Security Act, 2023.
             </p>
@@ -51,17 +51,17 @@ export default function PrivacyPage() {
             <Section title="2. Information we collect">
               <p>When you register and use the portal, we collect:</p>
               <ul className="list-disc space-y-2 pl-6">
-                <li><span className="text-ivory/90 font-medium">Account details</span> — your name, email address, and password (stored securely via Firebase Authentication; we never see your password).</li>
-                <li><span className="text-ivory/90 font-medium">Profile information</span> — batch / passing year, department, district, country (if living abroad), profession, company, blood group, date of birth, and profile photo.</li>
-                <li><span className="text-ivory/90 font-medium">Contact numbers</span> — your private phone number and, only if you choose to share it, a public WhatsApp number.</li>
-                <li><span className="text-ivory/90 font-medium">Community content</span> — photos you appear in within the gallery / memory wall, job circulars you post, and event participation.</li>
+                <li><span className="text-ivory/90 font-medium">Account details</span>, your name, email address, and password (stored securely via Firebase Authentication; we never see your password).</li>
+                <li><span className="text-ivory/90 font-medium">Profile information</span>, batch / passing year, department, district, country (if living abroad), profession, company, blood group, date of birth, and profile photo.</li>
+                <li><span className="text-ivory/90 font-medium">Contact numbers</span>, your private phone number and, only if you choose to share it, a public WhatsApp number.</li>
+                <li><span className="text-ivory/90 font-medium">Community content</span>, photos you appear in within the gallery / memory wall, job circulars you post, and event participation.</li>
               </ul>
             </Section>
 
             <Section title="3. Legal basis for processing">
               <p>
                 We process your personal data on the basis of <span className="text-ivory/90 font-medium">your
-                consent</span> — given when you register and accept our Terms of Service and this Policy — and
+                consent</span>, given when you register and accept our Terms of Service and this Policy, and
                 for the <span className="text-ivory/90 font-medium">legitimate purpose</span> of operating a
                 verified alumni community, including membership verification, community safety, and
                 communication. You may withdraw your consent at any time by requesting account deletion
@@ -82,7 +82,7 @@ export default function PrivacyPage() {
 
             <Section title="5. What stays private">
               <p>
-                Your <span className="text-ivory/90 font-medium">phone number is always private</span> — it is
+                Your <span className="text-ivory/90 font-medium">phone number is always private</span>, it is
                 stored separately from your public profile and is visible only to you and authorized
                 administrators. Your WhatsApp number appears publicly{" "}
                 <span className="text-ivory/90 font-medium">only if you explicitly choose to share it</span> in
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
             <Section title="7. Data storage, security & retention">
               <p>
                 Your data is stored securely with Google Firebase (Firestore database, Asia-South region) and
-                protected by strict access rules — private phone numbers are technically blocked from ever
+                protected by strict access rules, private phone numbers are technically blocked from ever
                 appearing in public profile records. Profile photos are compressed in your browser before
                 upload, and access to member data is limited to authorized administrators on a need-to-know basis.
               </p>
@@ -116,10 +116,10 @@ export default function PrivacyPage() {
 
             <Section title="8. Your rights">
               <ul className="list-disc space-y-2 pl-6">
-                <li><span className="text-ivory/90 font-medium">Access</span> — view all data we hold about you from your Profile page.</li>
-                <li><span className="text-ivory/90 font-medium">Correction</span> — edit your profile at any time to keep it accurate and up to date.</li>
-                <li><span className="text-ivory/90 font-medium">Withdrawal</span> — remove your public WhatsApp number or donor listing whenever you wish.</li>
-                <li><span className="text-ivory/90 font-medium">Deletion</span> — request a copy of your data or ask us to delete your account and data (see Section 13).</li>
+                <li><span className="text-ivory/90 font-medium">Access</span>, view all data we hold about you from your Profile page.</li>
+                <li><span className="text-ivory/90 font-medium">Correction</span>, edit your profile at any time to keep it accurate and up to date.</li>
+                <li><span className="text-ivory/90 font-medium">Withdrawal</span>, remove your public WhatsApp number or donor listing whenever you wish.</li>
+                <li><span className="text-ivory/90 font-medium">Deletion</span>, request a copy of your data or ask us to delete your account and data (see Section 13).</li>
               </ul>
             </Section>
 
@@ -143,8 +143,8 @@ export default function PrivacyPage() {
                 We handle your data in line with the laws of Bangladesh, including the{" "}
                 <span className="text-ivory/90 font-medium">Information and Communication Technology Act, 2006</span>{" "}
                 and the <span className="text-ivory/90 font-medium">Cyber Security Act, 2023</span>. Where the law
-                requires us to preserve or disclose information — for example, in response to a lawful order
-                from a competent court or authority in Bangladesh — we will comply as required. Misuse of
+                requires us to preserve or disclose information, for example, in response to a lawful order
+                from a competent court or authority in Bangladesh, we will comply as required. Misuse of
                 personal data through the portal may be reported to the relevant authorities under these laws.
               </p>
             </Section>

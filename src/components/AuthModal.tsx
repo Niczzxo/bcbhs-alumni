@@ -124,10 +124,10 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
                   </h2>
                   <p className="mt-2 max-w-sm text-xs leading-relaxed text-muted">
                     {registeredName
-                      ? "Your registration is in — an admin will verify it shortly."
+                      ? "Your registration is in, an admin will verify it shortly."
                       : mode === "login"
                         ? "Log in to your alumni home, ID card and member tools."
-                        : "Every registration is verified by an admin — no fake members, ever."}
+                        : "Every registration is verified by an admin, no fake members, ever."}
                   </p>
                 </motion.div>
 

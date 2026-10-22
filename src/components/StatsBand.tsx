@@ -34,7 +34,7 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   );
 }
 
-/** Gold-on-navy stats band — live Firestore counts when configured. */
+/** Gold-on-navy stats band, live Firestore counts when configured. */
 export default function StatsBand() {
   const stats = useSiteStats();
   const items = [
@@ -65,8 +65,8 @@ export default function StatsBand() {
         </div>
         <p className="mt-10 text-center text-xs text-muted/70">
           {stats.live
-            ? "Live counters — synced with the member database."
-            : "* Live counters — connected to the member database at launch."}
+            ? "Live counters, synced with the member database."
+            : "* Live counters, connected to the member database at launch."}
         </p>
       </div>
     </section>

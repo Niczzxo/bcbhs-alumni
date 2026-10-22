@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { inputCls, labelCls } from "./ui";
 
-/** Shared login form — used by the /login page and the auth modal. */
+/** Shared login form, used by the /login page and the auth modal. */
 export default function LoginForm({
   onSuccess,
   onSwitchToRegister,

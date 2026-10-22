@@ -9,10 +9,10 @@ import MemoriesMarquee from "@/components/MemoriesMarquee";
 import { useContent } from "@/lib/content-context";
 import { useAuth } from "@/lib/auth-context";
 
-/** Guests preview the first few memories — log in to unlock the full wall. */
+/** Guests preview the first few memories, log in to unlock the full wall. */
 const PREVIEW_COUNT = 6;
 
-/** Memories & Souvenirs — the full memory wall. */
+/** Memories & Souvenirs, the full memory wall. */
 export default function MemoriesPage() {
   const { gallery } = useContent();
   const { user } = useAuth();
@@ -34,14 +34,14 @@ export default function MemoriesPage() {
           title={<>Memories <span className="text-gold-gradient">&amp; Souvenirs</span></>}
           subtitle={
             isGuest
-              ? "A glimpse of the BCBHS story — log in to unlock the full memory wall."
-              : "Classrooms, playgrounds, reunions — the visual memory of BCBHS, kept alive by the community."
+              ? "A glimpse of the BCBHS story, log in to unlock the full memory wall."
+              : "Classrooms, playgrounds, reunions, the visual memory of BCBHS, kept alive by the community."
           }
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           {photos.length === 0 ? (
             <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
-              No memories yet — check back soon.
+              No memories yet, check back soon.
             </p>
           ) : (
             <div className="space-y-5">

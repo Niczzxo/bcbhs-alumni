@@ -26,12 +26,12 @@ export const ROLE_META: Record<
   editor: {
     label: "Editor",
     badge: "bg-sky-400/15 text-sky-300",
-    blurb: "Content staff — manages events, gallery, announcements & committee. No member approvals.",
+    blurb: "Content staff, manages events, gallery, announcements & committee. No member approvals.",
   },
   admin: {
     label: "Admin",
     badge: "bg-ivory/10 text-ivory",
-    blurb: "Administrator — only what the super admin explicitly grants.",
+    blurb: "Administrator, only what the super admin explicitly grants.",
   },
   super_admin: {
     label: "Super Admin",
@@ -46,8 +46,8 @@ export interface UserProfile {
   batch: string; // e.g. "2015"
   roll?: string;
   email: string;
-  phone?: string; // private — only visible to admins / self (lives in users_private)
-  whatsapp?: string; // public opt-in contact number — shown as a WhatsApp action button
+  phone?: string; // private, only visible to admins / self (lives in users_private)
+  whatsapp?: string; // public opt-in contact number, shown as a WhatsApp action button
   photoURL?: string;
   bloodGroup?: string;
   isDonor?: boolean;
@@ -56,14 +56,14 @@ export interface UserProfile {
   isAbroad: boolean;
   profession?: string;
   company?: string;
-  department?: string; // Science | Arts | Commerce — shown on the ID card
-  position?: string; // e.g. "President" — set ONLY by admins after manual verification
+  department?: string; // Science | Arts | Commerce, shown on the ID card
+  position?: string; // e.g. "President", set ONLY by admins after manual verification
   guestVisible?: boolean; // admin-picked: this profile shows in the public (logged-out) directory
-  dob?: string; // Date of birth, ISO YYYY-MM-DD — shown on the ID card
+  dob?: string; // Date of birth, ISO YYYY-MM-DD, shown on the ID card
   status: MemberStatus;
   role: MemberRole;
   permissions: string[]; // granular admin permissions
-  memberId?: string; // e.g. "BCBHS-2015-0001" — assigned on approval
+  memberId?: string; // e.g. "BCBHS-2015-0001", assigned on approval
   createdAt: string; // ISO date
 }
 
@@ -112,21 +112,21 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   aboutEyebrow: "Our story",
   aboutTitle: "The BCBHS Alumni Association",
   aboutIntro:
-    "We are the former students of Bogura Cantonment Board High School — bound by classrooms, playgrounds, and memories that never fade.",
+    "We are the former students of Bogura Cantonment Board High School, bound by classrooms, playgrounds, and memories that never fade.",
   aboutStory: [
     "The BCBHS Alumni Association was founded in 2023 by a group of former students who refused to let graduation be a goodbye. What began as a small reunion committee has grown into a thriving community of alumni across Bangladesh and beyond.",
-    "Today we connect batches across decades — seniors guide juniors with career advice and referrals, we stand together in emergencies through our blood donor network, and we gather every year to celebrate the school that made us who we are.",
+    "Today we connect batches across decades, seniors guide juniors with career advice and referrals, we stand together in emergencies through our blood donor network, and we gather every year to celebrate the school that made us who we are.",
   ],
   aboutMission:
-    "To keep every BCBHSian connected for life — fostering fellowship between batches, supporting juniors with mentorship and opportunity, serving our community, and upholding the honour of our school.",
+    "To keep every BCBHSian connected for life, fostering fellowship between batches, supporting juniors with mentorship and opportunity, serving our community, and upholding the honour of our school.",
   aboutValues: [
     {
       title: "Brotherhood",
-      text: "Once a BCBHSian, always family — across batches, cities, and countries.",
+      text: "Once a BCBHSian, always family, across batches, cities, and countries.",
     },
     {
       title: "Service",
-      text: "Blood drives, scholarships, and welfare — we give back to the community that raised us.",
+      text: "Blood drives, scholarships, and welfare, we give back to the community that raised us.",
     },
     {
       title: "Excellence",
@@ -145,7 +145,7 @@ export const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "R
 
 /**
  * A job circular posted by a member on the Job Board.
- * Only registered (signed-in) members may view or post — enforced by
+ * Only registered (signed-in) members may view or post, enforced by
  * firestore.rules (`jobs` collection). The poster's WhatsApp number is
  * public on the card so any member can start a chat with one tap.
  */
@@ -167,7 +167,7 @@ export interface JobPost {
 }
 
 /**
- * Official association positions — chosen from this list in the admin
+ * Official association positions, chosen from this list in the admin
  * dashboards (never typed freehand) and printed on the member's ID card
  * under their name.
  */
@@ -182,7 +182,7 @@ export const POSITIONS: string[] = [
   "Executive Member",
 ];
 
-/** Granular admin permissions — toggled by the super admin. */
+/** Granular admin permissions, toggled by the super admin. */
 export const PERMISSIONS: { key: string; label: string; hint: string }[] = [
   { key: "approve_members", label: "Approve Members", hint: "Verify & approve new registrations" },
   { key: "manage_events", label: "Manage Events", hint: "Create, edit & delete events" },
@@ -250,7 +250,7 @@ export interface PollVote {
   optionIndex: number;
 }
 
-/** A Hall of Fame entry — a notable alumnus and their story. */
+/** A Hall of Fame entry, a notable alumnus and their story. */
 export interface SuccessStory {
   id: string;
   name: string;
@@ -275,7 +275,7 @@ export interface Business {
   createdAt: string; // ISO
 }
 
-/** A photo on the Memory Wall — school-day memories, super-admin curated. */
+/** A photo on the Memory Wall, school-day memories, super-admin curated. */
 export interface WallPhoto {
   id: string;
   url: string; // data URL (browser-compressed) or remote URL
@@ -322,7 +322,7 @@ export const DEFAULT_FUND_INFO: FundInfo = {
   totalAwarded: "0",
   studentsHelped: "0",
   aboutText:
-    "The BCBHS Alumni Scholarship & Donation Fund supports our own — helping talented students from the school and alumni families through hardship, exam fees, books and emergencies. Every taka is accounted for by the association and reported to members.",
+    "The BCBHS Alumni Scholarship & Donation Fund supports our own, helping talented students from the school and alumni families through hardship, exam fees, books and emergencies. Every taka is accounted for by the association and reported to members.",
   applyText:
     "To apply for support, contact the association office or any committee member with the student's details and the reason for support. All applications are verified by the fund committee before disbursement.",
 };

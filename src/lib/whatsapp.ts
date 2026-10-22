@@ -2,7 +2,7 @@
 /*  WhatsApp contact helpers.                                          */
 /*  Members may publish an opt-in WhatsApp number on their profile;     */
 /*  the action button opens a chat with a pre-filled Bangla greeting   */
-/*  carrying the sender's name + batch — no typing needed.              */
+/*  carrying the sender's name + batch, no typing needed.              */
 /* ------------------------------------------------------------------ */
 
 /** Strip a phone number down to digits and normalize to international format. */
@@ -13,10 +13,10 @@ export function normalizeWhatsAppNumber(raw: string): string {
   return digits;
 }
 
-/** The auto greeting sent with the chat — carries the sender's identity. */
+/** The auto greeting sent with the chat, carries the sender's identity. */
 export function whatsappGreeting(senderName?: string, senderBatch?: string): string {
   if (senderName && senderBatch) {
-    return `Assalamu Alaikum! Ami ${senderName}, Batch ${senderBatch} — BCBHS Alumni portal theke bolchi.`;
+    return `Assalamu Alaikum! Ami ${senderName}, Batch ${senderBatch}, BCBHS Alumni portal theke bolchi.`;
   }
   return "Assalamu Alaikum! BCBHS Alumni portal theke bolchi.";
 }
@@ -43,7 +43,7 @@ export function jobInquiryMessage(
     senderName && senderBatch
       ? `Ami ${senderName}, Batch ${senderBatch}`
       : "Ami ekjon BCBHS alumnus";
-  return `Assalamu Alaikum! ${who} — BCBHS Alumni portal er Job Board e apnar "${jobTitle}" (${company}) circular ta dekhlam. Ektu details jante chai.`;
+  return `Assalamu Alaikum! ${who}, BCBHS Alumni portal er Job Board e apnar "${jobTitle}" (${company}) circular ta dekhlam. Ektu details jante chai.`;
 }
 
 /** wa.me deep link that opens a chat about a specific job post. */

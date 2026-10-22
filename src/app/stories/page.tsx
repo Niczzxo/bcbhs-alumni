@@ -7,7 +7,7 @@ import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { useContent } from "@/lib/content-context";
 
-/** Hall of Fame — success stories of notable BCBHS alumni. */
+/** Hall of Fame, success stories of notable BCBHS alumni. */
 export default function StoriesPage() {
   const { stories } = useContent();
   const sorted = [...stories].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -19,11 +19,11 @@ export default function StoriesPage() {
         <PageHero
           eyebrow="Hall of Fame"
           title={<>Success <span className="text-gold-gradient">Stories</span> 🏆</>}
-          subtitle="BCBHSians who make us proud — in service, business, academia and beyond. Their journeys light the way for every junior."
+          subtitle="BCBHSians who make us proud, in service, business, academia and beyond. Their journeys light the way for every junior."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           {sorted.length === 0 ? (
-            <p className="text-center text-sm text-muted">The first stories are being written — check back soon.</p>
+            <p className="text-center text-sm text-muted">The first stories are being written, check back soon.</p>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {sorted.map((s, i) => (

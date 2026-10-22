@@ -8,7 +8,7 @@ import IdCard, { CardDownloadButton } from "./IdCard";
 import { useAuth } from "@/lib/auth-context";
 import type { UserProfile } from "@/lib/types";
 
-/** Demo member for the homepage teaser — shows the REAL card design. */
+/** Demo member for the homepage teaser, shows the REAL card design. */
 const TEASER_MEMBER: UserProfile = {
   id: "teaser",
   name: "Your Name",
@@ -46,7 +46,7 @@ function Tick({ children }: { children: React.ReactNode }) {
 
 /**
  * Membership band. Guests see the join pitch with a sample card;
- * signed-in members see THEIR OWN card and details instead —
+ * signed-in members see THEIR OWN card and details instead
  * a "Register Now" button makes no sense once you have an account.
  */
 export default function IdCardCta() {
@@ -75,7 +75,7 @@ export default function IdCardCta() {
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-2">
         {loading ? (
-          /* Auth still resolving — skeleton in the exact layout, so a
+          /* Auth still resolving, skeleton in the exact layout, so a
            * reload never flashes the guest pitch + sample card at a
            * signed-in member. */
           <>
@@ -116,7 +116,7 @@ export default function IdCardCta() {
           {approved && user ? (
             <>
               <p className="mt-5 max-w-lg leading-relaxed text-muted">
-                Welcome back, {user.name.split(" ")[0]} — your verified digital
+                Welcome back, {user.name.split(" ")[0]}, your verified digital
                 ID card is ready. Anyone can scan its QR code to confirm you
                 are a true BCBHSian. Print it, carry it, show it with pride.
               </p>
@@ -130,7 +130,7 @@ export default function IdCardCta() {
                 </Link>
               </div>
               <ul className="mt-8 space-y-3 text-sm text-muted">
-                <Tick>Member ID — {user.memberId ?? "—"}</Tick>
+                <Tick>Member ID, {user.memberId ?? "-"}</Tick>
                 <Tick>Batch {user.batch} · {user.department ?? "Alumni"}</Tick>
                 <Tick>QR verification works even when printed</Tick>
               </ul>
@@ -139,7 +139,7 @@ export default function IdCardCta() {
             <>
               <p className="mt-5 max-w-lg leading-relaxed text-muted">
                 Thanks for registering, {user.name.split(" ")[0]}. Your
-                application is with our admins for verification — this can
+                application is with our admins for verification, this can
                 take up to 7 days. The moment you are approved, your official
                 ID card with its QR code appears right here.
               </p>
@@ -149,7 +149,7 @@ export default function IdCardCta() {
                 </Link>
               </div>
               <ul className="mt-8 space-y-3 text-sm text-muted">
-                <Tick>Registration received — Batch {user.batch}</Tick>
+                <Tick>Registration received, Batch {user.batch}</Tick>
                 <Tick>Admin verification in progress</Tick>
                 <Tick>Your card activates automatically on approval</Tick>
               </ul>
@@ -158,7 +158,7 @@ export default function IdCardCta() {
             <>
               <p className="mt-5 max-w-lg leading-relaxed text-muted">
                 Register with your batch and roll, get verified by our admins, and
-                your official digital ID card is generated automatically — complete
+                your official digital ID card is generated automatically, complete
                 with a QR code anyone can scan to confirm you are a true BCBHSian.
                 Print it, carry it, show it with pride.
               </p>
@@ -169,7 +169,7 @@ export default function IdCardCta() {
               </div>
               <ul className="mt-8 space-y-3 text-sm text-muted">
                 <Tick>Free registration for all BCBHS graduates</Tick>
-                <Tick>Admin-verified — no fake members, ever</Tick>
+                <Tick>Admin-verified, no fake members, ever</Tick>
                 <Tick>QR verification works even when printed</Tick>
               </ul>
             </>

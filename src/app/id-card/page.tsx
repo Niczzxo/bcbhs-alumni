@@ -30,7 +30,7 @@ export default function IdCardPage() {
         <PageHero
           eyebrow="Official identification"
           title={<>My Alumni <span className="text-gold-gradient">ID Card</span></>}
-          subtitle="Auto-generated on approval. Print it, carry it — the QR proves genuine membership."
+          subtitle="Auto-generated on approval. Print it, carry it, the QR proves genuine membership."
         />
         <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8">
           {loading ? (
@@ -47,7 +47,7 @@ export default function IdCardPage() {
             <Reveal className="rounded-3xl border border-gold/30 bg-ink-2 p-10 text-center">
               <p className="font-display text-2xl font-bold text-ivory">Approval pending</p>
               <p className="mt-3 text-sm leading-relaxed text-muted">
-                Hi {user.name.split(" ")[0]} — your registration is still awaiting admin approval.
+                Hi {user.name.split(" ")[0]}, your registration is still awaiting admin approval.
                 Your official ID card will be generated automatically once approved.
               </p>
             </Reveal>
@@ -76,7 +76,7 @@ export default function IdCardPage() {
                 </Link>
               </div>
               <p className="mt-6 max-w-md text-center text-xs text-muted print:hidden">
-                Anyone who scans the QR lands on your public verification page — proof you are a
+                Anyone who scans the QR lands on your public verification page, proof you are a
                 genuine BCBHS alumnus.
               </p>
             </Reveal>

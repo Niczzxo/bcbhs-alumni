@@ -10,7 +10,7 @@ import { useAuth } from "@/lib/auth-context";
 const PRIMARY_CTA =
   "btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105";
 
-/** Full-viewport hero — campus photo with parallax, seal-ring emblem, gold CTAs. */
+/** Full-viewport hero, campus photo with parallax, seal-ring emblem, gold CTAs. */
 export default function Hero() {
   const { openAuthModal } = useAuthModal();
   const { user, loading } = useAuth();
@@ -83,7 +83,7 @@ export default function Hero() {
           transition={{ delay: 0.6, duration: 0.7 }}
           className="mt-6 max-w-2xl text-lg leading-relaxed text-ivory/80"
         >
-          The official home of every BCBHS graduate — reconnect with batchmates,
+          The official home of every BCBHS graduate, reconnect with batchmates,
           find seniors across the globe, and carry the spirit of our school
           wherever life takes you.
         </motion.p>
@@ -94,7 +94,7 @@ export default function Hero() {
           transition={{ delay: 0.78, duration: 0.7 }}
           className="mt-10 flex flex-wrap items-center gap-4"
         >
-          {/* Members already joined — send them to their card/application, not registration.
+          {/* Members already joined, send them to their card/application, not registration.
               While auth is still resolving, hold an invisible placeholder so a reload
               never flashes "Join the Alumni" at a signed-in member. */}
           {loading ? (
@@ -123,7 +123,7 @@ export default function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* Scroll cue — desktop only; on short mobile viewports it would overlap the CTAs */}
+      {/* Scroll cue, desktop only; on short mobile viewports it would overlap the CTAs */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

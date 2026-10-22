@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ */
-/*  BCBHS Alumni design tokens — navy & gold drawn from the alumni logo */
+/*  BCBHS Alumni design tokens, navy & gold drawn from the alumni logo */
 /* ------------------------------------------------------------------ */
 @theme {
   --color-ink: #0a0f24; /* deep navy (page background) */
@@ -32,7 +32,7 @@ body {
   font-family: var(--font-display);
 }
 
-/* Gold gradient text — signature headline treatment */
+/* Gold gradient text, signature headline treatment */
 .text-gold-gradient {
   background: linear-gradient(115deg, #f5dfa0 0%, #d4a94e 38%, #f0cd7e 55%, #9c7422 100%);
   -webkit-background-clip: text;
@@ -46,7 +46,7 @@ body {
   height: 1px;
 }
 
-/* Sunburst echo of the alumni logo — decorative conic rays */
+/* Sunburst echo of the alumni logo, decorative conic rays */
 .sunburst {
   background: repeating-conic-gradient(
     from 0deg,
@@ -131,7 +131,7 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Print styles — ID card page prints only the card itself.            */
+/*  Print styles, ID card page prints only the card itself.            */
 /* ------------------------------------------------------------------ */
 @media print {
   body {
@@ -139,7 +139,7 @@ body {
   }
   /* When a printable ID card is on the page it is portalled to <body>
    * level (.print-portal). Hide the entire app so ONLY the card prints
-   * — display:none, not visibility, so the rest of the page cannot
+   *, display:none, not visibility, so the rest of the page cannot
    * paginate into blank pages. */
   body:has(.print-portal) > *:not(.print-portal) {
     display: none !important;
@@ -299,7 +299,7 @@ body {
   animation-play-state: paused;
 }
 
-/* Card hover lift — only where a true hover exists (desktop mouse).
+/* Card hover lift, only where a true hover exists (desktop mouse).
    On touch screens a tap would otherwise make the card visibly jump. */
 @media (hover: hover) and (pointer: fine) {
   .card-lift:hover {

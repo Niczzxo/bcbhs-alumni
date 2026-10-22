@@ -1,10 +1,10 @@
 "use client";
 
 /* ------------------------------------------------------------------ */
-/*  DottedQr — the approved BCBHS card-back QR (web port of the       */
+/*  DottedQr, the approved BCBHS card-back QR (web port of the       */
 /*  print pipeline in ~/workspace/bcbhs-qr): a genuine level-H QR     */
 /*  whose data field is tangent dots coloured from the alumni logo's  */
-/*  own palette — every dot deepened so it reads unambiguously dark.  */
+/*  own palette, every dot deepened so it reads unambiguously dark.  */
 /*  The centre carries the ORIGINAL logo, solid and full-colour, as   */
 /*  a gold-ringed badge; level-H error correction restores the        */
 /*  modules it covers. Finders are solid navy · white · red with a    */
@@ -19,7 +19,7 @@ const RED: [number, number, number] = [224, 26, 34];
 const GOLD = "#d4a94e";
 const BADGE_R = 9.4; // centre badge radius, in modules
 const QUIET = 2; // quiet-zone modules inside the plate
-const S = 920; // canvas resolution — the card displays it at ~190px
+const S = 920; // canvas resolution, the card displays it at ~190px
 
 const lum = (r: number, g: number, b: number) =>
   (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
@@ -61,7 +61,7 @@ export default function DottedQr({
       const data = qr.modules.data;
       const dark = (x: number, y: number) => data[y * n + x] === 1;
 
-      /* Logo palette sampler — downscaling to 300×300 IS the area
+      /* Logo palette sampler, downscaling to 300×300 IS the area
          averaging; saturation is then boosted ×1.3, exactly like the
          print pipeline. */
       let sample: (u: number, v: number) => [number, number, number] = () => NAVY;
@@ -87,7 +87,7 @@ export default function DottedQr({
         }
       }
 
-      /* Plate + geometry — same ratios as the print generator. */
+      /* Plate + geometry, same ratios as the print generator. */
       ctx.clearRect(0, 0, S, S);
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, S, S);
@@ -107,7 +107,7 @@ export default function DottedQr({
         ctx.fill();
       };
 
-      /* Data field — one tangent dot per dark module, coloured from
+      /* Data field, one tangent dot per dark module, coloured from
          the logo palette mapped across the whole field. */
       for (let y = 0; y < n; y++) {
         for (let x = 0; x < n; x++) {
@@ -117,7 +117,7 @@ export default function DottedQr({
         }
       }
 
-      /* Centre badge — the original logo itself, solid and
+      /* Centre badge, the original logo itself, solid and
          full-colour, on a white base with a gold ring. */
       const bcx = mc(centre - 0.5);
       const bcy = mc(centre - 0.5);
@@ -135,7 +135,7 @@ export default function DottedQr({
         dot(bcx, bcy, br, rgb(NAVY));
       }
 
-      /* Finders — solid navy · white · red with a fine dot texture. */
+      /* Finders, solid navy · white · red with a fine dot texture. */
       const navyShades = ["rgb(26,44,82)", "rgb(11,23,48)", "rgb(42,51,80)"];
       const redShades = ["rgb(232,58,64)", "rgb(196,15,24)", "rgb(236,74,66)"];
       const finder = (fx: number, fy: number) => {

@@ -8,7 +8,7 @@ import Reveal from "@/components/Reveal";
 import { useContent } from "@/lib/content-context";
 import { SITE_SCHOOL } from "@/lib/site";
 
-/** About the BCBHS Alumni Association — content editable by the super admin. */
+/** About the BCBHS Alumni Association, content editable by the super admin. */
 export default function AboutPage() {
   const { siteContent: c } = useContent();
 
@@ -65,7 +65,7 @@ export default function AboutPage() {
             ))}
           </div>
 
-          {/* Affiliation — the whole card links to the school's official site */}
+          {/* Affiliation, the whole card links to the school's official site */}
           <Reveal className="mt-14 rounded-3xl border border-ivory/10 bg-ink-2 p-8 transition-colors duration-300 hover:border-gold/40 sm:p-10">
             <a
               href={SITE_SCHOOL}
@@ -81,7 +81,7 @@ export default function AboutPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold">Affiliated with</p>
                 <h3 className="font-display mt-2 text-2xl font-bold text-ivory transition-colors group-hover:text-gold-2">Bogura Cantonment Board High School</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted">
-                  Our alma mater in Bogura Cantonment — the classrooms and playgrounds where every
+                  Our alma mater in Bogura Cantonment, the classrooms and playgrounds where every
                   BCBHSian&apos;s story began. This alumni association is run by former students.
                 </p>
                 <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-gold/80 transition-colors group-hover:text-gold">

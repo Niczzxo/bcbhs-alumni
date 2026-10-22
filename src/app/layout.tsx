@@ -27,9 +27,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "BCBHS Alumni — Bogura Cantonment Board High School",
+  title: "BCBHS Alumni, Bogura Cantonment Board High School",
   description:
-    "The official alumni portal of Bogura Cantonment Board High School. Connect, celebrate, and grow — once a BCBHSian, always a BCBHSian.",
+    "The official alumni portal of Bogura Cantonment Board High School. Connect, celebrate, and grow, once a BCBHSian, always a BCBHSian.",
 };
 
 export default function RootLayout({

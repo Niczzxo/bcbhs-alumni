@@ -23,7 +23,7 @@ export interface SiteStats {
 /**
  * Homepage counters.
  *
- * Live mode: read the public `site/stats` document — Firestore rules
+ * Live mode: read the public `site/stats` document, Firestore rules
  * stop guests from counting the `users` collection directly (they may
  * only read guest-visible profiles), so the totals are published to
  * this doc instead. StatsSync (mounted in Providers) recomputes it
@@ -62,7 +62,7 @@ export function useSiteStats(): SiteStats {
           () => undefined,
         );
       } catch {
-        /* no stats doc yet — the derived fallback below applies */
+        /* no stats doc yet, the derived fallback below applies */
       }
     })();
     return () => {
@@ -83,7 +83,7 @@ export function useSiteStats(): SiteStats {
   };
 }
 
-/** Approved members only — the public directory. */
+/** Approved members only, the public directory. */
 export function useDirectory(): UserProfile[] {
   const { members } = useAuth();
   return members.filter((m) => m.status === "approved");
@@ -105,7 +105,7 @@ export function useMember(lookup: string | undefined): UserProfile | null | unde
       try {
         const { collection, getDocs, query, where, limit } = await import("firebase/firestore");
         /* The query must constrain every field the read rule checks,
-           or Firestore denies it outright ("rules are not filters") —
+           or Firestore denies it outright ("rules are not filters")
            an unconstrained memberId lookup fails for everyone except
            admins and the profile page reports "not found". Guests are
            additionally limited to guestVisible profiles. */
@@ -140,7 +140,7 @@ export function useMember(lookup: string | undefined): UserProfile | null | unde
 }
 
 /**
- * PUBLIC card verification — resolves a memberId against the public
+ * PUBLIC card verification, resolves a memberId against the public
  * `verify` registry (see lib/verify-sync.ts), NOT the `users`
  * collection: a guest scanning a card QR cannot be authorized to read
  * `users` at all, so genuine members used to show "Not Verified".
@@ -194,7 +194,7 @@ export function useVerifiedMember(memberId: string | undefined): UserProfile | n
 
 /* ------------------------------------------------------------------ */
 /*  Private phone numbers.                                              */
-/*  Live mode: read from `users_private/{uid}` — Firestore rules allow  */
+/*  Live mode: read from `users_private/{uid}`, Firestore rules allow  */
 /*  only the owner and staff (admin / super_admin) to read.             */
 /*  Demo mode: the phone lives on the in-memory profile.                */
 /* ------------------------------------------------------------------ */

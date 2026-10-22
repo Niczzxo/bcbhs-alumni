@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type { GalleryPhoto } from "@/lib/types";
 
-/** Card pitch in px (card size + margin) — one seamless unit. */
+/** Card pitch in px (card size + margin), one seamless unit. */
 const PITCH_X = 308; // w-72 (288) + mr-5 (20)
 const PITCH_Y = 244; // h-56 (224) + mb-5 (20)
 
@@ -24,7 +24,7 @@ const ANIM_CLASS: Record<MarqueeDirection, string> = {
   down: "animate-marquee-down",
 };
 
-/** Infinite auto-sliding photo strip — horizontal or vertical, pauses while hovered. */
+/** Infinite auto-sliding photo strip, horizontal or vertical, pauses while hovered. */
 export default function MemoriesMarquee({
   photos,
   direction = "left",

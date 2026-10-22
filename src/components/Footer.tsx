@@ -33,7 +33,7 @@ const MailIcon = () => (
   </svg>
 );
 
-/** Footer — school crest, affiliation line, quick links. */
+/** Footer, school crest, affiliation line, quick links. */
 export default function Footer() {
   // Year is computed client-side so static prerendering stays deterministic.
   const [year, setYear] = useState(2026);
@@ -63,7 +63,7 @@ export default function Footer() {
               BCBHS <span className="text-gold-gradient">Alumni</span>
             </p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted">
-              Affiliated with Bogura Cantonment Board High School — the official
+              Affiliated with Bogura Cantonment Board High School, the official
               digital home of its graduates, since 2023.
             </p>
           </div>
@@ -118,7 +118,7 @@ export default function Footer() {
                   </span>
                 </a>
               </li>
-              {/* WhatsApp group — members only, hidden until login */}
+              {/* WhatsApp group, members only, hidden until login */}
               {user && (
                 <li>
                   <a

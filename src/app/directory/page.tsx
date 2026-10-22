@@ -43,7 +43,7 @@ export default function DirectoryPage() {
     (async () => {
       try {
         const { collection, query, where, limit, getDocs } = await import("firebase/firestore");
-        /* Both rule-checked fields must be constrained — Firestore
+        /* Both rule-checked fields must be constrained, Firestore
            denies a query whose results it cannot prove readable. */
         const snap = await getDocs(
           query(
@@ -96,8 +96,8 @@ export default function DirectoryPage() {
           title={<>Alumni <span className="text-gold-gradient">Directory</span></>}
           subtitle={
             isGuest
-              ? "A preview of our community — log in to search every verified member."
-              : `${members.length} verified members — search by name, batch, district, profession or blood group.`
+              ? "A preview of our community, log in to search every verified member."
+              : `${members.length} verified members, search by name, batch, district, profession or blood group.`
           }
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">

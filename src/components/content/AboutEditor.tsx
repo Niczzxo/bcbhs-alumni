@@ -49,7 +49,7 @@ export default function AboutEditor() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h3 className="font-display text-xl font-bold text-ivory">About page</h3>
-          <p className="mt-1 text-xs text-muted">Edit anytime — changes go live on the About page immediately.</p>
+          <p className="mt-1 text-xs text-muted">Edit anytime, changes go live on the About page immediately.</p>
         </div>
         {saved && <span className="rounded-full bg-emerald-500/15 px-4 py-1.5 text-xs font-bold text-emerald-300">✓ Saved</span>}
       </div>

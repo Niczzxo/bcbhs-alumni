@@ -5,7 +5,7 @@ import type { UserProfile } from "@/lib/types";
 import Reveal from "./Reveal";
 import WhatsAppButton from "./WhatsAppButton";
 
-/** Photo avatar — falls back to initials when a member has no photo. */
+/** Photo avatar, falls back to initials when a member has no photo. */
 export function Avatar({
   name,
   size = "md",

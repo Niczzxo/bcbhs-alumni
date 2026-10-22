@@ -7,7 +7,7 @@ import Reveal from "@/components/Reveal";
 import { useContent } from "@/lib/content-context";
 import type { PortalEvent } from "@/lib/types";
 
-/** Events & reunions — upcoming and past. */
+/** Events & reunions, upcoming and past. */
 export default function EventsPage() {
   const { events } = useContent();
   const upcoming = events.filter((e) => e.upcoming);
@@ -36,7 +36,7 @@ export default function EventsPage() {
         <PageHero
           eyebrow="Gather & celebrate"
           title={<>Events & <span className="text-gold-gradient">Reunions</span></>}
-          subtitle="From grand reunions to blood drives — never miss a moment with your batchmates."
+          subtitle="From grand reunions to blood drives, never miss a moment with your batchmates."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           <h2 className="font-display text-2xl font-bold text-ivory">Upcoming</h2>

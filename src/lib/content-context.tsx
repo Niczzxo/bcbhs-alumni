@@ -161,7 +161,7 @@ export function useContent(): ContentContextValue {
 
 function emptyContent(): DemoContent {
   /* Live mode starts empty so the public site never flashes demo
-     placeholders on first paint — Firestore snapshots fill it in. */
+     placeholders on first paint, Firestore snapshots fill it in. */
   return {
     events: [],
     gallery: [],
@@ -202,7 +202,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch {
-      /* corrupted storage — fall back to seed data */
+      /* corrupted storage, fall back to seed data */
     }
     setLoading(false);
   }, []);
@@ -217,7 +217,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     try {
       window.localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(content));
     } catch {
-      /* storage full — demo still works in memory */
+      /* storage full, demo still works in memory */
     }
   }, [content]);
 
@@ -418,7 +418,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       const { collection: col, doc, addDoc, updateDoc, deleteDoc } = await import(
         "firebase/firestore"
       );
-      /* Firestore rejects payloads containing `undefined` values — one
+      /* Firestore rejects payloads containing `undefined` values, one
        * unset optional form field would fail the whole write. Strip
        * them centrally so every collection/form is safe. */
       const clean = data

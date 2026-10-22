@@ -7,7 +7,7 @@ import { WhatsAppIcon } from "./Footer";
 /**
  * WhatsApp action button for a member's public opt-in number.
  * Opens a chat with a pre-filled greeting carrying the sender's
- * name + batch — no typing needed.
+ * name + batch, no typing needed.
  */
 export default function WhatsAppButton({
   whatsapp,

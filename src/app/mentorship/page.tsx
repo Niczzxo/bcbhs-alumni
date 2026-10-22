@@ -13,7 +13,7 @@ import { normalizeWhatsAppNumber } from "@/lib/whatsapp";
 const inputCls =
   "w-full rounded-xl border border-ivory/15 bg-ink px-4 py-2.5 text-sm text-ivory outline-none transition-colors focus:border-gold/60";
 
-/** Mentorship — senior alumni guiding juniors: studies, admissions, careers. */
+/** Mentorship, senior alumni guiding juniors: studies, admissions, careers. */
 export default function MentorshipPage() {
   const { mentors, addMentor, removeMentor } = useContent();
   const { user } = useAuth();
@@ -66,7 +66,7 @@ export default function MentorshipPage() {
         <PageHero
           eyebrow="Seniors guide juniors"
           title={<>Mentorship <span className="text-gold-gradient">Program</span> 🎓</>}
-          subtitle="Stuck on studies, admissions or your first job? A BCBHS senior has walked that road — reach out, they are happy to help."
+          subtitle="Stuck on studies, admissions or your first job? A BCBHS senior has walked that road, reach out, they are happy to help."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           {!user ? (
@@ -87,7 +87,7 @@ export default function MentorshipPage() {
               <Reveal className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
                 <input
                   className={inputCls}
-                  placeholder="Search mentors — try “BCS”, “BUET”, “software”, “medicine”…"
+                  placeholder="Search mentors, try “BCS”, “BUET”, “software”, “medicine”…"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
@@ -108,7 +108,7 @@ export default function MentorshipPage() {
                     <p className="mt-4 text-xs font-bold uppercase tracking-wider text-gold-2">{m.expertise}</p>
                     <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">{m.bio}</p>
                     <a
-                      href={`https://wa.me/${normalizeWhatsAppNumber(m.whatsapp)}?text=${encodeURIComponent(`Assalamu Alaikum! Ami ${user.name}, Batch ${user.batch} — BCBHS Mentorship program theke apnar guidance chachhi.`)}`}
+                      href={`https://wa.me/${normalizeWhatsAppNumber(m.whatsapp)}?text=${encodeURIComponent(`Assalamu Alaikum! Ami ${user.name}, Batch ${user.batch}, BCBHS Mentorship program theke apnar guidance chachhi.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-5 rounded-full border border-gold/40 px-5 py-2 text-center text-xs font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
@@ -128,7 +128,7 @@ export default function MentorshipPage() {
                 {myListing ? (
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                     <p className="text-sm text-emerald-200">
-                      ✅ You are listed as a mentor — juniors can already reach you. Thank you for giving back!
+                      ✅ You are listed as a mentor, juniors can already reach you. Thank you for giving back!
                     </p>
                     <button
                       onClick={() => removeMentor(myListing.id)}
@@ -145,9 +145,9 @@ export default function MentorshipPage() {
                   </p>
                 ) : (
                   <form onSubmit={submit} className="mt-6 grid gap-4 sm:grid-cols-2">
-                    <input className={inputCls} placeholder="Your expertise — e.g. “BCS · BUET admission · Software jobs” *" value={form.expertise} onChange={(e) => setForm({ ...form, expertise: e.target.value })} />
+                    <input className={inputCls} placeholder="Your expertise, e.g. “BCS · BUET admission · Software jobs” *" value={form.expertise} onChange={(e) => setForm({ ...form, expertise: e.target.value })} />
                     <input className={inputCls} placeholder="WhatsApp number *" value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} />
-                    <textarea className={`${inputCls} sm:col-span-2`} rows={3} placeholder="Short bio — who are you, and how can you help juniors? *" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+                    <textarea className={`${inputCls} sm:col-span-2`} rows={3} placeholder="Short bio, who are you, and how can you help juniors? *" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
                     {formError && <p className="text-sm text-red-300 sm:col-span-2">{formError}</p>}
                     <button type="submit" className="btn-shimmer rounded-xl bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-6 py-3 text-sm font-bold uppercase tracking-widest text-ink sm:col-span-2">
                       Join as Mentor

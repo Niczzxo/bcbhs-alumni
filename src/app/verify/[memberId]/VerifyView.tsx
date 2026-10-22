@@ -9,7 +9,7 @@ import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import { useVerifiedMember } from "@/lib/data";
 
-/** PUBLIC membership verification — consumes the route-params promise via `use()`. */
+/** PUBLIC membership verification, consumes the route-params promise via `use()`. */
 export default function VerifyView({ params }: { params: Promise<{ memberId: string }> }) {
   const { memberId } = use(params);
   const member = useVerifiedMember(decodeURIComponent(memberId));

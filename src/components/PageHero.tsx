@@ -9,7 +9,7 @@ interface PageHeroProps {
   subtitle?: string;
 }
 
-/** Inner-page hero — navy field, sunburst motif, gold eyebrow. */
+/** Inner-page hero, navy field, sunburst motif, gold eyebrow. */
 export default function PageHero({ eyebrow, title, subtitle }: PageHeroProps) {
   return (
     <section className="grain relative overflow-hidden border-b border-gold/20 bg-ink-2 pb-16 pt-36">

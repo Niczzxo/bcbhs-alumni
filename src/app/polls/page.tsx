@@ -9,7 +9,7 @@ import { useContent } from "@/lib/content-context";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
 
-/** Community polls — one vote per member; members may change their vote
+/** Community polls, one vote per member; members may change their vote
  * while a poll is open. Results are visible to all members live. */
 export default function PollsPage() {
   const { polls, pollVotes, castVote } = useContent();
@@ -28,7 +28,7 @@ export default function PollsPage() {
         <PageHero
           eyebrow="Your voice matters"
           title={<>Polls &amp; <span className="text-gold-gradient">Voting</span> 🗳️</>}
-          subtitle="Association decisions, reunion plans, community questions — vote and see the results live."
+          subtitle="Association decisions, reunion plans, community questions, vote and see the results live."
         />
         <div className="mx-auto max-w-4xl px-5 py-12 sm:px-8">
           {!user ? (
@@ -45,7 +45,7 @@ export default function PollsPage() {
               </button>
             </Reveal>
           ) : sorted.length === 0 ? (
-            <p className="text-center text-sm text-muted">No polls yet — the association will post the first question soon.</p>
+            <p className="text-center text-sm text-muted">No polls yet, the association will post the first question soon.</p>
           ) : (
             <div className="space-y-8">
               {sorted.map((poll, i) => {

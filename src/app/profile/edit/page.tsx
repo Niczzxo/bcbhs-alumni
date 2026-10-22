@@ -11,7 +11,7 @@ import { compressImageToDataURL } from "@/lib/image";
 import { inputCls, labelCls } from "@/components/auth/ui";
 import { BATCH_YEARS, BD_DISTRICTS, BLOOD_GROUPS, DEPARTMENTS } from "@/lib/types";
 
-/** Members edit their own profile — safe fields only. */
+/** Members edit their own profile, safe fields only. */
 export default function EditProfilePage() {
   const { user, loading, updateProfile } = useAuth();
   const router = useRouter();
@@ -123,7 +123,7 @@ export default function EditProfilePage() {
         <PageHero
           eyebrow="My profile"
           title={<>Edit <span className="text-gold-gradient">Profile</span></>}
-          subtitle="Keep your information up to date — your batchmates find you by it."
+          subtitle="Keep your information up to date, your batchmates find you by it."
         />
         <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8">
           <Reveal className="rounded-3xl border border-ivory/10 bg-ink-2 p-6 sm:p-10">
@@ -145,7 +145,7 @@ export default function EditProfilePage() {
                     <span className="flex h-14 w-14 items-center justify-center rounded-full bg-ink-3 text-xl text-gold-2">📷</span>
                   )}
                   <span className="text-xs text-muted">
-                    {photoBusy ? "Processing…" : f.photoURL ? "Photo set ✓ — tap to change" : "Tap to upload a photo"}
+                    {photoBusy ? "Processing…" : f.photoURL ? "Photo set ✓, tap to change" : "Tap to upload a photo"}
                   </span>
                 </button>
               </div>
@@ -193,7 +193,7 @@ export default function EditProfilePage() {
                   <div>
                     <label className={labelCls}>WhatsApp number (public)</label>
                     <input className={inputCls} value={f.whatsapp} onChange={set("whatsapp")} placeholder="01XXXXXXXXX" />
-                    <p className="mt-1.5 text-[11px] text-muted/70">Shown as a chat button on your profile — anyone can message you.</p>
+                    <p className="mt-1.5 text-[11px] text-muted/70">Shown as a chat button on your profile, anyone can message you.</p>
                   </div>
                 </div>
               </div>

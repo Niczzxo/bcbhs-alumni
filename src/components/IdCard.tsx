@@ -9,14 +9,14 @@ import type { UserProfile } from "@/lib/types";
 import { SITE_EMAIL } from "@/lib/site";
 
 /**
- * Official BCBHS Alumni ID card — portrait CR80 (53.98 × 85.6 mm).
+ * Official BCBHS Alumni ID card, portrait CR80 (53.98 × 85.6 mm).
  *
- * FRONT ("Noir Centered"): deep navy + gold, everything centered —
+ * FRONT ("Noir Centered"): deep navy + gold, everything centered
  * logo seal + association name on top, small gold-framed member photo,
  * serif member name, admin-assigned position badge, and a glass details
  * register: Member ID, Passing Year, Blood Group, Department,
  * Date of Birth, Contact, Email, Profession.
- * BACK ("Association Crest" — the approved print design): the front's
+ * BACK ("Association Crest", the approved print design): the front's
  * own navy sunburst background with a single-line gold frame,
  * graduation cap + BCBHS wordmark,
  * the dotted QR (logo-palette dots, original logo badge at centre) on
@@ -37,7 +37,7 @@ function CardShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* Shared card background — deep navy with center-emanating gold rays and a
+/* Shared card background, deep navy with center-emanating gold rays and a
  * thin gold horizon line, exactly like the approved reference. */
 function CardBackground() {
   return (
@@ -52,7 +52,7 @@ function CardBackground() {
 
 /** "1998-05-12" -> "12 May 1998" for the ID card. */
 function formatDob(iso?: string): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const parts = iso.split("-");
   if (parts.length !== 3) return iso;
   const [y, m, d] = parts.map(Number);
@@ -66,16 +66,16 @@ function CardFront({ member }: { member: UserProfile }) {
     <CardShell>
       <div className="relative h-full w-full">
         <CardBackground />
-        {/* hairline gold frame — same as the back side */}
+        {/* hairline gold frame, same as the back side */}
         <div className="pointer-events-none absolute inset-[8px] rounded-[12px] border border-[#d4a94e]/40" />
 
-        {/* everything centered — inside the gold frame */}
+        {/* everything centered, inside the gold frame */}
         <div className="absolute inset-[8px] flex flex-col items-center overflow-hidden rounded-[12px] px-[4.5cqw] pb-[4cqw] pt-[4.5cqw] text-center">
-          {/* logo — centered */}
+          {/* logo, centered */}
           <span className="relative block h-[12cqw] w-[12cqw] overflow-hidden rounded-full ring-2 ring-[#d4a94e]">
             <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
           </span>
-          {/* association name — centered */}
+          {/* association name, centered */}
           <p className="font-display mt-[2cqw] text-[5.4cqw] font-extrabold tracking-[0.16em] text-white">
             BCBHS <span className="text-gold-gradient">ALUMNI</span>
           </p>
@@ -83,7 +83,7 @@ function CardFront({ member }: { member: UserProfile }) {
             Official ID · Est. 2023
           </p>
 
-          {/* member photo — small, gold framed */}
+          {/* member photo, small, gold framed */}
           <div className="foil-frame mt-[3cqw] rounded-xl p-[1.5cqw] shadow-[0_12px_36px_rgba(0,0,0,0.55)]">
             <div className="relative h-[30cqw] w-[25cqw] overflow-hidden rounded-[8px] border-2 border-[#0a0f24] bg-[#0a0f24]">
               {member.photoURL ? (
@@ -103,7 +103,7 @@ function CardFront({ member }: { member: UserProfile }) {
             {member.name}
           </h2>
 
-          {/* standing — big, right below the name: the member's official
+          {/* standing, big, right below the name: the member's official
               position when one is assigned, otherwise plain MEMBER, so the
               card always states what the holder is in the association */}
           <p className="font-display mt-[1.8cqw] text-[4.4cqw] font-extrabold uppercase leading-none tracking-[0.18em] text-[#f0cd7e]">
@@ -116,7 +116,7 @@ function CardFront({ member }: { member: UserProfile }) {
               <div>
                 <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Member ID</p>
                 <p className="mt-[0.5cqw] font-mono text-[2.6cqw] font-bold tracking-wide text-white">
-                  {member.memberId ?? "—"}
+                  {member.memberId ?? "-"}
                 </p>
               </div>
               <div>
@@ -125,11 +125,11 @@ function CardFront({ member }: { member: UserProfile }) {
               </div>
               <div>
                 <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Blood Group</p>
-                <p className="mt-[0.5cqw] text-[2.6cqw] font-bold text-white">{member.bloodGroup ?? "—"}</p>
+                <p className="mt-[0.5cqw] text-[2.6cqw] font-bold text-white">{member.bloodGroup ?? "-"}</p>
               </div>
               <div>
                 <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Department</p>
-                <p className="mt-[0.5cqw] text-[2.6cqw] font-bold text-white">{member.department ?? "—"}</p>
+                <p className="mt-[0.5cqw] text-[2.6cqw] font-bold text-white">{member.department ?? "-"}</p>
               </div>
               <div>
                 <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Date of Birth</p>
@@ -138,7 +138,7 @@ function CardFront({ member }: { member: UserProfile }) {
               <div>
                 <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Contact</p>
                 <p className="mt-[0.5cqw] font-mono text-[2.6cqw] font-bold text-white">
-                  {member.whatsapp ?? "—"}
+                  {member.whatsapp ?? "-"}
                 </p>
               </div>
               <div className="col-span-2 border-t border-white/10 pt-[2cqw]">
@@ -150,7 +150,7 @@ function CardFront({ member }: { member: UserProfile }) {
               <div className="col-span-2">
                 <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Profession</p>
                 <p className="mt-[0.5cqw] truncate text-[2.6cqw] font-semibold text-[#f0cd7e]">
-                  {member.profession ?? "—"}
+                  {member.profession ?? "-"}
                 </p>
               </div>
             </div>
@@ -163,7 +163,7 @@ function CardFront({ member }: { member: UserProfile }) {
   );
 }
 
-/* ================= BACK — "Association Crest" (approved design) ====== */
+/* ================= BACK, "Association Crest" (approved design) ====== */
 
 function CapIcon() {
   return (
@@ -246,9 +246,9 @@ function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: st
   return (
     <CardShell>
       <div className="relative h-full w-full">
-        {/* same background as the front — navy radial + sunburst */}
+        {/* same background as the front, navy radial + sunburst */}
         <CardBackground />
-        {/* single-line gold frame — same as the front side */}
+        {/* single-line gold frame, same as the front side */}
         <div className="pointer-events-none absolute inset-[8px] rounded-[12px] border border-[#d4a94e]/40" />
 
         <div className="absolute inset-[8px] flex flex-col items-center overflow-hidden rounded-[12px] px-[6cqw] pb-[3.2cqw] pt-[3.4cqw] text-center [&>*]:shrink-0">
@@ -264,7 +264,7 @@ function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: st
             Bogura Cantonment Board High School
           </p>
 
-          {/* QR plate — slim gold rim around a white plate */}
+          {/* QR plate, slim gold rim around a white plate */}
           <div className="mt-[1.9cqw] w-[46cqw] rounded-[3.2cqw] bg-gradient-to-br from-[#f6d98a] via-[#d4a94e] to-[#8a6420] p-[0.7cqw] shadow-[0_16px_44px_rgba(0,0,0,0.5)]">
             <div className="overflow-hidden rounded-[2.6cqw] bg-white">
               <DottedQr url={verifyUrl} />
@@ -280,7 +280,7 @@ function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: st
             Verify Membership
           </p>
 
-          {/* signature — the card holder's own name, in script */}
+          {/* signature, the card holder's own name, in script */}
           <div className="mt-[2.3cqw] w-full rounded-[2.6cqw] border border-[#d4a94e]/45 bg-[#0d1d40]/70 px-[4cqw] pb-[1.6cqw] pt-[0.8cqw]">
             <p className="font-signature text-[7.2cqw] leading-tight text-white">{memberName}</p>
             <div className="mx-auto mt-[0.4cqw] h-px w-[45%] bg-gradient-to-r from-transparent via-[#d4a94e] to-transparent" />
@@ -309,7 +309,7 @@ function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: st
   );
 }
 
-/* Locked back — shown to guests on the homepage teaser: the real back
+/* Locked back, shown to guests on the homepage teaser: the real back
  * (verification QR, authorized signature, contacts) is members-only,
  * so a signed-out visitor who flips the sample card meets this face
  * instead of the card's details. */
@@ -337,7 +337,7 @@ function LockedBack() {
             Members Only
           </p>
           <p className="mt-[3cqw] max-w-[68cqw] text-[3cqw] leading-relaxed text-white/60">
-            The back of the card — with its verification QR — is visible to
+            The back of the card, with its verification QR, is visible to
             approved members only. Log in or register to get yours.
           </p>
         </div>
@@ -387,7 +387,7 @@ export default function IdCard({
       </div>
 
       {/* Print output: portalled to <body> so print CSS can hide the
-       * whole app and print ONLY this — front + back stacked on a
+       * whole app and print ONLY this, front + back stacked on a
        * single page at exact CR80 size, colours preserved. */}
       {mounted &&
         createPortal(
@@ -406,7 +406,7 @@ export default function IdCard({
 }
 
 /**
- * Download button — saves the member's card as one high-resolution
+ * Download button, saves the member's card as one high-resolution
  * PNG (front stacked over back) instead of sending it to a printer.
  * The two faces are rendered once more in an off-screen stage (real
  * layout, just parked outside the viewport) purely as the capture
@@ -435,7 +435,7 @@ export function CardDownloadButton({
       a.href = dataUrl;
       a.click();
     } catch {
-      /* capture failed (exotic browser) — the on-screen card remains */
+      /* capture failed (exotic browser), the on-screen card remains */
     } finally {
       setBusy(false);
     }
@@ -446,7 +446,7 @@ export function CardDownloadButton({
       <button onClick={download} disabled={busy} className={className}>
         {busy ? "Preparing…" : "⬇ Download Card"}
       </button>
-      {/* off-screen capture stage — laid out for real, never seen.
+      {/* off-screen capture stage, laid out for real, never seen.
           The parking wrapper carries the off-screen position so the
           captured node itself stays position-free for html-to-image. */}
       <div aria-hidden className="pointer-events-none fixed left-[-10000px] top-0">

@@ -16,7 +16,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/** Terms of Service — governed by the laws of Bangladesh. */
+/** Terms of Service, governed by the laws of Bangladesh. */
 export default function TermsPage() {
   return (
     <>
@@ -32,8 +32,8 @@ export default function TermsPage() {
             <p className="rounded-2xl border border-ivory/10 bg-ink-2 px-5 py-4 text-sm text-muted">
               Effective date: <span className="font-semibold text-ivory/90">October 15, 2026</span>.
               These Terms of Service (&ldquo;Terms&rdquo;) form a binding agreement between you and the BCBHS
-              Alumni Association (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) — a voluntary alumni
-              community based in Bogura, Bangladesh — under the Contract Act, 1872. By registering for or
+              Alumni Association (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;), a voluntary alumni
+              community based in Bogura, Bangladesh, under the Contract Act, 1872. By registering for or
               using the BCBHS Alumni Portal, you accept these Terms in full.
             </p>
           </Reveal>
@@ -60,7 +60,7 @@ export default function TermsPage() {
             <Section title="3. Your account">
               <ul className="list-disc space-y-2 pl-6">
                 <li>You must provide accurate and complete information during registration and keep it updated.</li>
-                <li>You are responsible for keeping your login credentials confidential and for all activity under your account — do not share your account with anyone.</li>
+                <li>You are responsible for keeping your login credentials confidential and for all activity under your account, do not share your account with anyone.</li>
                 <li>One account per person. If you lose access, contact us instead of creating a duplicate account.</li>
                 <li>Notify us immediately at <a href="mailto:bcbhs.alumni2023@gmail.com" className="text-gold-2 hover:underline">bcbhs.alumni2023@gmail.com</a> if you suspect unauthorized use of your account.</li>
               </ul>
@@ -70,7 +70,7 @@ export default function TermsPage() {
               <p>
                 Approval may take up to 7 days while administrators verify your alumni status. Once approved,
                 you receive an official digital Alumni ID card bearing a verification QR code. The ID card is
-                issued by the association — it must not be forged, altered, duplicated, or used to
+                issued by the association, it must not be forged, altered, duplicated, or used to
                 misrepresent any person. Misuse of the ID card will result in termination and may be reported
                 to the authorities.
               </p>
@@ -79,13 +79,13 @@ export default function TermsPage() {
             <Section title="5. Acceptable conduct">
               <p>As a member of this community, you agree not to:</p>
               <ul className="list-disc space-y-2 pl-6">
-                <li>Harass, threaten, defame, or abuse fellow members — online or offline.</li>
+                <li>Harass, threaten, defame, or abuse fellow members, online or offline.</li>
                 <li>Post spam, scams, misleading job offers, or unauthorized advertisements.</li>
                 <li>Share anyone&apos;s private contact details without their clear permission.</li>
                 <li>Upload photos or content you do not have the right to share, or that is obscene, hateful, or otherwise unlawful.</li>
                 <li>Attempt to gain unauthorized access to other members&apos; accounts, private data, or restricted administrative areas.</li>
                 <li>Impersonate any person, or publish deliberately false or misleading information.</li>
-                <li>Commit any act punishable under the <span className="text-ivory/90 font-medium">Cyber Security Act, 2023</span> or the <span className="text-ivory/90 font-medium">Information and Communication Technology Act, 2006</span> of Bangladesh — including identity fraud, cyber fraud, unauthorized access, and transmission of threatening or defamatory content — or under any other law of Bangladesh.</li>
+                <li>Commit any act punishable under the <span className="text-ivory/90 font-medium">Cyber Security Act, 2023</span> or the <span className="text-ivory/90 font-medium">Information and Communication Technology Act, 2006</span> of Bangladesh, including identity fraud, cyber fraud, unauthorized access, and transmission of threatening or defamatory content, or under any other law of Bangladesh.</li>
               </ul>
               <p>
                 Violations may be reported to the Bangladesh Police Cyber Unit or other competent authorities,
@@ -98,7 +98,7 @@ export default function TermsPage() {
                 You retain ownership of the Content you post. By posting, you grant the association a
                 non-exclusive, royalty-free license to display that Content within the portal (directory,
                 gallery, memory wall, event pages). You confirm that you have the right to share everything
-                you post — including the consent of any identifiable person appearing in your photos.
+                you post, including the consent of any identifiable person appearing in your photos.
               </p>
               <p>
                 If a photo of you has been posted and you want it removed, contact us and we will take it
@@ -111,7 +111,7 @@ export default function TermsPage() {
               <p>
                 Job circulars and blood donor listings are member-contributed. The association makes
                 reasonable efforts to keep them genuine but <span className="text-ivory/90 font-medium">does not
-                guarantee</span> any job offer, employer, salary, or donor availability — always verify details
+                guarantee</span> any job offer, employer, salary, or donor availability, always verify details
                 independently before acting or sharing personal information. In a medical emergency, contact
                 official emergency services first; a donor listing is never a substitute for professional care.
               </p>
@@ -132,7 +132,7 @@ export default function TermsPage() {
             <Section title="10. Suspension & termination">
               <p>
                 Administrators may warn, suspend, or permanently remove any account that violates these Terms,
-                provides false information, or harms the community — with or without prior notice in serious
+                provides false information, or harms the community, with or without prior notice in serious
                 cases. You may also end your membership at any time by requesting account deletion at{" "}
                 <a href="mailto:bcbhs.alumni2023@gmail.com" className="text-gold-2 hover:underline">
                   bcbhs.alumni2023@gmail.com
@@ -146,7 +146,7 @@ export default function TermsPage() {
                 best-effort, volunteer-run basis. We aim for reliable service but do not warrant uninterrupted,
                 error-free operation. To the maximum extent permitted by the laws of Bangladesh, the
                 association, its administrators, and volunteers shall not be liable for any direct or indirect
-                loss arising from your use of — or inability to use — the portal, including reliance on
+                loss arising from your use of, or inability to use, the portal, including reliance on
                 member-posted content.
               </p>
             </Section>

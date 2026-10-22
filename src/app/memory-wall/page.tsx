@@ -7,7 +7,7 @@ import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { useContent } from "@/lib/content-context";
 
-/** Memory Wall — treasured school-day photos, curated by the super admin. */
+/** Memory Wall, treasured school-day photos, curated by the super admin. */
 export default function MemoryWallPage() {
   const { wallPhotos } = useContent();
   const sorted = [...wallPhotos].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -19,11 +19,11 @@ export default function MemoryWallPage() {
         <PageHero
           eyebrow="Down memory lane"
           title={<>Memory <span className="text-gold-gradient">Wall</span> 🖼️</>}
-          subtitle="Old photos, golden days. The classrooms, the field, the friends — the school as we remember it."
+          subtitle="Old photos, golden days. The classrooms, the field, the friends, the school as we remember it."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           {sorted.length === 0 ? (
-            <p className="text-center text-sm text-muted">The wall is being prepared — old photos will appear here soon.</p>
+            <p className="text-center text-sm text-muted">The wall is being prepared, old photos will appear here soon.</p>
           ) : (
             <div className="columns-1 gap-6 sm:columns-2 lg:columns-3">
               {sorted.map((p, i) => (

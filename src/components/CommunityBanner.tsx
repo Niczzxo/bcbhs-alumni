@@ -5,7 +5,7 @@ import { WhatsAppIcon } from "@/components/Footer";
 import { useAuth } from "@/lib/auth-context";
 import { SITE_WHATSAPP } from "@/lib/site";
 
-/** WhatsApp community banner — visible only to logged-in members. */
+/** WhatsApp community banner, visible only to logged-in members. */
 export default function CommunityBanner() {
   const { user } = useAuth();
   if (!user) return null;
@@ -27,7 +27,7 @@ export default function CommunityBanner() {
                     Join the <span className="text-gold-gradient">WhatsApp community</span>
                   </h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-                    Daily adda, urgent notices, blood requests, and event updates —
+                    Daily adda, urgent notices, blood requests, and event updates
                     straight to your phone, with your batchmates.
                   </p>
                 </div>

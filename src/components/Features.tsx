@@ -12,7 +12,7 @@ const FEATURES: Feature[] = [
   {
     title: "Alumni Directory",
     blurb:
-      "Search every BCBHSian by name, batch, profession or city — and reconnect in one tap.",
+      "Search every BCBHSian by name, batch, profession or city, and reconnect in one tap.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={ICON_CLASS}>
         <circle cx="11" cy="11" r="7" />
@@ -24,7 +24,7 @@ const FEATURES: Feature[] = [
   {
     title: "Digital ID Card",
     blurb:
-      "An official, printable alumni ID auto-generated on approval — scan the QR to verify membership instantly.",
+      "An official, printable alumni ID auto-generated on approval, scan the QR to verify membership instantly.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={ICON_CLASS}>
         <rect x="3" y="5" width="18" height="14" rx="2.5" />
@@ -37,7 +37,7 @@ const FEATURES: Feature[] = [
   {
     title: "Blood Donor Network",
     blurb:
-      "Opt in as a donor with your blood group — be found in seconds when someone needs help urgently.",
+      "Opt in as a donor with your blood group, be found in seconds when someone needs help urgently.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={ICON_CLASS}>
         <path
@@ -51,7 +51,7 @@ const FEATURES: Feature[] = [
   {
     title: "Location Search",
     blurb:
-      "Search by district to see which alumni live near you — perfect for meetups in a new city.",
+      "Search by district to see which alumni live near you, perfect for meetups in a new city.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={ICON_CLASS}>
         <path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z" strokeLinejoin="round" />
@@ -62,7 +62,7 @@ const FEATURES: Feature[] = [
   {
     title: "Events & Reunions",
     blurb:
-      "Never miss a get-together — browse upcoming events, RSVP, and relive them in the gallery.",
+      "Never miss a get-together, browse upcoming events, RSVP, and relive them in the gallery.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={ICON_CLASS}>
         <rect x="4" y="6" width="16" height="14" rx="2.5" />
@@ -74,7 +74,7 @@ const FEATURES: Feature[] = [
   {
     title: "Career Connections",
     blurb:
-      "See where seniors work and reach out for guidance — your network is your net worth.",
+      "See where seniors work and reach out for guidance, your network is your net worth.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={ICON_CLASS}>
         <rect x="3.5" y="7.5" width="17" height="12" rx="2.5" />
@@ -84,7 +84,7 @@ const FEATURES: Feature[] = [
   },
 ];
 
-/** Six-card feature grid — the portal's signature capabilities. */
+/** Six-card feature grid, the portal's signature capabilities. */
 export default function Features() {
   return (
     <section id="features" className="relative py-24 sm:py-32">

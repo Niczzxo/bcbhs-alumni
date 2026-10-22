@@ -9,7 +9,7 @@ import { PUBLIC_NAV_LINKS, MEMBER_NAV_LINKS, MEMBER_MORE_LINKS, MEMBER_PROFILE_L
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
 
-/** Sticky top navigation — transparent over the hero, solid navy after scroll. */
+/** Sticky top navigation, transparent over the hero, solid navy after scroll. */
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -159,7 +159,7 @@ export default function Navbar() {
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {loading ? (
-            /* Auth still resolving — hold the space so a reload never
+            /* Auth still resolving, hold the space so a reload never
              * flashes the logged-out buttons at a signed-in member. */
             <div className="h-9 w-36" aria-hidden="true" />
           ) : user ? (

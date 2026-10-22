@@ -31,7 +31,7 @@ function NoticeCard({
 }) {
   const d = new Date(item.createdAt);
   const valid = !Number.isNaN(d.getTime());
-  const day = valid ? d.getDate().toString().padStart(2, "0") : "—";
+  const day = valid ? d.getDate().toString().padStart(2, "0") : "-";
   const month = valid
     ? d.toLocaleDateString("en-GB", { month: "short" })
     : "";
@@ -40,7 +40,7 @@ function NoticeCard({
   return (
     <Reveal delay={(index % 3) * 0.12} className="h-full">
       <article className="card-lift group relative flex h-full gap-5 overflow-hidden rounded-3xl border border-gold/15 bg-ink-2/80 p-6 transition-all duration-500 hover:border-gold/50 hover:shadow-[0_20px_60px_rgba(212,169,78,0.18)] sm:p-7">
-        {/* gold pin dot — the notice-board touch */}
+        {/* gold pin dot, the notice-board touch */}
         <span className="absolute right-5 top-5 h-2.5 w-2.5 rounded-full bg-gold shadow-[0_0_10px_rgba(212,169,78,0.8)]" />
 
         {/* date badge */}
@@ -75,14 +75,14 @@ function NoticeCard({
 }
 
 /**
- * Notice Board — public display for announcements posted from the
+ * Notice Board, public display for announcements posted from the
  * admin / super-admin dashboard. Newest first; renders nothing at all
  * when there are no announcements, so the homepage never shows an
  * empty board.
  */
 export default function NoticeBoard() {
   const { announcements } = useContent();
-  /* "Now" is read on the client after mount only — Cache Components
+  /* "Now" is read on the client after mount only, Cache Components
      forbids Date.now() during prerender. Null until mounted, so the
      NEW badge simply appears once the page hydrates. */
   const [now, setNow] = useState<number | null>(null);

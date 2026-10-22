@@ -21,7 +21,7 @@ function LoginBox() {
   );
 }
 
-/** Email/password login page — also available as a popup via the navbar. */
+/** Email/password login page, also available as a popup via the navbar. */
 export default function LoginPage() {
   return (
     <>

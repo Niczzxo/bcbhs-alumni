@@ -10,14 +10,14 @@ import ContentManager from "@/components/content/ContentManager";
 import V2Manager from "@/components/content/V2Manager";
 import type { ContentKind } from "@/components/content/ContentManager";
 
-/** Phone suffix for a member row — fetched from the private store. */
+/** Phone suffix for a member row, fetched from the private store. */
 function MemberPhone({ userId }: { userId: string }) {
   const phone = usePrivatePhone(userId);
   if (!phone) return null;
   return <span> · {phone}</span>;
 }
 
-/** Admin panel — approval queue + approved members. */
+/** Admin panel, approval queue + approved members. */
 export default function AdminPage() {
   const { members, approveMember, rejectMember, setPosition, setGuestVisible, hasPermission } = useAuth();
   const canApprove = hasPermission("approve_members");
@@ -47,7 +47,7 @@ export default function AdminPage() {
           <div className="mt-6 space-y-4">
             {pending.length === 0 && (
               <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
-                All caught up — no pending registrations. 🎉
+                All caught up, no pending registrations. 🎉
               </p>
             )}
             {pending.map((m, i) => (
@@ -120,7 +120,7 @@ export default function AdminPage() {
                       className="w-48 cursor-pointer rounded-full border border-gold/40 bg-ink px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
                     >
                       <option value="" className="bg-ink text-ivory">
-                        — No position —
+                       , No position
                       </option>
                       {m.position && !POSITIONS.includes(m.position) && (
                         <option value={m.position} className="bg-ink text-ivory">
@@ -154,7 +154,7 @@ export default function AdminPage() {
             ))}
             {canApprove && approved.length > 0 && (
               <p className="mt-3 text-[11px] text-muted/70">
-                Official positions are manually verified — allow up to 7 days.
+                Official positions are manually verified, allow up to 7 days.
               </p>
             )}
           </div>
@@ -174,7 +174,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Community features (v2.0) — sections self-gate by permission */}
+      {/* Community features (v2.0), sections self-gate by permission */}
       <div className="mt-14">
         <h2 className="font-display text-2xl font-bold text-ivory">Community features</h2>
         <div className="gold-rule mt-4 w-32" />

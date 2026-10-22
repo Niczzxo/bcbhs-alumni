@@ -16,7 +16,7 @@ import { BLOOD_GROUPS, BD_DISTRICTS } from "@/lib/types";
 const inputCls =
   "w-full rounded-xl border border-ivory/15 bg-ink px-4 py-2.5 text-sm text-ivory outline-none transition-colors focus:border-gold/60";
 
-/** Blood donor directory — filter by group + district, plus the live
+/** Blood donor directory, filter by group + district, plus the live
  * urgent-request board: members post a need, donors respond directly. */
 export default function BloodDonorsPage() {
   const members = useDirectory();
@@ -131,7 +131,7 @@ export default function BloodDonorsPage() {
             ))}
           </div>
           {donors.length === 0 && (
-            <p className="mt-6 text-center text-sm text-muted">No donors match — try widening the filters.</p>
+            <p className="mt-6 text-center text-sm text-muted">No donors match, try widening the filters.</p>
           )}
 
           {/* ------------------------- urgent requests ------------------------ */}
@@ -142,7 +142,7 @@ export default function BloodDonorsPage() {
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-muted">
                 Live requests from our alumni family. If your group matches, please call or
-                WhatsApp the attendant right away — minutes matter.
+                WhatsApp the attendant right away, minutes matter.
               </p>
             </Reveal>
 
@@ -188,7 +188,7 @@ export default function BloodDonorsPage() {
               </div>
             ) : (
               <p className="mt-6 rounded-3xl border border-ivory/10 bg-ink-2 p-6 text-center text-sm text-muted">
-                No urgent requests right now — Alhamdulillah. May it stay that way.
+                No urgent requests right now, Alhamdulillah. May it stay that way.
               </p>
             )}
 
@@ -198,7 +198,7 @@ export default function BloodDonorsPage() {
               {!user ? (
                 <>
                   <p className="mt-3 max-w-xl text-sm text-muted">
-                    Log in with your alumni account to post an urgent request — it appears here
+                    Log in with your alumni account to post an urgent request, it appears here
                     instantly for every donor to see.
                   </p>
                   <button

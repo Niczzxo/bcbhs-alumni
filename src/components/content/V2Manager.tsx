@@ -97,7 +97,7 @@ export default function V2Manager() {
           {[...bloodRequests].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((r) => (
             <div key={r.id} className="rounded-2xl border border-ivory/10 bg-ink p-4">
               <p className="text-sm font-semibold text-ivory">
-                {r.patientName} — <span className="text-red-300">{r.bloodGroup}</span>
+                {r.patientName}, <span className="text-red-300">{r.bloodGroup}</span>
                 {r.resolved && <span className="ml-2 text-xs text-emerald-300">✓ resolved</span>}
               </p>
               <p className="mt-1 text-xs text-muted">
@@ -119,7 +119,7 @@ export default function V2Manager() {
       {/* ------------------------------ polls ------------------------------ */}
       {canContent && (
         <div className={card}>
-          <SectionTitle blurb="Create a poll — members vote on the Polls page, one vote each.">
+          <SectionTitle blurb="Create a poll, members vote on the Polls page, one vote each.">
             🗳️ Polls & Voting
           </SectionTitle>
           <div className="mt-4 space-y-3">
@@ -173,12 +173,12 @@ export default function V2Manager() {
           </SectionTitle>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <input className={inputCls} placeholder="Name" value={storyForm.name} onChange={(e) => setStoryForm({ ...storyForm, name: e.target.value })} />
-            <input className={inputCls} placeholder="Achievement — e.g. BCS Cadre · Dhaka University" value={storyForm.title} onChange={(e) => setStoryForm({ ...storyForm, title: e.target.value })} />
+            <input className={inputCls} placeholder="Achievement, e.g. BCS Cadre · Dhaka University" value={storyForm.title} onChange={(e) => setStoryForm({ ...storyForm, title: e.target.value })} />
             <select className={inputCls} value={storyForm.batch} onChange={(e) => setStoryForm({ ...storyForm, batch: e.target.value })}>
               {BATCH_YEARS.map((y) => <option key={y} value={y}>Batch {y}</option>)}
             </select>
             <div className="flex items-center gap-2">
-              <ImagePick label={storyForm.photoURL ? "✓ Photo chosen — change" : "📷 Photo (optional)"} onPick={(url) => setStoryForm({ ...storyForm, photoURL: url })} />
+              <ImagePick label={storyForm.photoURL ? "✓ Photo chosen, change" : "📷 Photo (optional)"} onPick={(url) => setStoryForm({ ...storyForm, photoURL: url })} />
             </div>
             <textarea className={`${inputCls} sm:col-span-2`} rows={3} placeholder="Their story…" value={storyForm.story} onChange={(e) => setStoryForm({ ...storyForm, story: e.target.value })} />
             <button
@@ -241,11 +241,11 @@ export default function V2Manager() {
           </SectionTitle>
           <div className="mt-4 space-y-3">
             <div className="flex items-center gap-2">
-              <ImagePick label={wallForm.url ? "✓ Photo chosen — change" : "📷 Choose old photo"} onPick={(url) => setWallForm({ ...wallForm, url })} />
+              <ImagePick label={wallForm.url ? "✓ Photo chosen, change" : "📷 Choose old photo"} onPick={(url) => setWallForm({ ...wallForm, url })} />
               {wallForm.url && <span className="text-xs text-emerald-300">Ready</span>}
             </div>
-            <input className={inputCls} placeholder="Caption — e.g. Class VIII, Section A, annual sports day" value={wallForm.caption} onChange={(e) => setWallForm({ ...wallForm, caption: e.target.value })} />
-            <input className={inputCls} placeholder="Year (optional) — e.g. 2009" value={wallForm.year} onChange={(e) => setWallForm({ ...wallForm, year: e.target.value })} />
+            <input className={inputCls} placeholder="Caption, e.g. Class VIII, Section A, annual sports day" value={wallForm.caption} onChange={(e) => setWallForm({ ...wallForm, caption: e.target.value })} />
+            <input className={inputCls} placeholder="Year (optional), e.g. 2009" value={wallForm.year} onChange={(e) => setWallForm({ ...wallForm, year: e.target.value })} />
             <button
               className={btnPrimary}
               disabled={!wallForm.url || !wallForm.caption.trim()}
@@ -277,7 +277,7 @@ export default function V2Manager() {
       {/* ------------------------------ fund ------------------------------ */}
       {(isSuperAdmin || canContent) && (
         <div className={card}>
-          <SectionTitle blurb="Scholarship & Donation Fund — totals, bKash number and the honour roll.">
+          <SectionTitle blurb="Scholarship & Donation Fund, totals, bKash number and the honour roll.">
             🤲 Scholarship Fund
           </SectionTitle>
           {isSuperAdmin && (
@@ -315,7 +315,7 @@ export default function V2Manager() {
             <>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <input className={inputCls} placeholder="Donor name" value={donorForm.name} onChange={(e) => setDonorForm({ ...donorForm, name: e.target.value })} />
-                <input className={inputCls} placeholder="Amount — e.g. ৳5,000" value={donorForm.amount} onChange={(e) => setDonorForm({ ...donorForm, amount: e.target.value })} />
+                <input className={inputCls} placeholder="Amount, e.g. ৳5,000" value={donorForm.amount} onChange={(e) => setDonorForm({ ...donorForm, amount: e.target.value })} />
                 <input className={inputCls} placeholder="Batch (optional)" value={donorForm.batch} onChange={(e) => setDonorForm({ ...donorForm, batch: e.target.value })} />
                 <input className={inputCls} placeholder="Note (optional)" value={donorForm.note} onChange={(e) => setDonorForm({ ...donorForm, note: e.target.value })} />
                 <button
@@ -350,7 +350,7 @@ export default function V2Manager() {
       {/* --------------------------- batch links --------------------------- */}
       {isSuperAdmin && (
         <div className={card}>
-          <SectionTitle blurb="WhatsApp group invite link per batch — shown on the Batch Groups page.">
+          <SectionTitle blurb="WhatsApp group invite link per batch, shown on the Batch Groups page.">
             👥 Batch WhatsApp Links
           </SectionTitle>
           <div className="mt-4 space-y-3">

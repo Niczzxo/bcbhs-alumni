@@ -7,7 +7,7 @@ import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { useContent } from "@/lib/content-context";
 
-/** Photo gallery — school memories, managed by staff. */
+/** Photo gallery, school memories, managed by staff. */
 export default function GalleryPage() {
   const { gallery } = useContent();
 
@@ -18,12 +18,12 @@ export default function GalleryPage() {
         <PageHero
           eyebrow="Moments in gold"
           title={<>Photo <span className="text-gold-gradient">Gallery</span></>}
-          subtitle="Classrooms, playgrounds, reunions — the visual memory of BCBHS."
+          subtitle="Classrooms, playgrounds, reunions, the visual memory of BCBHS."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           {gallery.length === 0 ? (
             <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
-              No photos yet — check back soon.
+              No photos yet, check back soon.
             </p>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

@@ -27,7 +27,7 @@ const CATEGORIES = [
   "Other",
 ];
 
-/** Business Directory — businesses owned by BCBHS alumni. Support our own. */
+/** Business Directory, businesses owned by BCBHS alumni. Support our own. */
 export default function BusinessesPage() {
   const { businesses, addBusiness } = useContent();
   const { user } = useAuth();
@@ -161,7 +161,7 @@ export default function BusinessesPage() {
             ))}
           </div>
           {list.length === 0 && (
-            <p className="mt-6 text-center text-sm text-muted">No businesses match — be the first from your area to list one.</p>
+            <p className="mt-6 text-center text-sm text-muted">No businesses match, be the first from your area to list one.</p>
           )}
         </div>
       </main>

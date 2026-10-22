@@ -1,6 +1,6 @@
 import Reveal from "./Reveal";
 
-/* Placeholder committee — real names/photos come from the admin panel later. */
+/* Placeholder committee, real names/photos come from the admin panel later. */
 const SEATS = [
   { role: "President", name: "To be announced", note: "সভাপতি" },
   { role: "Vice President", name: "To be announced", note: "সহ-সভাপতি" },
@@ -8,7 +8,7 @@ const SEATS = [
   { role: "Director", name: "To be announced", note: "পরিচালক" },
 ];
 
-/** Leadership strip — who steers the alumni community. */
+/** Leadership strip, who steers the alumni community. */
 export default function Committee() {
   return (
     <section id="committee" className="grain relative overflow-hidden border-y border-gold/20 bg-ink-2 py-24">
@@ -22,7 +22,7 @@ export default function Committee() {
             Guided by <span className="text-gold-gradient">our own</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted">
-            The alumni committee — elected from the community — keeps the spirit
+            The alumni committee, elected from the community, keeps the spirit
             alive: events, welfare, and the bond between batches.
           </p>
           <div className="gold-rule mx-auto mt-6 w-56" />
@@ -49,7 +49,7 @@ export default function Committee() {
         </div>
 
         <p className="mt-10 text-center text-xs text-muted/70">
-          Committee seats are filled from verified alumni — managed in the admin panel.
+          Committee seats are filled from verified alumni, managed in the admin panel.
         </p>
       </div>
     </section>

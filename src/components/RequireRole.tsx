@@ -8,7 +8,7 @@ import Footer from "./Footer";
 import PageHero from "./PageHero";
 
 /**
- * Route guard — redirects to /login when signed out, shows an
+ * Route guard, redirects to /login when signed out, shows an
  * "access denied" panel when the role requirement is unmet.
  */
 export default function RequireRole({

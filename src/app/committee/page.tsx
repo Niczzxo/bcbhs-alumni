@@ -7,7 +7,7 @@ import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import { useContent } from "@/lib/content-context";
 
-/** Alumni committee / leadership page — managed by staff. */
+/** Alumni committee / leadership page, managed by staff. */
 export default function CommitteePage() {
   const { committee } = useContent();
   return (
@@ -17,7 +17,7 @@ export default function CommitteePage() {
         <PageHero
           eyebrow="Leadership"
           title={<>Guided by <span className="text-gold-gradient">our own</span></>}
-          subtitle="The elected alumni committee — keeping the spirit alive: events, welfare, and the bond between batches."
+          subtitle="The elected alumni committee, keeping the spirit alive: events, welfare, and the bond between batches."
         />
         <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
           {committee.length === 0 ? (

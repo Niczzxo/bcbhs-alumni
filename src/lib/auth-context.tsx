@@ -90,11 +90,11 @@ const DEMO_STORAGE_KEY = "bcbhs-demo-members-v1";
 const DEMO_USER_KEY = "bcbhs-demo-user-id";
 /* Last known live profile, kept in the browser so a page reload can
  * paint the signed-in UI instantly while Firebase re-verifies the
- * session in the background. Display-only — Firestore rules still
+ * session in the background. Display-only, Firestore rules still
  * guard every read and write server-side. */
 const AUTH_CACHE_KEY = "bcbhs-auth-cache-v1";
 
-/* Layout effects run before the browser paints — used for the cache
+/* Layout effects run before the browser paints, used for the cache
  * hydration below so the very first visible frame is already correct.
  * On the server this falls back to useEffect (no window, no cache). */
 const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -117,7 +117,7 @@ function nextMemberId(batch: string, members: UserProfile[]): string {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  /* Live mode starts EMPTY — seeding demo members here would flash
+  /* Live mode starts EMPTY, seeding demo members here would flash
      fake people (and fake stats) on the real site before sign-in
      resolves, and a member whose list query was denied would keep
      seeing them. Demo data belongs to demo mode only. */
@@ -150,12 +150,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (found) setUser(found);
       }
     } catch {
-      /* corrupted storage — fall back to seed data */
+      /* corrupted storage, fall back to seed data */
     }
     setLoading(false);
   }, []);
 
-  /* Persist demo mutations (never on the effect's first run — see above). */
+  /* Persist demo mutations (never on the effect's first run, see above). */
   useEffect(() => {
     if (isFirebaseConfigured) return;
     if (!persistArmed.current) {
@@ -165,13 +165,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(members));
     } catch {
-      /* storage full / unavailable — demo still works in memory */
+      /* storage full / unavailable, demo still works in memory */
     }
   }, [members]);
 
   /* Live mode: paint the cached profile the moment the app mounts, so a
    * reload shows the signed-in UI immediately instead of waiting on the
-   * network. Runs as a layout effect — before the first paint. The
+   * network. Runs as a layout effect, before the first paint. The
    * subscription below then refreshes (or clears) it. */
   useIsomorphicLayoutEffect(() => {
     if (!isFirebaseConfigured) return;
@@ -196,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user) window.localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(user));
       else window.localStorage.removeItem(AUTH_CACHE_KEY);
     } catch {
-      /* storage unavailable — reloads simply fall back to the network */
+      /* storage unavailable, reloads simply fall back to the network */
     }
   }, [user]);
 
@@ -214,7 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           if (fbUser) {
             /* Resolve the visitor's OWN profile first and end the
-             * loading state immediately — the member list (needed by
+             * loading state immediately, the member list (needed by
              * the directory and dashboards) loads right after, so a
              * page reload never flashes the logged-out UI while the
              * collection is still downloading. */
@@ -228,7 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             /* Role-aware list fetch. Firestore denies a query whose
              * results it cannot prove readable: the full collection is
              * only readable by admins, while regular members may read
-             * approved profiles — so they get a status-constrained
+             * approved profiles, so they get a status-constrained
              * query (plus their own doc, whatever its status). The old
              * unconstrained fetch silently failed for every non-admin
              * and left the demo seed list on screen. */
@@ -250,7 +250,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (!cancelled) setLoading(false);
           }
         } catch {
-          /* Firestore unreachable — stay logged out of member data */
+          /* Firestore unreachable, stay logged out of member data */
           if (!cancelled) setLoading(false);
         }
       });
@@ -275,7 +275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           window.localStorage.setItem(DEMO_USER_KEY, found.id);
         } catch {
-          /* session persistence unavailable — in-memory only */
+          /* session persistence unavailable, in-memory only */
         }
         return { ok: true };
       }
@@ -371,7 +371,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           memberId: null,
           createdAt: new Date().toISOString(),
         });
-        /* Phone numbers live in the private store — never in the public profile. */
+        /* Phone numbers live in the private store, never in the public profile. */
         const phone = input.phone.trim();
         if (phone) {
           await setDoc(doc(db, "users_private", cred.user.uid), { phone });
@@ -387,7 +387,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /* Admin mutations update local state FIRST in both modes, then write
    * to Firestore in live mode. The member list is loaded once per login
    * (no live subscription), so without the optimistic update the
-   * dashboard controls — controlled selects, checkboxes, badges — snap
+   * dashboard controls, controlled selects, checkboxes, badges, snap
    * back to the old value and look broken until the next page reload. */
 
   const approveMember = useCallback(
@@ -476,7 +476,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [user],
   );
 
-  /* A member edits their own profile. Only safe fields may change — never
+  /* A member edits their own profile. Only safe fields may change, never
    * status / role / permissions / memberId / email. */
   const updateProfile = useCallback(
     async (input: ProfileUpdateInput): Promise<{ ok: boolean; error?: string }> => {

@@ -16,7 +16,7 @@ export type ContentKind = "events" | "gallery" | "committee" | "announcements";
 const KIND_META: Record<ContentKind, { title: string; blurb: string; addLabel: string }> = {
   events: {
     title: "Events",
-    blurb: "Reunions, workshops, drives — upcoming and past.",
+    blurb: "Reunions, workshops, drives, upcoming and past.",
     addLabel: "Add event",
   },
   gallery: {
@@ -26,7 +26,7 @@ const KIND_META: Record<ContentKind, { title: string; blurb: string; addLabel: s
   },
   committee: {
     title: "Committee",
-    blurb: "Leadership seats — who holds which position.",
+    blurb: "Leadership seats, who holds which position.",
     addLabel: "Add seat",
   },
   announcements: {
@@ -91,7 +91,7 @@ function PhotoPicker({
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-ink-3 text-xl text-gold-2">🖼️</span>
         )}
         <span className="text-xs text-muted">
-          {busy ? "Processing…" : value ? <>Photo set ✓ — <span className="text-gold-2 underline">tap to change</span></> : "Tap to upload a photo"}
+          {busy ? "Processing…" : value ? <>Photo set ✓, <span className="text-gold-2 underline">tap to change</span></> : "Tap to upload a photo"}
         </span>
       </button>
       {err && <p className="mt-2 text-xs text-red-300">{err}</p>}
@@ -161,7 +161,7 @@ function GalleryForm({ initial, onDone }: { initial?: GalleryPhoto; onDone: () =
   return (
     <form onSubmit={submit} className="grid gap-4">
       <div><label className={labelCls}>Photo *</label><PhotoPicker value={src} onChange={setSrc} maxDim={1024} quality={0.8} /></div>
-      <div><label className={labelCls}>Caption *</label><input className={inputCls} value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Reunion 2024 — grand gathering" /></div>
+      <div><label className={labelCls}>Caption *</label><input className={inputCls} value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Reunion 2024, grand gathering" /></div>
       <div className="flex gap-3">
         <button type="submit" disabled={busy} className={btnPrimary}>{busy ? "Saving…" : initial ? "Save changes" : "Add photo"}</button>
         <button type="button" onClick={onDone} className={btnEdit}>Cancel</button>
@@ -265,7 +265,7 @@ export default function ContentManager({ kind }: { kind: ContentKind }) {
     if (kind === "gallery") return (it as GalleryPhoto).caption;
     if (kind === "committee") {
       const s = it as CommitteeSeat;
-      return `${s.role} — ${s.name}`;
+      return `${s.role}, ${s.name}`;
     }
     return (it as AnnouncementItem).title;
   };
@@ -306,7 +306,7 @@ export default function ContentManager({ kind }: { kind: ContentKind }) {
       <div className="mt-6 space-y-3">
         {items.length === 0 && !adding && (
           <p className="rounded-2xl border border-dashed border-ivory/15 p-6 text-center text-sm text-muted">
-            Nothing here yet — add the first one.
+            Nothing here yet, add the first one.
           </p>
         )}
         {items.map((it) => (

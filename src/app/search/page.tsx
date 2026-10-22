@@ -9,7 +9,7 @@ import Reveal from "@/components/Reveal";
 import { useDirectory } from "@/lib/data";
 import { BD_DISTRICTS } from "@/lib/types";
 
-/** Location search — pick a district, see who's there now. */
+/** Location search, pick a district, see who's there now. */
 export default function SearchPage() {
   const members = useDirectory();
   const [district, setDistrict] = useState("");
@@ -26,7 +26,7 @@ export default function SearchPage() {
         <PageHero
           eyebrow="Nearby alumni"
           title={<>Who&apos;s in <span className="text-gold-gradient">your district?</span></>}
-          subtitle="New in town? Search a district to find fellow BCBHSians around you — perfect for meetups."
+          subtitle="New in town? Search a district to find fellow BCBHSians around you, perfect for meetups."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           <Reveal className="mx-auto max-w-xl rounded-3xl border border-ivory/10 bg-ink-2 p-6">
@@ -55,7 +55,7 @@ export default function SearchPage() {
                 <span className="font-semibold text-ivory">{district === "Abroad" ? "abroad 🌍" : district}</span>
               </p>
               {results.length === 0 ? (
-                <p className="mt-6 text-center text-sm text-muted">No verified members here yet — be the first to register!</p>
+                <p className="mt-6 text-center text-sm text-muted">No verified members here yet, be the first to register!</p>
               ) : (
                 <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {results.map((m, i) => (

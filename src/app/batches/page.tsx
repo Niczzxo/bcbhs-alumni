@@ -10,7 +10,7 @@ import { useContent } from "@/lib/content-context";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
 
-/** Batch Groups — every batch at a glance, with its WhatsApp group link. */
+/** Batch Groups, every batch at a glance, with its WhatsApp group link. */
 export default function BatchesPage() {
   const members = useDirectory();
   const { batchLinks } = useContent();
@@ -42,7 +42,7 @@ export default function BatchesPage() {
         <PageHero
           eyebrow="Every batch, one family"
           title={<>Batch <span className="text-gold-gradient">Groups</span> 👥</>}
-          subtitle="Find your own batch's corner of the family — member counts, donors, and the batch WhatsApp group."
+          subtitle="Find your own batch's corner of the family, member counts, donors, and the batch WhatsApp group."
         />
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           {!user ? (

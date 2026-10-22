@@ -7,7 +7,7 @@
 /*  Guests cannot count the `users` collection (rules only let them   */
 /*  read guest-visible profiles), so the homepage counters read this  */
 /*  public doc instead. Only the super admin may write it (rules:     */
-/*  site/{doc} — public read, super-admin write), so the sync runs    */
+/*  site/{doc}, public read, super-admin write), so the sync runs    */
 /*  on any page while the super admin is signed in and recomputes     */
 /*  whenever the member or event list changes (approvals included).   */
 /* ------------------------------------------------------------------ */
@@ -50,7 +50,7 @@ export default function StatsSync() {
           { merge: true },
         );
       } catch {
-        /* offline / rules — retried on the next change or visit */
+        /* offline / rules, retried on the next change or visit */
         lastWritten.current = "";
       }
     })();

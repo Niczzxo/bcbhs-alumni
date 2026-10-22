@@ -6,7 +6,7 @@ import MemoriesMarquee from "./MemoriesMarquee";
 import { useContent } from "@/lib/content-context";
 import { useAuth } from "@/lib/auth-context";
 
-/** Homepage teaser — first 6 memories. "See more" needs login, then shows the full gallery. */
+/** Homepage teaser, first 6 memories. "See more" needs login, then shows the full gallery. */
 export default function MemoriesSection() {
   const { gallery } = useContent();
   const { user } = useAuth();
@@ -32,7 +32,7 @@ export default function MemoriesSection() {
             Memories <span className="text-gold-gradient">&amp; Souvenirs</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted">
-            Classrooms, playgrounds, reunions — the visual memory of BCBHS,
+            Classrooms, playgrounds, reunions, the visual memory of BCBHS,
             kept alive by the community.
           </p>
           <div className="gold-rule mx-auto mt-6 w-56" />
@@ -40,7 +40,7 @@ export default function MemoriesSection() {
 
         {preview.length === 0 && (
           <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
-            No memories yet — check back soon.
+            No memories yet, check back soon.
           </p>
         )}
       </div>

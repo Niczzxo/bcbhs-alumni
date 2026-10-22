@@ -7,7 +7,7 @@
 /*                                                                     */
 /*  Runs on any page while the super admin is signed in (the only     */
 /*  role guaranteed to see the full member list) and reconciles      */
-/*  whenever the list changes — this both backfills members who       */
+/*  whenever the list changes, this both backfills members who       */
 /*  were approved before the registry existed and repairs any         */
 /*  best-effort write a client flow missed. Same pattern as           */
 /*  StatsSync.                                                         */
@@ -58,7 +58,7 @@ export default function VerifySync() {
           }
         }
       } catch {
-        /* offline / rules — retried on the next change or visit */
+        /* offline / rules, retried on the next change or visit */
         lastSynced.current = "";
       }
     })();
