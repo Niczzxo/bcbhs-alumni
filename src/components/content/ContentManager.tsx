@@ -214,17 +214,26 @@ function EventForm({ initial, onDone }: { initial?: PortalEvent; onDone: () => v
 }
 
 function GalleryForm({ initial, onDone }: { initial?: GalleryPhoto; onDone: () => void }) {
-  const { addPhoto, updatePhoto } = useContent();
+  /* Adding supports picking many photos at once (owner's rule,
+     2026-10-23, same as events); editing stays a single-photo form. */
+  return initial ? (
+    <GalleryEditForm initial={initial} onDone={onDone} />
+  ) : (
+    <GalleryAddForm onDone={onDone} />
+  );
+}
+
+function GalleryEditForm({ initial, onDone }: { initial: GalleryPhoto; onDone: () => void }) {
+  const { updatePhoto } = useContent();
   const [busy, setBusy] = useState(false);
-  const [src, setSrc] = useState(initial?.src ?? "");
-  const [caption, setCaption] = useState(initial?.caption ?? "");
+  const [src, setSrc] = useState(initial.src ?? "");
+  const [caption, setCaption] = useState(initial.caption ?? "");
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!src || !caption.trim()) return;
     setBusy(true);
-    if (initial) await updatePhoto(initial.id, { src, caption });
-    else await addPhoto({ src, caption });
+    await updatePhoto(initial.id, { src, caption });
     setBusy(false);
     onDone();
   }
@@ -234,7 +243,100 @@ function GalleryForm({ initial, onDone }: { initial?: GalleryPhoto; onDone: () =
       <div><label className={labelCls}>Photo *</label><PhotoPicker value={src} onChange={setSrc} maxDim={1024} quality={0.8} /></div>
       <div><label className={labelCls}>Caption *</label><input className={inputCls} value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Reunion 2024, grand gathering" /></div>
       <div className="flex gap-3">
-        <button type="submit" disabled={busy} className={btnPrimary}>{busy ? "Saving…" : initial ? "Save changes" : "Add photo"}</button>
+        <button type="submit" disabled={busy} className={btnPrimary}>{busy ? "Saving…" : "Save changes"}</button>
+        <button type="button" onClick={onDone} className={btnEdit}>Cancel</button>
+      </div>
+    </form>
+  );
+}
+
+/** How many photos one gallery upload batch may carry. */
+const MAX_GALLERY_BATCH = 10;
+
+function GalleryAddForm({ onDone }: { onDone: () => void }) {
+  const { addPhoto } = useContent();
+  const [busy, setBusy] = useState(false);
+  const [imgBusy, setImgBusy] = useState(false);
+  const [imgErr, setImgErr] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [srcs, setSrcs] = useState<string[]>([]);
+  const [caption, setCaption] = useState("");
+
+  async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = [...(e.target.files ?? [])].filter((x) => x.type.startsWith("image/"));
+    e.target.value = "";
+    if (!files.length) return;
+    setImgBusy(true);
+    try {
+      const room = MAX_GALLERY_BATCH - srcs.length;
+      const added: string[] = [];
+      for (const file of files.slice(0, room)) {
+        added.push(await compressImageToDataURL(file, 1024, 0.8));
+      }
+      setSrcs((p) => [...p, ...added]);
+      setImgErr(files.length > room ? `Up to ${MAX_GALLERY_BATCH} photos per batch, the rest were skipped. Add the remaining ones in another batch.` : "");
+    } catch {
+      setImgErr("Could not process one of those images.");
+    }
+    setImgBusy(false);
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!srcs.length || !caption.trim()) return;
+    setBusy(true);
+    for (const src of srcs) {
+      await addPhoto({ src, caption: caption.trim() });
+    }
+    setBusy(false);
+    onDone();
+  }
+
+  return (
+    <form onSubmit={submit} className="grid gap-4">
+      <div>
+        <label className={labelCls}>Photos * (up to {MAX_GALLERY_BATCH} at once)</label>
+        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={onFiles} />
+        {srcs.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-3">
+            {srcs.map((src, i) => (
+              <span key={i} className="relative block h-20 w-20 overflow-hidden rounded-xl ring-1 ring-gold/40">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt={`Selected photo ${i + 1}`} className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setSrcs((p) => p.filter((_, j) => j !== i))}
+                  aria-label={`Remove photo ${i + 1}`}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-[11px] font-bold text-white transition-colors hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={imgBusy || srcs.length >= MAX_GALLERY_BATCH}
+          className="flex w-full items-center gap-4 rounded-xl border border-dashed border-ivory/20 bg-ink px-4 py-3 text-left transition-colors hover:border-gold/50 disabled:opacity-60"
+        >
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-ink-3 text-xl text-gold-2">🖼️</span>
+          <span className="text-xs text-muted">
+            {imgBusy
+              ? "Processing…"
+              : srcs.length >= MAX_GALLERY_BATCH
+                ? `Maximum ${MAX_GALLERY_BATCH} photos in this batch`
+                : srcs.length
+                  ? <>Add more photos, <span className="text-gold-2 underline">tap to choose</span> ({srcs.length}/{MAX_GALLERY_BATCH})</>
+                  : "Tap to upload photos, you can choose several at once"}
+          </span>
+        </button>
+        {imgErr && <p className="mt-2 text-xs text-red-300">{imgErr}</p>}
+      </div>
+      <div><label className={labelCls}>Caption * (same caption for all photos in this batch)</label><input className={inputCls} value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Reunion 2024, grand gathering" /></div>
+      <div className="flex gap-3">
+        <button type="submit" disabled={busy || !srcs.length} className={btnPrimary}>{busy ? "Adding…" : `Add ${srcs.length || ""} photo${srcs.length === 1 ? "" : "s"}`}</button>
         <button type="button" onClick={onDone} className={btnEdit}>Cancel</button>
       </div>
     </form>
