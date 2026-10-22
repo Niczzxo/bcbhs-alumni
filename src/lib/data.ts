@@ -73,7 +73,7 @@ export function useSiteStats(): SiteStats {
 
   if (remote) return remote;
 
-  const counted = members.filter((m) => m.status !== "rejected");
+  const counted = members.filter((m) => m.status !== "rejected" && m.status !== "banned");
   return {
     totalMembers: counted.length,
     membersAbroad: counted.filter((m) => m.isAbroad).length,

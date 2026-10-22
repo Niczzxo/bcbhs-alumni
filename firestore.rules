@@ -54,7 +54,10 @@ service cloud.firestore {
     function can(perm) {
       return isSuperAdmin()
         || (signedIn() && me().role == 'admin' && perm in me().permissions)
-        || (isEditor() && perm in editorPerms());
+        || (isEditor() && perm in editorPerms())
+        /* A customized editor's own toggled list governs, exactly as
+           in the app (permissionsCustom set by the super admin). */
+        || (isEditor() && me().get('permissionsCustom', false) == true && perm in me().permissions);
     }
 
     function onlyStatusFieldsChanged() {
@@ -121,7 +124,9 @@ service cloud.firestore {
         && (!request.resource.data.isAbroad
             || (request.resource.data.country is string && request.resource.data.country.size() > 0));
 
-      // Approvals: admins with the permission may flip status (+memberId).
+      // Approvals & bans: the approval permission covers the whole
+      // member lifecycle, approve, reject, ban and unban all flip the
+      // same status field (+memberId on approval).
       allow update: if can('approve_members') && onlyStatusFieldsChanged() && !('phone' in request.resource.data.diff(resource.data).affectedKeys());
 
       // Positions: staff with the approval permission may assign / clear a

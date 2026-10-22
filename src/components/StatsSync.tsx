@@ -29,7 +29,7 @@ export default function StatsSync() {
        (u-1, u-<timestamp>); real Firestore/Auth ids never do. */
     if (members.length === 0 || members.some((m) => m.id.includes("-"))) return;
 
-    const counted = members.filter((m) => m.status !== "rejected");
+    const counted = members.filter((m) => m.status !== "rejected" && m.status !== "banned");
     const stats = {
       totalMembers: counted.length,
       membersAbroad: counted.filter((m) => m.isAbroad).length,

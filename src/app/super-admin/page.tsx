@@ -17,7 +17,7 @@ import type { MemberRole, UserProfile } from "@/lib/types";
  * click opens one sector's work area instead of one endless page.
  */
 export default function SuperAdminPage() {
-  const { user, members, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember } = useAuth();
+  const { user, members, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember, banMember, unbanMember } = useAuth();
 
   const approved = members.filter((m) => m.status === "approved");
   const pending = members.filter((m) => m.status === "pending");
@@ -114,7 +114,9 @@ export default function SuperAdminPage() {
           <div className="gold-rule mt-4 w-32" />
           <div className="mt-8 space-y-5">
             {members
-              .filter((m) => m.status === "approved")
+              /* Banned members stay listed here so the super admin can
+                 see the BANNED badge and unban them. */
+              .filter((m) => m.status === "approved" || m.status === "banned")
               .map((m) => (
                 <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
                   <div className="flex flex-wrap items-center gap-4">
@@ -187,6 +189,32 @@ export default function SuperAdminPage() {
                       Guest view
                     </label>
                   </div>
+                  {m.role !== "super_admin" && m.id !== user?.id && (m.status === "approved" || m.status === "banned") && (
+                    <div className="mt-4 flex items-center gap-3">
+                      {m.status === "banned" ? (
+                        <>
+                          <span className="rounded-full bg-red-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-red-300">
+                            Banned
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => unbanMember(m.id)}
+                            className="rounded-full border border-gold/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+                          >
+                            Unban
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => banMember(m.id)}
+                          className="rounded-full border border-red-400/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-red-300 transition-colors hover:bg-red-500/10"
+                        >
+                          Ban member
+                        </button>
+                      )}
+                    </div>
+                  )}
                   <p className="mt-1.5 text-[11px] text-muted/70">
                     Official positions are manually verified, allow up to 7 days.
                   </p>

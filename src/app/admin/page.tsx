@@ -24,12 +24,16 @@ function MemberPhone({ userId }: { userId: string }) {
  * community features each open their own work area on click.
  */
 export default function AdminPage() {
-  const { members, approveMember, rejectMember, setPosition, setGuestVisible, hasPermission } = useAuth();
+  const { user, members, approveMember, rejectMember, banMember, unbanMember, setPosition, setGuestVisible, hasPermission } = useAuth();
   const canApprove = hasPermission("approve_members");
+  /* Ban rides on the approval permission (owner's rule, 2026-10-23):
+     whoever may approve members may also ban and unban them. */
+  const canBan = canApprove;
   const canSeeData = hasPermission("view_member_data");
 
   const pending = members.filter((m) => m.status === "pending");
   const approved = members.filter((m) => m.status === "approved");
+  const banned = members.filter((m) => m.status === "banned");
 
   const contentSections: { kind: ContentKind; perm: string; label: string }[] = (
     [
@@ -120,8 +124,10 @@ export default function AdminPage() {
                     {ROLE_META[m.role].label}
                   </span>
                 </div>
-                {canApprove && (
+                {(canApprove || canBan) && (
                   <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-ivory/10 pt-2.5">
+                    {canApprove && (
+                    <>
                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted">
                       Position
                     </label>
@@ -160,6 +166,17 @@ export default function AdminPage() {
                       />
                       Guest view
                     </label>
+                    </>
+                    )}
+                    {canBan && m.role !== "super_admin" && m.id !== user?.id && (
+                      <button
+                        type="button"
+                        onClick={() => banMember(m.id)}
+                        className="rounded-full border border-red-400/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-red-300 transition-colors hover:bg-red-500/10"
+                      >
+                        Ban
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -170,6 +187,39 @@ export default function AdminPage() {
               </p>
             )}
           </div>
+          {banned.length > 0 && (
+            <>
+              <h3 className="font-display mt-10 text-lg font-bold text-ivory">
+                Banned members <span className="text-red-300">({banned.length})</span>
+              </h3>
+              <div className="gold-rule mt-3 w-28" />
+              <div className="mt-6 space-y-3">
+                {banned.map((m) => (
+                  <div key={m.id} className="flex items-center gap-3 rounded-2xl border border-red-400/20 bg-ink-2 px-4 py-3">
+                    <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-ivory">{m.name}</p>
+                      <p className="text-xs text-muted">
+                        {m.memberId} · Batch {m.batch}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-red-300">
+                      Banned
+                    </span>
+                    {canBan && (
+                      <button
+                        type="button"
+                        onClick={() => unbanMember(m.id)}
+                        className="rounded-full border border-gold/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+                      >
+                        Unban
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </section>
       ),
     },

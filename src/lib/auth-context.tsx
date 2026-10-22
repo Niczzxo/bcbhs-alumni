@@ -54,6 +54,8 @@ interface AuthContextValue {
   register: (input: RegisterInput) => Promise<{ ok: boolean; error?: string }>;
   approveMember: (id: string) => Promise<void>;
   rejectMember: (id: string) => Promise<void>;
+  banMember: (id: string) => Promise<void>;
+  unbanMember: (id: string) => Promise<void>;
   setPermissions: (id: string, permissions: string[]) => Promise<void>;
   setRole: (id: string, role: UserProfile["role"]) => Promise<void>;
   /** Assign / clear a member's official position (admin only, manually verified). */
@@ -427,6 +429,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await removeVerifyDoc(db, target?.memberId);
   }, [members]);
 
+  /* Ban: an approved member is suspended (owner's feature, 2026-10-23).
+     Their profile stops counting as approved everywhere at once:
+     listings filter on status, their ID card stops verifying, and
+     the app shows them a suspension gate instead of member content. */
+  const banMember = useCallback(async (id: string) => {
+    const target = members.find((m) => m.id === id);
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "banned" } : m)));
+    setUser((u) => (u && u.id === id ? { ...u, status: "banned" } : u));
+    if (!isFirebaseConfigured || !db) return;
+    const { doc, updateDoc } = await import("firebase/firestore");
+    await updateDoc(doc(db, "users", id), { status: "banned" }).catch(() => undefined);
+    const { removeVerifyDoc } = await import("./verify-sync");
+    await removeVerifyDoc(db, target?.memberId);
+  }, [members]);
+
+  /* Unban restores full approved status, ID-card verification included. */
+  const unbanMember = useCallback(async (id: string) => {
+    const target = members.find((m) => m.id === id);
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "approved" } : m)));
+    setUser((u) => (u && u.id === id ? { ...u, status: "approved" } : u));
+    if (!isFirebaseConfigured || !db) return;
+    const { doc, updateDoc } = await import("firebase/firestore");
+    await updateDoc(doc(db, "users", id), { status: "approved" }).catch(() => undefined);
+    if (target) {
+      const { syncVerifyDoc } = await import("./verify-sync");
+      await syncVerifyDoc(db, { ...target, status: "approved" });
+    }
+  }, [members]);
+
   const setPermissions = useCallback(async (id: string, permissions: string[]) => {
     /* Customizing an EDITOR also flips permissionsCustom, so their
        toggled list (not the standard bundle) governs from now on. */
@@ -482,6 +513,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPermission = useCallback(
     (perm: string) => {
       if (!user) return false;
+      if (user.status === "banned") return false;
       if (user.role === "super_admin") return true;
       if (user.role === "admin") return user.permissions.includes(perm);
       if (user.role === "editor")
@@ -566,6 +598,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       approveMember,
       rejectMember,
+      banMember,
+      unbanMember,
       setPermissions,
       setRole,
       setPosition,
@@ -575,7 +609,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, logout, register, approveMember, rejectMember, setPermissions, setRole, setPosition, setGuestVisible, updateProfile, hasPermission],
+    [user, members, loading, login, logout, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, setGuestVisible, updateProfile, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

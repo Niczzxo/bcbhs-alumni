@@ -2,7 +2,7 @@
 /*  Shared domain types for the BCBHS Alumni Portal.                   */
 /* ------------------------------------------------------------------ */
 
-export type MemberStatus = "pending" | "approved" | "rejected";
+export type MemberStatus = "pending" | "approved" | "rejected" | "banned";
 export type MemberRole = "member" | "editor" | "admin" | "super_admin";
 
 /** Fixed permission bundle for the editor role (content staff). */
@@ -186,7 +186,7 @@ export const POSITIONS: string[] = [
 
 /** Granular admin permissions, toggled by the super admin. */
 export const PERMISSIONS: { key: string; label: string; hint: string }[] = [
-  { key: "approve_members", label: "Approve Members", hint: "Verify & approve new registrations" },
+  { key: "approve_members", label: "Approve Members", hint: "Verify & approve new registrations, ban & unban members" },
   { key: "manage_events", label: "Manage Events", hint: "Create, edit & delete events" },
   { key: "manage_gallery", label: "Manage Gallery", hint: "Upload & curate gallery photos" },
   { key: "post_announcements", label: "Post Announcements", hint: "Publish notices to all members" },
