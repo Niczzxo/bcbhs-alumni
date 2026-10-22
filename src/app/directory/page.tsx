@@ -11,6 +11,7 @@ import { useDirectory } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
 import { isFirebaseConfigured, db } from "@/lib/firebase";
 import type { UserProfile } from "@/lib/types";
+import { POSITIONS } from "@/lib/types";
 
 /** How many picked members a logged-out guest may preview. */
 const GUEST_PREVIEW_COUNT = 6;
@@ -71,11 +72,19 @@ export default function DirectoryPage() {
   }, [isGuest, approvedMembers, guestMembers]);
 
   /* Position holders only: an official position assigned by the super
-     admin is what puts an alumnus in this directory. */
-  const holders = useMemo(
-    () => members.filter((m) => !!m.position && m.position.trim() !== ""),
-    [members],
-  );
+     admin is what puts an alumnus in this directory. Holders are
+     ordered by position rank (owner's rule, 2026-10-23): President
+     first, then Vice President, General Secretary and so on down the
+     POSITIONS list; same-position holders are ordered by name. */
+  const holders = useMemo(() => {
+    const rank = (p?: string) => {
+      const i = POSITIONS.indexOf(p ?? "");
+      return i === -1 ? POSITIONS.length : i;
+    };
+    return members
+      .filter((m) => !!m.position && m.position.trim() !== "")
+      .sort((a, b) => rank(a.position) - rank(b.position) || a.name.localeCompare(b.name));
+  }, [members]);
 
   return (
     <>
