@@ -3,9 +3,7 @@
 import Link from "next/link";
 import Reveal from "./Reveal";
 import { Avatar } from "./MemberCard";
-import { useContent } from "@/lib/content-context";
-import { useAuth } from "@/lib/auth-context";
-import { mergeLeadership } from "@/lib/leadership";
+import { useLeadership } from "@/lib/leadership";
 
 /* Shown only until real seats are added from the dashboard. */
 const PLACEHOLDER_SEATS = [
@@ -23,11 +21,7 @@ const PLACEHOLDER_SEATS = [
  * hardcoded placeholders that never showed the real seats.)
  */
 export default function Committee() {
-  const { committee } = useContent();
-  const { user, members } = useAuth();
-  const canSeeAll = !!user && user.status === "approved";
-  const visible = canSeeAll ? members : members.filter((m) => m.guestVisible);
-  const leaders = mergeLeadership(visible, committee);
+  const leaders = useLeadership();
   const hasSeats = leaders.length > 0;
 
   return (

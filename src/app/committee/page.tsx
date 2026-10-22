@@ -5,9 +5,7 @@ import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
-import { useContent } from "@/lib/content-context";
-import { useAuth } from "@/lib/auth-context";
-import { mergeLeadership } from "@/lib/leadership";
+import { useLeadership } from "@/lib/leadership";
 
 /**
  * Alumni committee / leadership page. Position holders appear
@@ -15,11 +13,7 @@ import { mergeLeadership } from "@/lib/leadership";
  * added by hand in the dashboard cover people without an account.
  */
 export default function CommitteePage() {
-  const { committee } = useContent();
-  const { user, members } = useAuth();
-  const canSeeAll = !!user && user.status === "approved";
-  const visible = canSeeAll ? members : members.filter((m) => m.guestVisible);
-  const leaders = mergeLeadership(visible, committee);
+  const leaders = useLeadership();
   return (
     <>
       <Navbar />

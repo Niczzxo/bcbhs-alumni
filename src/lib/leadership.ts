@@ -1,4 +1,8 @@
+import { useEffect, useState } from "react";
 import { POSITIONS, type CommitteeSeat, type UserProfile } from "./types";
+import { useAuth } from "./auth-context";
+import { useContent } from "./content-context";
+import { db, isFirebaseConfigured } from "./firebase";
 
 /** One leadership entry, however it was sourced. */
 export interface LeaderSeat {
@@ -55,4 +59,54 @@ export function mergeLeadership(
       photoURL: s.photoURL,
     }));
   return [...holders, ...manual];
+}
+
+/**
+ * The leadership list for the current viewer, with the right data
+ * source per viewer: signed-in members read the role-aware member
+ * list from the auth context, while GUESTS get their own fetch of
+ * guest-visible approved profiles (the same rule-constrained query
+ * the Directory page runs). Without this, the live auth context
+ * holds NO members at all for guests, and the Leadership strip
+ * showed only the hand-added seats (owner report, 2026-10-23).
+ */
+export function useLeadership(): LeaderSeat[] {
+  const { user, members } = useAuth();
+  const { committee } = useContent();
+  const [guestMembers, setGuestMembers] = useState<UserProfile[] | null>(null);
+  const isGuest = !user;
+
+  useEffect(() => {
+    if (!isGuest || !isFirebaseConfigured || !db) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { collection, query, where, limit, getDocs } = await import("firebase/firestore");
+        const snap = await getDocs(
+          query(
+            collection(db, "users"),
+            where("guestVisible", "==", true),
+            where("status", "==", "approved"),
+            limit(50),
+          ),
+        );
+        const list = snap.docs
+          .map((d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) }) as UserProfile)
+          .filter((m) => m.status === "approved" && m.guestVisible);
+        if (!cancelled) setGuestMembers(list);
+      } catch {
+        if (!cancelled) setGuestMembers([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isGuest]);
+
+  const base = isGuest
+    ? isFirebaseConfigured
+      ? (guestMembers ?? [])
+      : members.filter((m) => m.guestVisible)
+    : members;
+  return mergeLeadership(base, committee);
 }
