@@ -28,7 +28,7 @@ function Counter({ to, suffix = "", big = false }: { to: number; suffix?: string
   }, [inView, to]);
 
   return (
-    <span ref={ref} className={`font-display text-gold-gradient font-extrabold ${big ? "text-7xl sm:text-8xl" : "text-5xl sm:text-6xl"}`}>
+    <span ref={ref} className={`font-display text-gold-gradient font-extrabold ${big ? "text-7xl [filter:drop-shadow(0_0_22px_rgba(212,169,78,0.5))] sm:text-8xl" : "text-5xl sm:text-6xl"}`}>
       {value.toLocaleString()}
       {suffix}
     </span>
@@ -77,11 +77,7 @@ export default function StatsBand() {
             <Reveal
               key={s.label}
               delay={i * 0.12}
-              className={`text-center ${s.cls} ${
-                s.hero
-                  ? "rounded-[2rem] border border-gold/40 bg-gold/[0.07] px-4 py-7 shadow-[0_0_50px_rgba(212,169,78,0.22)]"
-                  : ""
-              }`}
+              className={`text-center ${s.cls}`}
             >
               <Counter to={s.value} suffix={s.suffix} big={s.hero} />
               <p
