@@ -48,8 +48,10 @@ export const MEMBER_NAV_LINKS = [
   { label: "Contacts", href: "/contact" },
 ];
 
-/** Trailing member link shown after the More dropdown. */
-export const MEMBER_PROFILE_LINK = { label: "Profile", href: "/profile/edit" };
+/** The drawer's Profile link: same destination as the desktop chip
+ * dropdown's Profile (/profile, which lands on the member's own
+ * profile page) — owner's rule, 2026-10-23, mobile and desktop agree. */
+export const MEMBER_PROFILE_LINK = { label: "Profile", href: "/profile" };
 
 /** Items inside the members navbar "More" dropdown. */
 export const MEMBER_MORE_LINKS = [
