@@ -220,13 +220,21 @@ export default function Navbar() {
               <div className="h-9 w-10 sm:w-44" aria-hidden="true" />
             ) : user ? (
               <>
-                {/* Profile chip (owner's pick, 2026-10-23): photo +
-                    name + batch in the bar, like the big pro sites.
-                    On phones only the photo shows and it opens the
-                    drawer (which carries the full identity card); on
-                    desktop the chip opens a dropdown with Profile,
-                    ID Card, Dashboard and Logout at the end. The
-                    dashboard button stays LAST in the bar. */}
+                {/* Bar order (owner's swap, 2026-10-23): the staff
+                    dashboard button comes FIRST, the profile chip
+                    LAST. Both share one height so the bar reads as a
+                    single aligned row. The chip (owner's pick): photo
+                    + name + batch; on phones only the photo shows and
+                    it opens the drawer; on desktop it opens a dropdown
+                    with Profile, ID Card, About and Logout last. */}
+                {isAdmin && (
+                  <Link
+                    href={dashboardHref}
+                    className="flex h-10 items-center rounded-full border border-gold/40 px-3.5 text-[10px] font-bold uppercase tracking-wider text-gold-2 transition-colors hover:bg-gold/10 sm:px-5 sm:text-xs lg:h-[54px] lg:px-6"
+                  >
+                    {dashboardLabel}
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
@@ -241,7 +249,7 @@ export default function Navbar() {
                     onClick={() => setProfileOpen((v) => !v)}
                     aria-haspopup="menu"
                     aria-expanded={profileOpen}
-                    className="flex items-center gap-3 rounded-full border border-ivory/10 bg-ink-2/70 py-1.5 pl-1.5 pr-4 transition-colors hover:border-gold/40"
+                    className="flex h-[54px] items-center gap-3 rounded-full border border-ivory/10 bg-ink-2/70 py-1.5 pl-1.5 pr-4 shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-colors hover:border-gold/40"
                   >
                     <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
                     <span className="max-w-44 text-left leading-tight">
@@ -284,8 +292,8 @@ export default function Navbar() {
                           My ID Card <span className="text-muted/60">›</span>
                         </Link>
                         {/* About sits here instead of a second Dashboard
-                            entry: the dashboard already has its own bar
-                            button, last in the bar (owner's fix). */}
+                            entry: the dashboard already has its own
+                            button in the bar (owner's fix). */}
                         <Link
                           href="/about"
                           role="menuitem"
@@ -311,14 +319,6 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-                {isAdmin && (
-                  <Link
-                    href={dashboardHref}
-                    className="rounded-full border border-gold/40 px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-gold-2 transition-colors hover:bg-gold/10 sm:px-5 sm:text-xs"
-                  >
-                    {dashboardLabel}
-                  </Link>
-                )}
               </>
             ) : (
               <>
