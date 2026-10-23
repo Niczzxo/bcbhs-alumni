@@ -230,7 +230,7 @@ export default function Navbar() {
                 {isAdmin && (
                   <Link
                     href={dashboardHref}
-                    className="flex h-10 items-center rounded-full border border-gold/40 px-3.5 text-[10px] font-bold uppercase tracking-wider text-gold-2 transition-colors hover:bg-gold/10 sm:px-5 sm:text-xs lg:h-[54px] lg:px-6"
+                    className="btn-shimmer flex h-10 items-center rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-3.5 text-[10px] font-extrabold uppercase tracking-wider text-ink shadow-[0_0_28px_rgba(212,169,78,0.4)] transition-transform duration-300 hover:scale-[1.03] sm:px-5 sm:text-xs lg:h-[54px] lg:px-6"
                   >
                     {dashboardLabel}
                   </Link>
@@ -249,14 +249,14 @@ export default function Navbar() {
                     onClick={() => setProfileOpen((v) => !v)}
                     aria-haspopup="menu"
                     aria-expanded={profileOpen}
-                    className="flex h-[54px] items-center gap-3 rounded-full border border-ivory/10 bg-ink-2/70 py-1.5 pl-1.5 pr-4 shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-colors hover:border-gold/40"
+                    className="flex h-[54px] items-center gap-3 rounded-full border border-ivory/10 bg-white/[0.04] py-1.5 pl-1.5 pr-4 shadow-[0_6px_20px_rgba(0,0,0,0.25)] backdrop-blur transition-colors hover:border-gold/50"
                   >
                     <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
                     <span className="max-w-44 text-left leading-tight">
                       <span className="block truncate text-sm font-semibold text-ivory">{user.name}</span>
-                      <span className="block text-[11px] text-muted">Batch {user.batch}</span>
+                      <span className="block text-[11px] font-medium tracking-wide text-gold-2/80">Batch {user.batch}</span>
                     </span>
-                    <span className={`text-[10px] text-muted transition-transform duration-300 ${profileOpen ? "rotate-180" : ""}`}>▾</span>
+                    <span className={`text-[10px] text-gold-2/80 transition-transform duration-300 ${profileOpen ? "rotate-180" : ""}`}>▾</span>
                   </button>
                   {profileOpen && (
                     <div
