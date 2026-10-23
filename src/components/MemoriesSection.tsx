@@ -55,7 +55,7 @@ export default function MemoriesSection() {
         <Reveal className="mt-12 text-center">
           <button
             onClick={handleSeeMore}
-            className="rounded-full border border-gold/40 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:scale-105 hover:bg-gold/10 hover:shadow-[0_0_30px_rgba(212,169,78,0.25)]"
+            className="w-full rounded-full border border-gold/40 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:scale-105 hover:bg-gold/10 hover:shadow-[0_0_30px_rgba(212,169,78,0.25)] sm:w-auto"
           >
             See more memories
           </button>

@@ -8,7 +8,7 @@ import { useAuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth-context";
 
 const PRIMARY_CTA =
-  "btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105 active:scale-95";
+  "btn-shimmer w-full rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-center text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105 active:scale-95 sm:w-auto";
 
 /** Full-viewport hero, campus photo with parallax, seal-ring emblem, gold CTAs. */
 export default function Hero() {
@@ -139,7 +139,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.78, duration: 0.7 }}
-          className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start"
+          className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center lg:justify-start"
         >
           {/* Members already joined, send them to their card/application, not registration.
               While auth is still resolving, hold an invisible placeholder so a reload
@@ -163,7 +163,7 @@ export default function Hero() {
           )}
           <Link
             href="/directory"
-            className="rounded-full border border-gold/50 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:bg-gold/10 active:scale-95"
+            className="w-full rounded-full border border-gold/50 px-9 py-4 text-center text-sm font-bold uppercase tracking-widest text-gold-2 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:bg-gold/10 active:scale-95 sm:w-auto"
           >
             Explore Directory
           </Link>

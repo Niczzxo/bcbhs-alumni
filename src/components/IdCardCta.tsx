@@ -28,10 +28,13 @@ const TEASER_MEMBER: UserProfile = {
   createdAt: "2023-01-01T00:00:00.000Z",
 };
 
+/* Mobile button law (owner, 2026-10-23): every button on mobile
+   is the SAME size, full-width and stacked; text-hugging pills of
+   varying widths are gone. From sm up they size to their label. */
 const GOLD_BUTTON =
-  "btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105";
+  "btn-shimmer w-full rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-center text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105 sm:w-auto";
 const GHOST_BUTTON =
-  "rounded-full border border-gold/40 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:border-gold hover:bg-gold/10";
+  "w-full rounded-full border border-gold/40 px-9 py-4 text-center text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:border-gold hover:bg-gold/10 sm:w-auto";
 
 function Tick({ children }: { children: React.ReactNode }) {
   return (
@@ -120,7 +123,7 @@ export default function IdCardCta() {
                 ID card is ready. Anyone can scan its QR code to confirm you
                 are a true BCBHSian. Print it, carry it, show it with pride.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
                 <Link href="/id-card" className={GOLD_BUTTON}>
                   View My ID Card
                 </Link>
@@ -143,7 +146,7 @@ export default function IdCardCta() {
                 take up to 7 days. The moment you are approved, your official
                 ID card with its QR code appears right here.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
                 <Link href="/profile/edit" className={GOLD_BUTTON}>
                   View My Application
                 </Link>
@@ -162,7 +165,7 @@ export default function IdCardCta() {
                 with a QR code anyone can scan to confirm you are a true BCBHSian.
                 Print it, carry it, show it with pride.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
                 <button onClick={() => openAuthModal("register")} className={GOLD_BUTTON}>
                   Register Now
                 </button>

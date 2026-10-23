@@ -380,7 +380,7 @@ export default function IdCard({
         </div>
         <button
           onClick={() => setFlipped((f) => !f)}
-          className="mx-auto mt-5 flex items-center gap-2 rounded-full border border-gold/40 px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+          className="mx-auto mt-5 flex w-full items-center justify-center gap-2 rounded-full border border-gold/40 px-6 py-4 text-xs font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10 sm:w-auto sm:py-2.5 sm:text-[11px]"
         >
           ⇄ Show {flipped ? "front" : "back"}
         </button>
