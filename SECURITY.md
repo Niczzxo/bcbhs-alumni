@@ -89,13 +89,20 @@ API quota to; if API routes are introduced, apply the brief's
 - **Never** contains passwords, tokens, OTPs or raw emails. Pre-auth
   events store a truncated **SHA-256 hash** of the normalized email;
   post-auth events store user IDs.
-- Rules: clients may **create only** (actor must be themselves, or
-  `null` + hash for pre-auth events, with a strict field allowlist);
-  **update/delete are denied to everyone**; **read is super-admin
-  only** (Firestore Console or a future admin view).
+- Rules (hardened in pass 2): `allow create, update, delete: if
+  false` for EVERY client; **read is super-admin only** (the
+  administrator audit view). Records are created exclusively by the
+  server endpoint with a Google service account (which bypasses
+  rules, Admin-SDK style). Rules alone could never distinguish
+  "browser wrote directly" from "our endpoint wrote with the user's
+  token"; the service-account-only writer is what makes records
+  non-forgeable.
 - Logging is fire-and-forget: a logging failure never blocks or
-  delays the action it records (documented availability trade-off —
-  enforcement does not depend on the log).
+  delays the action it records. Live delivery goes ONLY to
+  POST /api/security/log, with exactly one bounded retry on network
+  failure reusing the same eventId (the server write is idempotent).
+  There is NO direct-Firestore fallback: on 429/503 the event is
+  dropped by design (see §10).
 - Retention: review quarterly; old entries can be pruned by the super
   admin in the Firestore Console (a Firestore TTL policy on
   `createdAt` can automate this).
@@ -124,15 +131,19 @@ normalized identifier) work even if IP identification is unavailable.
 (@upstash/redis + @upstash/ratelimit, sliding windows, lazy
 singletons), `src/server/verify-token.ts` (Firebase ID-token
 verification against Google's JWKs), and the route
-`src/app/api/security/log/route.ts`. The client logger posts there
-first and falls back to the direct rules-governed Firestore write on
-any failure, so the audit trail survives an inactive limiter.
+`src/app/api/security/log/route.ts`, plus
+`src/server/service-account.ts` (the endpoint's only write path).
+The client logger posts there and NOWHERE else: the former
+direct-write fallback was removed in pass 2 because it let any
+client mint unverifiable audit records while bypassing the limiter.
 
 The endpoint pipeline: body validation (allowlisted event types,
 4 KB cap, meta sanitization) → **rate-limit gate before any expensive
 work** → token verification (actor comes from the verified token,
-never the body) → Firestore write via REST with the caller's token
-forwarded, so security rules still authorize the write.
+never the body) → Firestore write with the service account. The
+client supplies an `eventId` per event and the document is created
+under that id, so the bounded retry is idempotent (a repeat write
+returns 409, mapped to success, never a duplicate).
 
 Policies (`LIMIT_POLICIES`, each overridable via
 `RL_<NAME>_LIMIT` / `RL_<NAME>_WINDOW` env vars):
@@ -156,18 +167,29 @@ placeholder key) and identifier limits still apply.
 **Failure policy: fail closed.** Unconfigured or erroring Redis →
 the endpoint answers **503 `{error:"security_service_unavailable"}`**
 (verified by smoke test, §9). Rate-limited → **429** with
-`Retry-After`. The client logger's documented fallback keeps audit
-writes alive during an outage; it does not weaken the endpoint's own
-policy.
+`Retry-After`. During an outage the client DROPS events rather than
+writing them through any unverifiable path (deliberate trade-off,
+§10).
 
-**Activation (owner, ~5 minutes):**
-1. Create an Upstash Redis database (region close to the deployment).
-2. In Vercel → Project → Settings → Environment Variables (Production),
-   set the **server-only** variables `UPSTASH_REDIS_REST_URL`,
-   `UPSTASH_REDIS_REST_TOKEN`, and `RATE_LIMIT_SECRET` (any long
-   random string). Never prefix them with `NEXT_PUBLIC_`.
-3. Redeploy. The endpoint switches from fail-closed 503 to active
-   limiting automatically; verify with the smoke commands in §9.
+**Activation (owner, ~10 minutes):**
+1. Upstash: sign in at console.upstash.com → Create Database (Redis,
+   regional, close to the deployment) → open it → REST API section →
+   copy `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
+2. Service account: Google Cloud Console (project
+   bcbhs-alumni-a18d8) → IAM & Admin → Service Accounts → Create
+   service account (e.g. `audit-log-writer`) → grant ONLY the role
+   **Cloud Datastore User** → Keys → Add key → Create new key → JSON
+   → download. That file is a production secret: never commit it,
+   never paste it into chat.
+3. Vercel → Project bcbhs-alumni → Settings → Environment Variables
+   (Production): set FOUR **server-only** variables (never
+   `NEXT_PUBLIC_`): `UPSTASH_REDIS_REST_URL`,
+   `UPSTASH_REDIS_REST_TOKEN` (step 1), `RATE_LIMIT_SECRET` (any
+   long random string), `FIREBASE_SERVICE_ACCOUNT` (the ENTIRE
+   contents of the JSON key from step 2 as one value; base64 also
+   accepted).
+4. Redeploy. The endpoint switches from fail-closed 503 to active
+   automatically; verify with the smoke commands in §9.
 
 **Not covered, by design:** Firebase Authentication requests
 (sign-in / register / reset / OTP) never pass through this or any
@@ -193,7 +215,7 @@ Auth traffic, which does not transit Vercel.
 
 ## 9. Tests
 
-- `npm run test:security` — **21 node:test cases, all passing**
+- `npm run test:security` — **31 node:test cases, all passing**
   (2026-10-23). 9 cover the client throttle and normalization
   (shared counters for equivalent identifiers, counter independence,
   success clearing only its own account, schedule + cap, 15-minute
@@ -209,6 +231,13 @@ Auth traffic, which does not transit Vercel.
   specified). The 429/202 path activates once the owner configures
   Upstash (§7) and was verified at the gate-logic level by the
   mocked-limiter tests, not against a live Redis.
+- Pass 2 (fallback removal) added 10 cases: delivery semantics
+  (429/503 final and never rerouted; exactly one network retry with
+  an identical eventId; token attached only when supplied), a static
+  source assertion that no direct `security_logs` write remains in
+  the client, service-account env parsing (raw / base64 / junk),
+  the 409-to-success outcome mapping, and a static rules assertion
+  (client writes denied, super-admin read preserved).
 - Firestore rules behaviour is covered by the manual rules audit in
   §2–§4 and the demo-mode route sweep (27 routes, 0 errors). A
   Firebase-emulator rules test suite is the recommended next step if
@@ -235,9 +264,11 @@ Auth traffic, which does not transit Vercel.
 - The audit ingest endpoint's rate limiting is **implemented and
   unit-verified but not yet live**: it needs the owner's Upstash
   database + env vars (§7). Until then the endpoint fails closed
-  (503) and the client uses its direct rules-governed write, which
-  is NOT rate-limited — a modified client can still write audit
-  entries directly within what the rules allow (create-only,
-  field-allowlisted, actor-bound). Cross-instance behaviour of the
-  real limiters is guaranteed by Upstash's shared store design and
-  was not re-verified against a live Redis in this pass.
+  (503) and — because the insecure direct-write fallback was
+  deliberately removed — **live audit events are dropped, not
+  recorded**, until activation. That is the accepted cost of closing
+  the bypass: the trail has a gap rather than a forgeable record in
+  the interim. (Demo mode's local trail is unaffected; it never
+  claimed trust.) Cross-instance behaviour of the real limiters and
+  the endpoint's 202/429 paths against a live Redis remain
+  unverified until activation and are NOT claimed.

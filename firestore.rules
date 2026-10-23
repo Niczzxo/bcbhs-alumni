@@ -298,30 +298,18 @@ service cloud.firestore {
     }
 
     match /security_logs/{logId} {
-      // Append-only security audit log (2026-10-23). Clients may only
-      // CREATE entries; nobody can edit or delete them from a client,
-      // and only the super admin can read the trail. Two write shapes:
-      // signed-in actors write about their own actions (actorUid must
-      // be their own uid), and pre-auth events (failed login, reset
-      // request) carry actorUid null plus a HASHED identifier only —
-      // raw emails, passwords and tokens never appear here.
-      allow create: if request.resource.data.keys().hasOnly(
-          ['type', 'actorUid', 'targetUid', 'identifierHash', 'meta', 'createdAt'])
-        && (
-          (signedIn()
-            && request.resource.data.actorUid == request.auth.uid
-            && request.resource.data.type in [
-              'login_success', 'logout',
-              'member_approved', 'member_rejected', 'member_banned', 'member_unbanned',
-              'role_changed', 'permissions_changed', 'position_changed',
-              'guest_visibility_changed'])
-          || (request.resource.data.actorUid == null
-            && request.resource.data.type in [
-              'login_failed', 'login_throttled', 'password_reset_requested']
-            && request.resource.data.identifierHash is string)
-        );
+      // TRUSTED security audit log (hardened 2026-10-23). Clients can
+      // NEVER create, edit or delete entries: audit records are
+      // written only by the server endpoint POST /api/security/log
+      // using a service account (which bypasses these rules), after
+      // it verifies the actor from the Firebase ID token and applies
+      // distributed rate limiting. This closes the direct-write
+      // bypass entirely: a modified client cannot mint or alter a
+      // "trusted" record, and cannot skip the rate limiter by
+      // writing around the endpoint. Only the super admin can READ
+      // the trail (the administrator audit view).
+      allow create, update, delete: if false;
       allow read: if isSuperAdmin();
-      allow update, delete: if false;
     }
 
     match /verify/{memberId} {

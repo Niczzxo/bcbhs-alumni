@@ -1,10 +1,15 @@
 /**
  * Security audit logging + auth hardening helpers.
  *
- * Audit log: append-only `security_logs` collection. Firestore rules
- * (see firestore.rules) make it write-only for clients and readable
- * ONLY by the super admin; entries can never be edited or deleted
- * from a client. Events NEVER contain passwords, tokens, OTPs or raw
+ * Audit log: `security_logs` records are TRUSTED records. They can
+ * only be created by the server endpoint POST /api/security/log,
+ * which verifies the actor from the Firebase ID token, applies
+ * distributed rate limiting, and writes with a service account.
+ * Firestore rules deny ALL client creates on the collection, and
+ * this client has NO direct-write fallback (security-delivery.ts):
+ * if the endpoint refuses or is down, the event is dropped rather
+ * than written through an unverifiable path. Readable ONLY by the
+ * super admin; entries can never be edited or deleted by a client. Events NEVER contain passwords, tokens, OTPs or raw
  * email addresses: pre-auth events carry a SHA-256 hash of the
  * normalized identifier, post-auth events carry user IDs (which the
  * super admin can already see in the members list).
@@ -15,6 +20,7 @@
 
 import { auth, db, isFirebaseConfigured } from "@/lib/firebase";
 import { LoginThrottle, normalizeIdentifier } from "@/lib/throttle";
+import { deliverSecurityEvent } from "@/lib/security-delivery";
 
 export type SecurityEventType =
   | "login_success"
@@ -104,38 +110,24 @@ export async function logSecurityEvent(
       }
       return;
     }
-    /* Preferred path: the rate-limited ingest endpoint
-       (POST /api/security/log), which verifies the actor from the ID
-       token and writes server-side. On ANY failure (endpoint down,
-       rate limiter unconfigured, offline) fall back to the direct
-       rules-governed write so the audit trail never silently dies;
-       the fallback is documented in SECURITY.md. */
-    let sent = false;
-    try {
-      const payload: Record<string, unknown> = { type };
-      if (details.targetUid) payload.targetUid = details.targetUid;
-      if (entry.identifierHash) payload.identifierHash = entry.identifierHash;
-      if (details.meta) payload.meta = details.meta;
-      const token =
-        !isPreAuth && auth?.currentUser
-          ? await auth.currentUser.getIdToken().catch(() => null)
-          : null;
-      const res = await fetch("/api/security/log", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(payload),
-      });
-      sent = res.ok;
-    } catch {
-      sent = false;
-    }
-    if (!sent) {
-      const { addDoc, collection, serverTimestamp } = await import("firebase/firestore");
-      await addDoc(collection(db, "security_logs"), { ...entry, createdAt: serverTimestamp() });
-    }
+    /* The ONLY live delivery path: the protected ingest endpoint.
+       No direct-write fallback exists (rules deny client creates,
+       and a fallback would bypass rate limiting and actor
+       verification). 429/503 drop the event by design. */
+    const payload: Record<string, unknown> = { type, eventId: crypto.randomUUID() };
+    if (details.targetUid) payload.targetUid = details.targetUid;
+    if (entry.identifierHash) payload.identifierHash = entry.identifierHash;
+    if (details.meta) payload.meta = details.meta;
+    const token =
+      !isPreAuth && auth?.currentUser
+        ? await auth.currentUser.getIdToken().catch(() => null)
+        : null;
+    await deliverSecurityEvent({
+      fetchFn: (url, init) => fetch(url, init as RequestInit),
+      sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+      payload,
+      token,
+    });
   } catch {
     /* auditing is best-effort; the action itself already happened */
   }

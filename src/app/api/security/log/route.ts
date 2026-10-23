@@ -6,10 +6,11 @@
  * Pipeline: body validation → rate-limit gate (BEFORE any expensive
  * work; fails closed with 503 when Redis is unconfigured or down) →
  * Firebase ID-token verification (the actor is taken from the
- * VERIFIED token, never from the request body) → Firestore write via
- * the REST API with the caller's own token forwarded, so Firestore
- * security rules still authorize the write exactly as a direct
- * client write.
+ * VERIFIED token, never from the request body) → Firestore write by
+ * the server's service account. Firestore rules deny ALL client
+ * creates on security_logs, so this endpoint is the only way an
+ * audit record can come into existence, and a browser cannot forge
+ * one, with or without a modified client.
  *
  * This endpoint does NOT handle logins. Firebase Authentication
  * requests (sign-in, registration, password reset, OTP) travel from
@@ -20,6 +21,7 @@
 import { NextResponse } from "next/server";
 import { clientIp, getIngestLimiters, ingestGate, rateLimitSecret } from "@/server/ratelimit";
 import { verifyFirebaseIdToken } from "@/server/verify-token";
+import { getServiceAccount, writeSecurityLogDoc } from "@/server/service-account";
 
 const EVENT_TYPES = new Set([
   "login_success",
@@ -87,6 +89,14 @@ export async function POST(req: Request) {
     }
   }
   if (PRE_AUTH_TYPES.has(type) && !identifierHash) return json(400, { error: "invalid_request" });
+  /* Idempotency: the client generates one eventId per event and
+     reuses it on its single bounded retry, so a retry can never
+     create a duplicate record (the write returns 409, mapped to
+     success below). Absent or malformed ids get a server uuid. */
+  const eventId =
+    typeof body.eventId === "string" && /^[0-9a-f-]{36}$/i.test(body.eventId)
+      ? body.eventId
+      : crypto.randomUUID();
 
   /* ---- 2. Rate-limit gate (fail closed; before token/Firestore) -- */
   const gate = await ingestGate({
@@ -119,7 +129,8 @@ export async function POST(req: Request) {
   if (!PRE_AUTH_TYPES.has(type) && !actorUid) return json(401, { error: "unauthorized" });
   if (PRE_AUTH_TYPES.has(type) && actorUid) return json(400, { error: "invalid_request" });
 
-  /* ---- 4. Write via Firestore REST; rules still govern the write - */
+  /* ---- 4. Write with the service account (the only writer) ------ */
+  if (!getServiceAccount()) return json(503, { error: "security_service_unavailable" });
   const fields: Record<string, unknown> = {
     type: { stringValue: type },
     actorUid: actorUid ? { stringValue: actorUid } : { nullValue: null },
@@ -134,22 +145,7 @@ export async function POST(req: Request) {
       },
     };
   }
-
-  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/security_logs?documentId=${crypto.randomUUID()}`;
-  let resp: Response;
-  try {
-    resp = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
-      },
-      body: JSON.stringify({ fields }),
-    });
-  } catch {
-    return json(502, { error: "ingest_failed" });
-  }
-  if (resp.status === 403) return json(403, { error: "forbidden" });
-  if (!resp.ok) return json(502, { error: "ingest_failed" });
-  return json(202, { ok: true });
+  const outcome = await writeSecurityLogDoc(projectId, eventId, fields);
+  if (outcome === "error") return json(502, { error: "ingest_failed" });
+  return json(202, { ok: true, ...(outcome === "exists" ? { deduped: true } : {}) });
 }
