@@ -125,7 +125,7 @@ normalized identifier) work even if IP identification is unavailable.
 - Security headers (HSTS, X-Frame-Options DENY, nosniff,
   Referrer-Policy, Permissions-Policy) are set in `next.config.ts`.
 
-## 7. Server-side rate limiting (Upstash) — implemented, pending activation
+## 7. Server-side rate limiting (Upstash) — ACTIVE (activated 2026-10-23)
 
 **Implemented in code (2026-10-23):** `src/server/ratelimit.ts`
 (@upstash/redis + @upstash/ratelimit, sliding windows, lazy
@@ -171,7 +171,18 @@ the endpoint answers **503 `{error:"security_service_unavailable"}`**
 writing them through any unverifiable path (deliberate trade-off,
 §10).
 
-**Activation (owner, ~10 minutes):**
+**Activation: COMPLETED 2026-10-23.** The Upstash database
+`bcbhs-alumni` (ap-south-1 Mumbai, Free plan) and the service
+account `audit-log-writer` (Cloud Datastore User role only, single
+live key) were created, all four variables below were set in
+Vercel Production, and the site was redeployed. **Live verification
+against the production endpoint (same day):** valid event → **202**;
+malformed → **400**; oversized → **413**; a 22-request flood against
+one identifier produced exactly 20 x 202 then **429 with
+`Retry-After`**, the shared Redis counter staying exact across
+serverless instances; the recorded event was read back from
+Firestore in the expected shape, and all 21 test records were
+deleted afterwards. Original setup steps kept for reference:
 1. Upstash: sign in at console.upstash.com → Create Database (Redis,
    regional, close to the deployment) → open it → REST API section →
    copy `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
@@ -256,19 +267,17 @@ Auth traffic, which does not transit Vercel.
   a malicious insider with a modified client could omit an entry.
   The system of record for privileged changes remains Firestore
   itself (rules + document history); the log is a monitoring aid,
-  and its rules guarantee entries cannot be forged for another actor
-  or altered after the fact.
+  and its rules guarantee entries cannot be created by clients at
+  all, forged for another actor, or altered after the fact.
 - No alerting pipeline yet: repeated `login_failed` /
   `login_throttled` spikes are visible in `security_logs` but do not
   yet notify anyone. A scheduled check can be added if wanted.
-- The audit ingest endpoint's rate limiting is **implemented and
-  unit-verified but not yet live**: it needs the owner's Upstash
-  database + env vars (§7). Until then the endpoint fails closed
-  (503) and — because the insecure direct-write fallback was
-  deliberately removed — **live audit events are dropped, not
-  recorded**, until activation. That is the accepted cost of closing
-  the bypass: the trail has a gap rather than a forgeable record in
-  the interim. (Demo mode's local trail is unaffected; it never
-  claimed trust.) Cross-instance behaviour of the real limiters and
-  the endpoint's 202/429 paths against a live Redis remain
-  unverified until activation and are NOT claimed.
+- The audit ingest endpoint is **ACTIVE in production** (§7,
+  live-verified 2026-10-23: 202/400/413, exact 429 threshold with
+  Retry-After, Firestore read-back, test records deleted). One
+  residual note: between the pass-2 deployment and activation
+  (same day), live audit events were dropped by design rather than
+  recorded through the removed insecure fallback, so the trail has
+  a short gap on 2026-10-23; from activation onward it is
+  continuous. (Demo mode's local trail is unaffected; it never
+  claimed trust.)
