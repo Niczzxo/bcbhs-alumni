@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
 import DashboardShell, { type DashSection } from "@/components/DashboardShell";
@@ -25,15 +25,18 @@ import type { MemberRole, UserProfile } from "@/lib/types";
 export default function SuperAdminPage() {
   const { user, members, loading, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember, banMember, unbanMember } = useAuth();
 
-  const approved = members.filter((m) => m.status === "approved");
+  const approved = useMemo(() => members.filter((m) => m.status === "approved"), [members]);
   /* All Members search (owner's request, 2026-10-23): a name field
      (quietly also matches email / member ID when pasted) plus a
      batch picker; both filters combine. */
   const [dashKey, setDashKey] = useState("overview");
   const [memberQuery, setMemberQuery] = useState("");
   const [memberBatch, setMemberBatch] = useState("");
-  const memberBatches = [...new Set(approved.map((m) => m.batch))].sort().reverse();
-  const shownMembers = approved.filter((m) => {
+  const memberBatches = useMemo(
+    () => [...new Set(approved.map((m) => m.batch))].sort().reverse(),
+    [approved],
+  );
+  const shownMembers = useMemo(() => approved.filter((m) => {
     const q = memberQuery.trim().toLowerCase();
     const nameOk =
       !q ||
@@ -42,37 +45,44 @@ export default function SuperAdminPage() {
       (m.memberId ?? "").toLowerCase().includes(q);
     const batchOk = !memberBatch || m.batch === memberBatch;
     return nameOk && batchOk;
-  });
-  const pending = members.filter((m) => m.status === "pending");
-  const banned = members.filter((m) => m.status === "banned");
-  const staff = members.filter(
-    (m) => (m.status === "approved" || m.status === "banned") && m.role !== "member",
+  }), [approved, memberQuery, memberBatch]);
+  const pending = useMemo(() => members.filter((m) => m.status === "pending"), [members]);
+  const banned = useMemo(() => members.filter((m) => m.status === "banned"), [members]);
+  const staff = useMemo(
+    () => members.filter((m) => (m.status === "approved" || m.status === "banned") && m.role !== "member"),
+    [members],
   );
-  const admins = members.filter((m) => m.role === "admin" || m.role === "super_admin");
-  const editors = members.filter((m) => m.role === "editor");
+  const admins = useMemo(() => members.filter((m) => m.role === "admin" || m.role === "super_admin"), [members]);
+  const editors = useMemo(() => members.filter((m) => m.role === "editor"), [members]);
 
   /* The permissions a person holds are exactly their toggled list,
      for Batch Reps and editors alike. Editors start EMPTY: the super
      admin grants each section explicitly (owner's rule, 2026-10-23). */
-  const effectivePerms = (m: UserProfile): string[] => m.permissions;
+  const effectivePerms = useCallback((m: UserProfile): string[] => m.permissions, []);
 
-  const togglePerm = (m: UserProfile, key: string) => {
-    const base = effectivePerms(m);
-    const next = base.includes(key)
-      ? base.filter((p) => p !== key)
-      : [...base, key];
-    setPermissions(m.id, next);
-  };
+  const togglePerm = useCallback(
+    (m: UserProfile, key: string) => {
+      const base = effectivePerms(m);
+      const next = base.includes(key)
+        ? base.filter((p) => p !== key)
+        : [...base, key];
+      setPermissions(m.id, next);
+    },
+    [effectivePerms, setPermissions],
+  );
 
-  const changeRole = (m: UserProfile, role: MemberRole) => {
-    if (m.id === user?.id) return; /* never change your own role from here */
-    setRole(m.id, role);
-  };
+  const changeRole = useCallback(
+    (m: UserProfile, role: MemberRole) => {
+      if (m.id === user?.id) return; /* never change your own role from here */
+      setRole(m.id, role);
+    },
+    [user, setRole],
+  );
 
   /* The one member card: role select, position, guest view, ban and
      the permission grid. Used by Roles & Access (staff only) and by
      All Members (every approved member). */
-  const renderCard = (m: UserProfile) => (
+  const renderCard = useCallback((m: UserProfile) => (
     <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
       <div className="flex flex-wrap items-center gap-4">
         <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
@@ -203,9 +213,15 @@ export default function SuperAdminPage() {
         </div>
       )}
     </Reveal>
-  );
+  ), [user, effectivePerms, changeRole, togglePerm, setPosition, setGuestVisible, banMember, unbanMember]);
 
-  const sections: DashSection[] = [
+  /* Memoized on the data the sections actually read (owner's
+     complaint, 2026-10-24: section switches felt unresponsive).
+     dashKey is deliberately NOT a dependency: switching sections
+     re-renders this page, and with stable section elements React
+     skips re-rendering every already-mounted section — only the
+     shell's highlight and the hidden flags change. */
+  const sections: DashSection[] = useMemo<DashSection[]>(() => [
     {
       key: "overview",
       label: "Overview",
@@ -419,7 +435,7 @@ export default function SuperAdminPage() {
     })),
     { key: "about", label: "About Page", content: <AboutEditor /> },
     { key: "settings", label: "Settings", content: <SettingsManager /> },
-  ];
+  ], [approved, pending, banned, staff, admins, editors, members, loading, approveMember, rejectMember, unbanMember, renderCard, shownMembers, memberBatches, memberQuery, memberBatch]);
 
   return (
     <RequireRole role="super_admin" eyebrow="Full access" title={<>Super Admin <span className="text-gold-gradient">Dashboard</span></>}>

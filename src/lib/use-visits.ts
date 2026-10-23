@@ -22,15 +22,11 @@ export interface Visit {
  * the live site always shows the real collection.
  */
 export function useVisits(limitCount = 300): { visits: Visit[]; loaded: boolean } {
-  const [visits, setVisits] = useState<Visit[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [visits, setVisits] = useState<Visit[]>(() => (isFirebaseConfigured ? [] : demoVisits()));
+  const [loaded, setLoaded] = useState(() => !isFirebaseConfigured);
 
   useEffect(() => {
-    if (!isFirebaseConfigured || !db) {
-      setVisits(demoVisits());
-      setLoaded(true);
-      return;
-    }
+    if (!isFirebaseConfigured || !db) return;
     let unsub: (() => void) | undefined;
     let cancelled = false;
     (async () => {

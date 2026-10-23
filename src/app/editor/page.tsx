@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
 import DashboardShell, { type DashSection } from "@/components/DashboardShell";
@@ -25,8 +26,9 @@ export default function EditorPage() {
       { kind: "committee", perm: "manage_committee", label: "Committee" },
     ] as { kind: ContentKind; perm: string; label: string }[]
   ).filter((s) => hasPermission(s.perm));
+  const kindsMemo = useMemo(() => kinds, [kinds]);
 
-  const sections: DashSection[] = [
+  const sections: DashSection[] = useMemo<DashSection[]>(() => [
     {
       key: "overview",
       label: "Overview",
@@ -41,9 +43,9 @@ export default function EditorPage() {
             on the public site right away. Member approvals, official positions and roles are
             handled from the Batch Rep and Super Admin panels, so they do not appear here.
           </p>
-          {kinds.length > 0 ? (
+          {kindsMemo.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2">
-              {kinds.map((s) => (
+              {kindsMemo.map((s) => (
                 <span key={s.kind} className="rounded-full border border-gold/30 bg-gold/5 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest text-gold-2">
                   {s.label}
                 </span>
@@ -57,7 +59,7 @@ export default function EditorPage() {
         </Reveal>
       ),
     },
-    ...kinds.map((s) => ({
+    ...kindsMemo.map((s) => ({
       key: s.kind,
       label: s.label,
       content: <ContentManager kind={s.kind} />,
@@ -75,7 +77,7 @@ export default function EditorPage() {
         </div>
       ),
     })),
-  ];
+  ], [user, kindsMemo, hasPermission]);
 
   return (
     <RequireRole role="editor" eyebrow="Content team" title={<>Editor <span className="text-gold-gradient">Dashboard</span></>}>

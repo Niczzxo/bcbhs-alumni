@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import RequireRole from "@/components/RequireRole";
 import Reveal from "@/components/Reveal";
 import DashboardShell, { type DashSection } from "@/components/DashboardShell";
@@ -31,9 +32,9 @@ export default function AdminPage() {
   const canBan = canApprove;
   const canSeeData = hasPermission("view_member_data");
 
-  const pending = members.filter((m) => m.status === "pending");
-  const approved = members.filter((m) => m.status === "approved");
-  const banned = members.filter((m) => m.status === "banned");
+  const pending = useMemo(() => members.filter((m) => m.status === "pending"), [members]);
+  const approved = useMemo(() => members.filter((m) => m.status === "approved"), [members]);
+  const banned = useMemo(() => members.filter((m) => m.status === "banned"), [members]);
 
   const contentSections: { kind: ContentKind; perm: string; label: string }[] = (
     [
@@ -43,8 +44,12 @@ export default function AdminPage() {
       { kind: "committee", perm: "manage_committee", label: "Committee" },
     ] as { kind: ContentKind; perm: string; label: string }[]
   ).filter((s) => hasPermission(s.perm));
+  const contentSectionsMemo = useMemo(() => contentSections, [contentSections]);
 
-  const sections: DashSection[] = [
+  /* Memoized for the same reason as the super-admin page: stable
+     section elements keep section switches from re-rendering every
+     mounted section (owner's complaint, 2026-10-24). */
+  const sections: DashSection[] = useMemo<DashSection[]>(() => [
     {
       key: "approvals",
       label: "Approvals",
@@ -223,7 +228,7 @@ export default function AdminPage() {
         </section>
       ),
     },
-    ...contentSections.map((s) => ({
+    ...contentSectionsMemo.map((s) => ({
       key: s.kind,
       label: s.label,
       content: <ContentManager kind={s.kind} />,
@@ -241,7 +246,7 @@ export default function AdminPage() {
         </div>
       ),
     })),
-  ];
+  ], [pending, approved, banned, loading, canApprove, canBan, canSeeData, user, approveMember, rejectMember, banMember, unbanMember, setPosition, setGuestVisible, contentSectionsMemo, hasPermission]);
 
   return (
     <RequireRole role="admin" eyebrow="Batch Representatives" title={<>Batch Rep <span className="text-gold-gradient">Panel</span></>}>

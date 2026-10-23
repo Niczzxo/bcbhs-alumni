@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { startTransition, useEffect, useRef, useState, type ReactNode } from "react";
 
 /* Section icons for the sidebar + mobile sheet (owner's reference
    layout, 2026-10-24). Unknown keys fall back to a plain dot. */
@@ -93,33 +93,66 @@ export default function DashboardShell({
      with its data, and switching is instant from the first tap. */
   const keysSig = sections.map((s) => s.key).join(",");
   const warmedRef = useRef(false);
+  const lastInteractRef = useRef(0);
   useEffect(() => {
     if (warmedRef.current) return;
     warmedRef.current = true;
     const keys = keysSig.split(",").filter(Boolean);
     let i = 0;
+    let cancelled = false;
     let timer: number | undefined;
+    let idle: number | undefined;
+    const ric = window.requestIdleCallback as
+      | ((cb: () => void, opts?: { timeout: number }) => number)
+      | undefined;
+    const cic = window.cancelIdleCallback as ((id: number) => void) | undefined;
+    /* Warm-mount ONLY in idle slices and never right after a tap
+       (owner's complaint, 2026-10-24: switching felt unresponsive —
+       the old fixed 450ms stampede mounted heavy sections back to
+       back and every tap queued behind a mount). Mounts also run as
+       transitions so the UI stays responsive throughout. */
     const step = () => {
-      if (i >= keys.length) return;
+      if (cancelled || i >= keys.length) return;
+      if (Date.now() - lastInteractRef.current < 2500) {
+        timer = window.setTimeout(step, 600);
+        return;
+      }
       const key = keys[i++];
-      setVisited((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
-      timer = window.setTimeout(step, 450);
+      startTransition(() => {
+        setVisited((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+      });
+      if (i < keys.length) {
+        if (ric) idle = ric(step, { timeout: 3000 });
+        else timer = window.setTimeout(step, 500);
+      }
     };
-    timer = window.setTimeout(step, 800);
-    return () => window.clearTimeout(timer);
+    timer = window.setTimeout(step, 1600);
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+      if (idle !== undefined && cic) cic(idle);
+    };
   }, [keysSig]);
 
   const open = (key: string) => {
     setActive(key);
-    setVisited((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
     setSheetOpen(false);
+    // Mounting a heavy section synchronously inside the tap froze
+    // the whole UI until it rendered. The active state lands now;
+    // the mount runs as a transition (a placeholder shows meanwhile).
+    startTransition(() => {
+      setVisited((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+    });
   };
 
   /* Controlled jumps (quick actions) must also mark the target
      visited so it renders instead of staying unmounted. */
   useEffect(() => {
     if (active) {
-      setVisited((prev) => (prev.has(active) ? prev : new Set(prev).add(active)));
+      lastInteractRef.current = Date.now();
+      startTransition(() => {
+        setVisited((prev) => (prev.has(active) ? prev : new Set(prev).add(active)));
+      });
     }
   }, [active]);
 
@@ -200,6 +233,19 @@ export default function DashboardShell({
       </aside>
 
       <div className="min-w-0 flex-1">
+        {current && !visited.has(current.key) && (
+          <div className="rounded-3xl border border-ivory/10 bg-ink-2 p-6 sm:p-7" aria-live="polite">
+            <div className="flex items-center gap-3">
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-gold/25 border-t-gold" />
+              <p className="text-sm font-semibold text-ivory/85">Loading {current.label}…</p>
+            </div>
+            <div className="mt-6 grid gap-3">
+              <div className="h-24 animate-pulse rounded-2xl bg-ivory/[0.05]" />
+              <div className="h-24 animate-pulse rounded-2xl bg-ivory/[0.04]" />
+              <div className="h-24 animate-pulse rounded-2xl bg-ivory/[0.03]" />
+            </div>
+          </div>
+        )}
         {sections
           .filter((s) => visited.has(s.key))
           .map((s) => (

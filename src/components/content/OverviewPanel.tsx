@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import Image from "next/image";
 import Reveal from "@/components/Reveal";
 import { Avatar } from "@/components/MemberCard";
 import { useContent } from "@/lib/content-context";
