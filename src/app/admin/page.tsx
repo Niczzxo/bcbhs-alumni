@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { ROLE_META, POSITIONS } from "@/lib/types";
 import { usePrivatePhone } from "@/lib/data";
 import ContentManager from "@/components/content/ContentManager";
-import V2Manager from "@/components/content/V2Manager";
+import V2Manager, { V2_SECTIONS } from "@/components/content/V2Manager";
 import type { ContentKind } from "@/components/content/ContentManager";
 
 /** Phone suffix for a member row, fetched from the private store. */
@@ -228,19 +228,19 @@ export default function AdminPage() {
       label: s.label,
       content: <ContentManager kind={s.kind} />,
     })),
-    {
-      key: "community",
-      label: "Community",
+    ...V2_SECTIONS.filter((v) => !v.needsContentPerm || hasPermission("post_announcements")).map((v) => ({
+      key: `v2-${v.key}`,
+      label: v.label,
       content: (
         <div>
-          <h2 className="font-display text-2xl font-bold text-ivory">Community features</h2>
+          <h2 className="font-display text-2xl font-bold text-ivory">{v.label}</h2>
           <div className="gold-rule mt-4 w-32" />
           <div className="mt-8">
-            <V2Manager />
+            <V2Manager section={v.key} />
           </div>
         </div>
       ),
-    },
+    })),
   ];
 
   return (

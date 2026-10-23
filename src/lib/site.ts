@@ -62,7 +62,6 @@ export const MEMBER_PROFILE_LINK = { label: "Profile", href: "/profile" };
 export const MEMBER_MORE_LINKS = [
   { label: "Jobs", href: "/jobs" },
   { label: "Blood Donors", href: "/blood-donors" },
-  { label: "Polls & Voting", href: "/polls" },
   { label: "Mentorship", href: "/mentorship" },
   { label: "Batch Groups", href: "/batches" },
   { label: "Success Stories", href: "/stories" },

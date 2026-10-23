@@ -228,22 +228,6 @@ export interface BloodRequest {
   resolved?: boolean;
 }
 
-/** A community poll. Votes live in PollVote docs (one per member). */
-export interface Poll {
-  id: string;
-  question: string;
-  options: string[];
-  active: boolean;
-  createdAt: string; // ISO
-}
-
-export interface PollVote {
-  id: string; // `${pollId}_${uid}` in live mode
-  pollId: string;
-  uid: string;
-  optionIndex: number;
-}
-
 /** A Hall of Fame entry, a notable alumnus and their story. */
 export interface SuccessStory {
   id: string;
@@ -269,16 +253,6 @@ export interface Business {
   createdAt: string; // ISO
 }
 
-/** A photo on the Memory Wall, school-day memories, super-admin curated. */
-export interface WallPhoto {
-  id: string;
-  url: string; // data URL (browser-compressed) or remote URL
-  caption: string;
-  year?: string;
-  createdAt: string; // ISO
-}
-
-/** A senior alumnus offering mentorship to juniors. */
 export interface MentorProfile {
   id: string;
   memberId: string; // uid

@@ -25,11 +25,8 @@ import {
   DEMO_ANNOUNCEMENTS,
   DEMO_JOBS,
   DEMO_BLOOD_REQUESTS,
-  DEMO_POLLS,
-  DEMO_POLL_VOTES,
   DEMO_STORIES,
   DEMO_BUSINESSES,
-  DEMO_WALL,
   DEMO_MENTORS,
   DEMO_FUND_DONORS,
   DEMO_BATCH_LINKS,
@@ -46,12 +43,9 @@ import type {
   GalleryPhoto,
   JobPost,
   MentorProfile,
-  Poll,
-  PollVote,
   PortalEvent,
   SiteContent,
   SuccessStory,
-  WallPhoto,
 } from "./types";
 
 const CONTENT_STORAGE_KEY = "bcbhs-demo-content-v1";
@@ -63,11 +57,8 @@ interface DemoContent {
   announcements: AnnouncementItem[];
   jobs: JobPost[];
   bloodRequests: BloodRequest[];
-  polls: Poll[];
-  pollVotes: PollVote[];
   stories: SuccessStory[];
   businesses: Business[];
-  wallPhotos: WallPhoto[];
   mentors: MentorProfile[];
   fundDonors: FundDonor[];
   fundInfo: FundInfo;
@@ -83,11 +74,8 @@ function seedContent(): DemoContent {
     announcements: DEMO_ANNOUNCEMENTS,
     jobs: DEMO_JOBS,
     bloodRequests: DEMO_BLOOD_REQUESTS,
-    polls: DEMO_POLLS,
-    pollVotes: DEMO_POLL_VOTES,
     stories: DEMO_STORIES,
     businesses: DEMO_BUSINESSES,
-    wallPhotos: DEMO_WALL,
     mentors: DEMO_MENTORS,
     fundDonors: DEMO_FUND_DONORS,
     fundInfo: DEFAULT_FUND_INFO,
@@ -126,21 +114,12 @@ interface ContentContextValue {
   addBloodRequest: (r: Omit<BloodRequest, "id" | "createdAt">) => Promise<void>;
   updateBloodRequest: (id: string, r: Partial<BloodRequest>) => Promise<void>;
   removeBloodRequest: (id: string) => Promise<void>;
-  polls: Poll[];
-  pollVotes: PollVote[];
-  addPoll: (p: Omit<Poll, "id" | "createdAt">) => Promise<void>;
-  updatePoll: (id: string, p: Partial<Poll>) => Promise<void>;
-  removePoll: (id: string) => Promise<void>;
-  castVote: (pollId: string, uid: string, optionIndex: number) => Promise<void>;
   stories: SuccessStory[];
   addStory: (s: Omit<SuccessStory, "id" | "createdAt">) => Promise<void>;
   removeStory: (id: string) => Promise<void>;
   businesses: Business[];
   addBusiness: (b: Omit<Business, "id" | "createdAt">) => Promise<void>;
   removeBusiness: (id: string) => Promise<void>;
-  wallPhotos: WallPhoto[];
-  addWallPhoto: (p: Omit<WallPhoto, "id" | "createdAt">) => Promise<void>;
-  removeWallPhoto: (id: string) => Promise<void>;
   mentors: MentorProfile[];
   addMentor: (m: Omit<MentorProfile, "id" | "createdAt">) => Promise<void>;
   removeMentor: (id: string) => Promise<void>;
@@ -172,11 +151,8 @@ function emptyContent(): DemoContent {
     announcements: [],
     jobs: [],
     bloodRequests: [],
-    polls: [],
-    pollVotes: [],
     stories: [],
     businesses: [],
-    wallPhotos: [],
     mentors: [],
     fundDonors: [],
     fundInfo: DEFAULT_FUND_INFO,
@@ -187,7 +163,7 @@ function emptyContent(): DemoContent {
 
 const CONTENT_KEYS = [
   "events", "gallery", "committee", "announcements", "jobs", "bloodRequests",
-  "polls", "pollVotes", "stories", "businesses", "wallPhotos", "mentors",
+  "stories", "businesses", "mentors",
   "fundDonors", "batchLinks", "fundInfo", "siteContent",
 ] as const;
 
@@ -313,25 +289,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
               })),
             }));
           }),
-          onSnapshot(collection(db, "polls"), (snap) => {
-            markArrived("polls");
-            if (cancelled) return;
-            setContent((p) => ({
-              ...p,
-              polls: snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Poll, "id">) })),
-            }));
-          }),
-          onSnapshot(collection(db, "pollVotes"), (snap) => {
-            markArrived("pollVotes");
-            if (cancelled) return;
-            setContent((p) => ({
-              ...p,
-              pollVotes: snap.docs.map((d) => ({
-                id: d.id,
-                ...(d.data() as Omit<PollVote, "id">),
-              })),
-            }));
-          }),
           onSnapshot(collection(db, "stories"), (snap) => {
             markArrived("stories");
             if (cancelled) return;
@@ -351,17 +308,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
               businesses: snap.docs.map((d) => ({
                 id: d.id,
                 ...(d.data() as Omit<Business, "id">),
-              })),
-            }));
-          }),
-          onSnapshot(collection(db, "wallPhotos"), (snap) => {
-            markArrived("wallPhotos");
-            if (cancelled) return;
-            setContent((p) => ({
-              ...p,
-              wallPhotos: snap.docs.map((d) => ({
-                id: d.id,
-                ...(d.data() as Omit<WallPhoto, "id">),
               })),
             }));
           }),
@@ -432,10 +378,8 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         | "announcements"
         | "jobs"
         | "requests"
-        | "polls"
         | "stories"
         | "businesses"
-        | "wallPhotos"
         | "mentors"
         | "fundDonors",
       op: "add" | "update" | "remove",
@@ -523,27 +467,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         } as Record<string, unknown>),
       updateBloodRequest: (id, r) => mutate("requests", "update", id, r as Record<string, unknown>),
       removeBloodRequest: (id) => mutate("requests", "remove", id),
-      polls: content.polls,
-      pollVotes: content.pollVotes,
-      addPoll: (p) =>
-        mutate("polls", "add", null, {
-          ...p,
-          createdAt: new Date().toISOString(),
-        } as Record<string, unknown>),
-      updatePoll: (id, p) => mutate("polls", "update", id, p as Record<string, unknown>),
-      removePoll: (id) => mutate("polls", "remove", id),
-      castVote: async (pollId, uid, optionIndex) => {
-        const vote: PollVote = { id: `${pollId}_${uid}`, pollId, uid, optionIndex };
-        if (!isFirebaseConfigured || !db) {
-          setContent((prev) => ({
-            ...prev,
-            pollVotes: [...prev.pollVotes.filter((v) => v.id !== vote.id), vote],
-          }));
-          return;
-        }
-        const { doc, setDoc } = await import("firebase/firestore");
-        await setDoc(doc(db, "pollVotes", vote.id), { pollId, uid, optionIndex });
-      },
       stories: content.stories,
       addStory: (s) =>
         mutate("stories", "add", null, {
@@ -558,13 +481,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
           createdAt: new Date().toISOString(),
         } as Record<string, unknown>),
       removeBusiness: (id) => mutate("businesses", "remove", id),
-      wallPhotos: content.wallPhotos,
-      addWallPhoto: (p) =>
-        mutate("wallPhotos", "add", null, {
-          ...p,
-          createdAt: new Date().toISOString(),
-        } as Record<string, unknown>),
-      removeWallPhoto: (id) => mutate("wallPhotos", "remove", id),
       mentors: content.mentors,
       addMentor: (m) =>
         mutate("mentors", "add", null, {

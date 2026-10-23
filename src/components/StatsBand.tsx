@@ -42,6 +42,7 @@ export default function StatsBand() {
      (never during prerender), so the number rolls over every
      January with no code change and no redeploy. */
   const [year, setYear] = useState(2026);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time client hydration, mirrors Footer
   useEffect(() => setYear(new Date().getFullYear()), []);
   /* Placement (owner's layout, screenshot-clarified 2026-10-23):
      Years of Legacy in the MIDDLE on every viewport. Desktop:

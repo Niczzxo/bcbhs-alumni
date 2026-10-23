@@ -13,11 +13,8 @@ import type {
   AnnouncementItem,
   JobPost,
   BloodRequest,
-  Poll,
-  PollVote,
   SuccessStory,
   Business,
-  WallPhoto,
   MentorProfile,
   FundDonor,
   BatchLink,
@@ -469,21 +466,7 @@ export const DEMO_BLOOD_REQUESTS: BloodRequest[] = [
   },
 ];
 
-export const DEMO_POLLS: Poll[] = [
-  {
-    id: "p-1",
-    question: "Where should the Grand Reunion 2026 be held?",
-    options: ["School Field", "Bogura Convention Centre", "Momo Inn Park"],
-    active: true,
-    createdAt: "2026-10-15T00:00:00.000Z",
-  },
-];
 
-export const DEMO_POLL_VOTES: PollVote[] = [
-  { id: "p-1_u-1", pollId: "p-1", uid: "u-1", optionIndex: 0 },
-  { id: "p-1_u-admin", pollId: "p-1", uid: "u-admin", optionIndex: 0 },
-  { id: "p-1_u-superadmin", pollId: "p-1", uid: "u-superadmin", optionIndex: 2 },
-];
 
 export const DEMO_STORIES: SuccessStory[] = [
   {
@@ -513,15 +496,6 @@ export const DEMO_BUSINESSES: Business[] = [
   },
 ];
 
-export const DEMO_WALL: WallPhoto[] = [
-  {
-    id: "w-1",
-    url: "/images/school.jpg",
-    caption: "The school building, where it all began",
-    year: "2010",
-    createdAt: "2026-10-01T00:00:00.000Z",
-  },
-];
 
 export const DEMO_MENTORS: MentorProfile[] = [
   {

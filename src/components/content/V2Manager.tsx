@@ -2,7 +2,7 @@
 
 /* ------------------------------------------------------------------ */
 /*  v2.0 community-feature management for the staff dashboards:        */
-/*  blood requests, polls, hall of fame, businesses, memory wall,      */
+/*  blood requests, hall of fame, businesses,      */
 /*  mentors, scholarship fund, batch WhatsApp links. Each section      */
 /*  gates itself on the signed-in staff member's role/permissions.     */
 /* ------------------------------------------------------------------ */
@@ -60,23 +60,31 @@ function ImagePick({ onPick, label }: { onPick: (dataUrl: string) => void; label
   );
 }
 
-export default function V2Manager() {
+/** The community work areas, one per dashboard sidebar entry
+ *  (owner, 2026-10-24: no single "Community" page anymore, each
+ *  area is its own sidebar section in every dashboard). */
+export type V2SectionKey = "blood" | "stories" | "listings" | "fund" | "batches";
+export const V2_SECTIONS: { key: V2SectionKey; label: string; blurb: string; needsContentPerm?: boolean }[] = [
+  { key: "blood", label: "Blood Requests", blurb: "Urgent requests posted by members. Mark resolved once the blood is managed." },
+  { key: "stories", label: "Hall of Fame", blurb: "Celebrate notable alumni on the Success Stories page.", needsContentPerm: true },
+  { key: "listings", label: "Businesses & Mentors", blurb: "Moderate member-submitted listings." },
+  { key: "fund", label: "Scholarship Fund", blurb: "Scholarship & Donation Fund, totals, bKash number and the honour roll.", needsContentPerm: true },
+  { key: "batches", label: "Batch Groups", blurb: "WhatsApp group invite link per batch, shown on the Batch Groups page." },
+];
+
+export default function V2Manager({ section }: { section: V2SectionKey }) {
   const { user, members, hasPermission, isSuperAdmin } = useAuth();
   const {
     bloodRequests, updateBloodRequest, removeBloodRequest,
-    polls, addPoll, updatePoll, removePoll, pollVotes,
     stories, addStory, removeStory,
     businesses, removeBusiness,
-    wallPhotos, addWallPhoto, removeWallPhoto,
     mentors, removeMentor,
     fundInfo, saveFundInfo, fundDonors, addFundDonor, removeFundDonor,
     batchLinks, setBatchLink,
   } = useContent();
 
   const canContent = hasPermission("post_announcements");
-  const [pollForm, setPollForm] = useState({ question: "", options: "" });
   const [storyForm, setStoryForm] = useState({ name: "", batch: "2015", title: "", story: "", photoURL: "" });
-  const [wallForm, setWallForm] = useState({ url: "", caption: "", year: "" });
   const [fundForm, setFundForm] = useState<null | typeof fundInfo>(null);
   const [donorForm, setDonorForm] = useState({ name: "", batch: "", amount: "", note: "" });
   const [linkDrafts, setLinkDrafts] = useState<Record<string, string>>({});
@@ -96,7 +104,9 @@ export default function V2Manager() {
   const fund = fundForm ?? fundInfo;
 
   return (
-    <div className="grid gap-6 xl:grid-cols-2">
+    <div className="grid gap-6">
+{section === "blood" && (
+        <>
       {/* ------------------------- blood requests ------------------------- */}
       <div className={card}>
         <SectionTitle blurb="Urgent requests posted by members. Mark resolved once the blood is managed.">
@@ -126,55 +136,10 @@ export default function V2Manager() {
         </div>
       </div>
 
-      {/* ------------------------------ polls ------------------------------ */}
-      {canContent && (
-        <div className={card}>
-          <SectionTitle blurb="Create a poll, members vote on the Polls page, one vote each.">
-            Polls & Voting
-          </SectionTitle>
-          <div className="mt-4 space-y-3">
-            <div>
-              <label className={labelCls}>Question</label>
-              <input className={inputCls} value={pollForm.question} onChange={(e) => setPollForm({ ...pollForm, question: e.target.value })} placeholder="e.g. Where should the reunion be held?" />
-            </div>
-            <div>
-              <label className={labelCls}>Options (one per line)</label>
-              <textarea className={inputCls} rows={3} value={pollForm.options} onChange={(e) => setPollForm({ ...pollForm, options: e.target.value })} placeholder={"School Field\nConvention Centre\nMomo Inn Park"} />
-            </div>
-            <button
-              className={btnPrimary}
-              disabled={!pollForm.question.trim() || pollForm.options.split("\n").filter((o) => o.trim()).length < 2}
-              onClick={async () => {
-                await addPoll({
-                  question: pollForm.question.trim(),
-                  options: pollForm.options.split("\n").map((o) => o.trim()).filter(Boolean),
-                  active: true,
-                });
-                setPollForm({ question: "", options: "" });
-              }}
-            >
-              Publish poll
-            </button>
-          </div>
-          <div className="mt-5 space-y-3">
-            {polls.map((p) => (
-              <div key={p.id} className="rounded-2xl border border-ivory/10 bg-ink p-4">
-                <p className="text-sm font-semibold text-ivory">{p.question}</p>
-                <p className="mt-1 text-xs text-muted">
-                  {pollVotes.filter((v) => v.pollId === p.id).length} votes · {p.active ? "Open" : "Closed"}
-                </p>
-                <div className="mt-3 flex gap-2">
-                  <button className={btnGhost} onClick={() => updatePoll(p.id, { active: !p.active })}>
-                    {p.active ? "Close voting" : "Reopen"}
-                  </button>
-                  <button className={btnDanger} onClick={() => removePoll(p.id)}>Delete</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        </>
       )}
-
+{section === "stories" && (
+        <>
       {/* --------------------------- hall of fame --------------------------- */}
       {canContent && (
         <div className={card}>
@@ -219,6 +184,10 @@ export default function V2Manager() {
         </div>
       )}
 
+        </>
+      )}
+{section === "listings" && (
+        <>
       {/* ------------------------- businesses / mentors ------------------------- */}
       <div className={card}>
         <SectionTitle blurb="Moderate member-submitted listings.">
@@ -243,47 +212,10 @@ export default function V2Manager() {
         </div>
       </div>
 
-      {/* ---------------------------- memory wall ---------------------------- */}
-      {isSuperAdmin && (
-        <div className={card}>
-          <SectionTitle blurb="Super-admin only. Old school photos for the Memory Wall.">
-            Memory Wall
-          </SectionTitle>
-          <div className="mt-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <ImagePick label={wallForm.url ? "✓ Photo chosen, change" : "📷 Choose old photo"} onPick={(url) => setWallForm({ ...wallForm, url })} />
-              {wallForm.url && <span className="text-xs text-emerald-300">Ready</span>}
-            </div>
-            <input className={inputCls} placeholder="Caption, e.g. Class VIII, Section A, annual sports day" value={wallForm.caption} onChange={(e) => setWallForm({ ...wallForm, caption: e.target.value })} />
-            <input className={inputCls} placeholder="Year (optional), e.g. 2009" value={wallForm.year} onChange={(e) => setWallForm({ ...wallForm, year: e.target.value })} />
-            <button
-              className={btnPrimary}
-              disabled={!wallForm.url || !wallForm.caption.trim()}
-              onClick={async () => {
-                await addWallPhoto({ url: wallForm.url, caption: wallForm.caption.trim(), year: wallForm.year.trim() || undefined });
-                setWallForm({ url: "", caption: "", year: "" });
-              }}
-            >
-              Add to Memory Wall
-            </button>
-          </div>
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            {wallPhotos.map((p) => (
-              <div key={p.id} className="group relative overflow-hidden rounded-xl">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.url} alt={p.caption} className="h-20 w-full object-cover" />
-                <button
-                  onClick={() => removeWallPhoto(p.id)}
-                  className="absolute inset-x-0 bottom-0 bg-red-900/85 py-1 text-[10px] font-bold uppercase tracking-widest text-red-100 opacity-0 transition-opacity group-hover:opacity-100"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+        </>
       )}
-
+{section === "fund" && (
+        <>
       {/* ------------------------------ fund ------------------------------ */}
       {(isSuperAdmin || canContent) && (
         <div className={card}>
@@ -357,6 +289,10 @@ export default function V2Manager() {
         </div>
       )}
 
+        </>
+      )}
+{section === "batches" && (
+        <>
       {/* --------------------------- batch links --------------------------- */}
       {(isSuperAdmin || isBatchRep) && (
         <div className={card}>
@@ -388,7 +324,9 @@ export default function V2Manager() {
             })}
           </div>
         </div>
+      )}        </>
       )}
+
     </div>
   );
 }
