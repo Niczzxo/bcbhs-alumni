@@ -120,6 +120,43 @@ export default function OverviewPanel({
     };
   }, [visits]);
 
+  /* Who visited, grouped by person (owner, 2026-10-24): the wall
+     shows people, not page trails — each member once with their
+     latest visit + how often they came; guests fold into a single
+     anonymous tile. Profile photos come from the members list. */
+  const people = useMemo(() => {
+    const byUid = new Map<
+      string,
+      { name: string; latest: number; count: number; profile?: UserProfile }
+    >();
+    let guestCount = 0;
+    let guestLatest = 0;
+    for (const v of visits) {
+      if (v.uid && v.name) {
+        const cur = byUid.get(v.uid);
+        if (cur) {
+          cur.count += 1;
+          cur.latest = Math.max(cur.latest, v.ts);
+        } else {
+          byUid.set(v.uid, {
+            name: v.name,
+            latest: v.ts,
+            count: 1,
+            profile: members.find((m) => m.id === v.uid),
+          });
+        }
+      } else {
+        guestCount += 1;
+        guestLatest = Math.max(guestLatest, v.ts);
+      }
+    }
+    return {
+      list: [...byUid.values()].sort((a, b) => b.latest - a.latest),
+      guestCount,
+      guestLatest,
+    };
+  }, [visits, members]);
+
   const batches = useMemo(() => {
     const counts = new Map<string, number>();
     for (const m of members) {
@@ -284,6 +321,52 @@ export default function OverviewPanel({
             ))}
           </div>
 
+          {/* People strip: overlapping avatars of the most recent
+              visitors, the section's signature (owner, 2026-10-24). */}
+          {people.list.length > 0 && (
+            <div className="relative mt-6 overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-gold/[0.08] via-ink to-ink px-5 py-4">
+              <div className="pointer-events-none absolute -left-10 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-gold/15 blur-3xl" />
+              <div className="relative flex flex-wrap items-center gap-4">
+                <div className="flex -space-x-3">
+                  {people.list.slice(0, 8).map((person, i) => (
+                    <span
+                      key={person.name + i}
+                      className={`relative rounded-full ring-2 ${i === 0 ? "z-10 ring-gold" : "ring-ink-2"}`}
+                      title={person.name}
+                    >
+                      <Avatar name={person.name} photoURL={person.profile?.photoURL} size="md" />
+                    </span>
+                  ))}
+                  {people.list.length > 8 && (
+                    <span className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full bg-ink-3 text-xs font-extrabold text-gold-2 ring-2 ring-ink-2">
+                      +{people.list.length - 8}
+                    </span>
+                  )}
+                </div>
+                <p className="min-w-40 flex-1 text-sm leading-relaxed text-muted">
+                  <span className="font-display text-base font-bold text-ivory">
+                    {people.list.length} member{people.list.length === 1 ? "" : "s"}
+                  </span>{" "}
+                  visited recently
+                  {people.guestCount > 0 && (
+                    <>
+                      , plus{" "}
+                      <span className="font-semibold text-ivory/85">
+                        {people.guestCount} guest visit{people.guestCount === 1 ? "" : "s"}
+                      </span>
+                    </>
+                  )}
+                  .
+                </p>
+                {people.list[0] && (
+                  <span className="rounded-full border border-gold/35 bg-gold/10 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2">
+                    Latest · {people.list[0].name.split(" ").slice(-1)[0]} · {relTime(people.list[0].latest)}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="mt-6 grid gap-7 lg:grid-cols-[1fr_1.2fr]">
             {/* last 7 days bars */}
             <div>
@@ -309,39 +392,51 @@ export default function OverviewPanel({
               </p>
             </div>
 
-            {/* recent visitors */}
+            {/* who visited — people only, no page trails */}
             <div>
-              <p className={eyebrowCls}>Recent visitors</p>
-              <div className="mt-3 grid gap-1">
+              <p className={eyebrowCls}>Who visited</p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {!loaded ? (
                   <p className="py-4 text-sm text-muted">Loading visitors…</p>
                 ) : visits.length === 0 ? (
-                  <p className="rounded-2xl border border-ivory/[0.07] bg-ink px-4 py-5 text-sm leading-relaxed text-muted">
+                  <p className="rounded-2xl border border-ivory/[0.07] bg-ink px-4 py-5 text-sm leading-relaxed text-muted sm:col-span-2">
                     No visits recorded yet. Counting starts as soon as people browse the site.
                   </p>
                 ) : (
-                  visits.slice(0, 7).map((v) => (
-                    <div key={v.id} className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-ivory/[0.03]">
-                      {v.name ? (
-                        <Avatar name={v.name} size="sm" />
-                      ) : (
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ivory/15 bg-ink-3 text-muted">
+                  <>
+                    {people.list.slice(0, 6).map((person) => (
+                      <div
+                        key={person.name}
+                        className="flex items-center gap-3 rounded-2xl border border-ivory/[0.07] bg-ink px-3.5 py-3 transition-colors hover:border-gold/30"
+                      >
+                        <Avatar name={person.name} photoURL={person.profile?.photoURL} size="ml" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-ivory">{person.name}</p>
+                          <p className="truncate text-[11px] text-muted">
+                            {person.profile ? `Batch ${person.profile.batch}` : "Member"} · {relTime(person.latest)}
+                          </p>
+                        </div>
+                        {person.count > 1 && (
+                          <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 text-[10px] font-extrabold text-gold-2">
+                            ×{person.count}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                    {people.guestCount > 0 && (
+                      <div className="flex items-center gap-3 rounded-2xl border border-dashed border-ivory/15 bg-ink px-3.5 py-3">
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-ivory/15 bg-ink-3 text-muted">
                           <PersonIcon />
                         </span>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-ivory">
-                          {v.name ?? "Guest visitor"}
-                          {v.role === "super_admin" && <span className="ml-2 text-[10px] font-bold uppercase tracking-widest text-gold-2">Super admin</span>}
-                          {v.role === "admin" && <span className="ml-2 text-[10px] font-bold uppercase tracking-widest text-gold-2">Batch Rep</span>}
-                        </p>
-                        <p className="truncate text-[11px] text-muted">
-                          {v.path} · {v.device}
-                        </p>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-ivory/85">Guest visitors</p>
+                          <p className="truncate text-[11px] text-muted">
+                            {people.guestCount} visit{people.guestCount === 1 ? "" : "s"} · latest {relTime(people.guestLatest)}
+                          </p>
+                        </div>
                       </div>
-                      <span className="shrink-0 text-[11px] font-medium text-muted/80">{relTime(v.ts)}</span>
-                    </div>
-                  ))
+                    )}
+                  </>
                 )}
               </div>
             </div>
