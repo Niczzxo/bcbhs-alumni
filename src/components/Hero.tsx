@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth-context";
 
@@ -23,13 +23,23 @@ export default function Hero() {
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "60%"]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  /* Scroll-linked parallax is DESKTOP ONLY (owner's screen recording,
+   * 2026-10-23): on phones the giant text layer cannot keep up with
+   * the scroll, it sticks, jumps and ghosts over the next section.
+   * Below lg the hero is fully static and scrolls natively. */
+  const [fx, setFx] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const apply = () => setFx(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   return (
     <section ref={ref} id="top" className="relative flex min-h-svh items-center overflow-hidden">
-      {/* Parallax campus backdrop. will-change keeps both parallax
-          layers on their own compositor layers, so scrolling the
-          hero does not repaint the photo every frame (mobile lag). */}
-      <motion.div style={{ y: bgY }} className="absolute inset-0 -bottom-24 will-change-transform">
+      {/* Parallax campus backdrop (desktop only, see fx above). */}
+      <motion.div style={fx ? { y: bgY } : undefined} className={`absolute inset-0 -bottom-24 ${fx ? "will-change-transform" : ""}`}>
         <Image
           src="/images/school.jpg"
           alt="Bogura Cantonment Board High School campus"
@@ -46,8 +56,8 @@ export default function Hero() {
       <div className="sunburst animate-drift pointer-events-none absolute -right-40 top-1/2 hidden h-[640px] w-[640px] -translate-y-1/2 lg:block" />
 
       <motion.div
-        style={{ y: contentY, opacity: contentOpacity }}
-        className="relative z-10 mx-auto w-full px-5 pb-24 pt-36 text-center will-change-transform sm:px-10 lg:px-[3vw] lg:text-left"
+        style={fx ? { y: contentY, opacity: contentOpacity } : undefined}
+        className={`relative z-10 mx-auto w-full px-5 pb-24 pt-36 text-center sm:px-10 lg:px-[3vw] lg:text-left ${fx ? "will-change-transform" : ""}`}
       >
         {/* Seal emblem */}
         <motion.div
