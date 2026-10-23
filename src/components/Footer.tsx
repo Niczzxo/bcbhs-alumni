@@ -44,9 +44,10 @@ export default function Footer() {
     <footer className="border-t border-gold/20 bg-[#070b1c]">
       <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-12">
         <div className="grid gap-9 md:grid-cols-3 md:gap-10">
-          {/* Brand + affiliation */}
-          <div>
-            <div className="flex items-center gap-4">
+          {/* Brand + affiliation: centered on phones (owner's rule,
+              2026-10-23), left-aligned from md up. */}
+          <div className="text-center md:text-left">
+            <div className="flex items-center justify-center gap-4 md:justify-start">
               <span className="seal-ring relative block h-14 w-14 overflow-hidden rounded-full">
                 <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
               </span>
@@ -62,7 +63,7 @@ export default function Footer() {
             <p className="font-display mt-5 text-xl font-bold text-ivory">
               BCBHS <span className="text-gold-gradient">Alumni</span>
             </p>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted">
+            <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-muted md:mx-0">
               Affiliated with Bogura Cantonment Board High School, the official
               digital home of its graduates, since 2023.
             </p>
