@@ -43,22 +43,23 @@ export default function StatsBand() {
      January with no code change and no redeploy. */
   const [year, setYear] = useState(2026);
   useEffect(() => setYear(new Date().getFullYear()), []);
-  /* Placement (owner's corrected layout, 2026-10-23): on mobile
-     Years of Legacy stands in the MIDDLE, flanked by two stats
-     on its left and two on its right (explicit grid cells in a
-     3-column grid, Legacy spanning both rows, vertically
-     centered). On desktop the five run in a row, Legacy last. */
+  /* Placement (owner's layout, 2026-10-23): Years of Legacy
+     stands in the MIDDLE on every viewport, flanked by two stats
+     on each side. On mobile that is explicit grid cells in a
+     3-column grid (Legacy spanning both rows, vertically
+     centered); on desktop the five run in a row with Legacy
+     third, two stats to its left and two to its right. */
   const cell = "lg:col-start-auto lg:row-start-auto";
   const items = [
     { label: "Registered Members", value: stats.totalMembers, suffix: "+", cls: `order-1 col-start-1 row-start-1 ${cell}` },
     { label: "Living Abroad", value: stats.membersAbroad, suffix: "+", cls: `order-2 col-start-3 row-start-1 ${cell}` },
-    { label: "Batches Connected", value: stats.batches, suffix: "", cls: `order-4 lg:order-3 col-start-1 row-start-2 ${cell}` },
-    { label: "Events & Reunions", value: stats.eventsHeld, suffix: "", cls: `order-5 lg:order-4 col-start-3 row-start-2 ${cell}` },
+    { label: "Batches Connected", value: stats.batches, suffix: "", cls: `order-4 col-start-1 row-start-2 ${cell}` },
+    { label: "Events & Reunions", value: stats.eventsHeld, suffix: "", cls: `order-5 col-start-3 row-start-2 ${cell}` },
     {
       label: "Years of Legacy",
       value: Math.max(0, year - SCHOOL_FOUNDED_YEAR),
       suffix: "",
-      cls: `order-3 lg:order-5 col-start-2 row-start-1 row-span-2 self-center ${cell} lg:row-span-1`,
+      cls: `order-3 col-start-2 row-start-1 row-span-2 self-center ${cell} lg:row-span-1`,
     },
   ];
   return (
