@@ -53,7 +53,7 @@ export default function PollsPage() {
                 const total = votes.length;
                 const mine = votes.find((v) => v.uid === user.id);
                 return (
-                  <Reveal key={poll.id} delay={Math.min(i, 3) * 0.06} className="rounded-3xl border border-ivory/10 bg-ink-2 p-7">
+                  <Reveal key={poll.id} delay={Math.min(i, 3) * 0.06} className="card-lift rounded-3xl border border-ivory/10 bg-ink-2 p-7 transition-all duration-300 hover:border-gold/40">
                     <div className="flex items-start justify-between gap-4">
                       <h2 className="font-display text-xl font-bold leading-snug text-ivory sm:text-2xl">
                         {poll.question}

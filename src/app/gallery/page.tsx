@@ -157,7 +157,7 @@ export default function GalleryPage() {
 
         {/* ------------------------------ lightbox ------------------------------ */}
         {album && lightbox !== null && album.photos[lightbox] && (
-          <div className="fixed inset-0 z-[80] flex flex-col bg-black/92 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={`${album.name} photo viewer`}>
+          <div className="animate-fade-in fixed inset-0 z-[80] flex flex-col bg-black/92 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={`${album.name} photo viewer`}>
             <div className="flex items-center justify-between gap-4 px-5 py-4">
               <p className="min-w-0 truncate text-sm font-semibold text-ivory">{album.name}</p>
               <p className="shrink-0 text-xs font-bold uppercase tracking-widest text-muted">
@@ -175,9 +175,10 @@ export default function GalleryPage() {
             <div className="relative flex flex-1 items-center justify-center overflow-hidden px-3 pb-6 sm:px-16">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
+                key={lightbox}
                 src={album.photos[lightbox].src}
                 alt={album.photos[lightbox].caption}
-                className="max-h-full max-w-full rounded-xl object-contain"
+                className="animate-pop-in max-h-full max-w-full rounded-xl object-contain"
               />
               {album.photos.length > 1 && (
                 <>

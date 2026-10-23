@@ -8,7 +8,7 @@ import { useAuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth-context";
 
 const PRIMARY_CTA =
-  "btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105";
+  "btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105 active:scale-95";
 
 /** Full-viewport hero, campus photo with parallax, seal-ring emblem, gold CTAs. */
 export default function Hero() {
@@ -40,14 +40,24 @@ export default function Hero() {
     <section ref={ref} id="top" className="relative flex min-h-svh items-center overflow-hidden">
       {/* Parallax campus backdrop (desktop only, see fx above). */}
       <motion.div style={fx ? { y: bgY } : undefined} className={`absolute inset-0 -bottom-24 ${fx ? "will-change-transform" : ""}`}>
-        <Image
-          src="/images/school.jpg"
-          alt="Bogura Cantonment Board High School campus"
-          fill
-          className="object-cover"
-          quality={90}
-          priority
-        />
+        {/* One-time cinematic settle zoom on load (both viewports):
+            the campus eases from 1.12x to rest and then stays still,
+            so it costs nothing while scrolling. */}
+        <motion.div
+          className="absolute inset-0"
+          initial={{ scale: 1.12 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 2.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Image
+            src="/images/school.jpg"
+            alt="Bogura Cantonment Board High School campus"
+            fill
+            className="object-cover"
+            quality={90}
+            priority
+          />
+        </motion.div>
       </motion.div>
       {/* Navy cinematic grade over the photo */}
       <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/55 to-ink" />
@@ -79,16 +89,30 @@ export default function Hero() {
           Bogura Cantonment Board High School
         </motion.p>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="font-display mx-auto max-w-4xl text-5xl font-extrabold leading-[1.05] text-ivory sm:text-6xl lg:text-7xl lg:mx-0"
-        >
-          Once a <span className="text-gold-gradient">BCBHSian</span>,
-          <br />
-          Always a BCBHSian.
-        </motion.h1>
+        {/* Masked line reveal: each headline line rises out of its
+            own clipped row, the editorial premium standard. */}
+        <h1 className="font-display mx-auto max-w-4xl text-5xl font-extrabold leading-[1.05] text-ivory sm:text-6xl lg:text-7xl lg:mx-0">
+          <span className="block overflow-hidden pb-1">
+            <motion.span
+              className="block"
+              initial={{ y: "112%" }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.35, duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
+            >
+              Once a <span className="text-gold-gradient">BCBHSian</span>,
+            </motion.span>
+          </span>
+          <span className="block overflow-hidden pb-1">
+            <motion.span
+              className="block"
+              initial={{ y: "112%" }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.5, duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
+            >
+              Always a BCBHSian.
+            </motion.span>
+          </span>
+        </h1>
 
         <motion.p
           initial={{ opacity: 0, y: 24 }}
@@ -129,7 +153,7 @@ export default function Hero() {
           )}
           <Link
             href="/directory"
-            className="rounded-full border border-gold/50 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:bg-gold/10"
+            className="rounded-full border border-gold/50 px-9 py-4 text-sm font-bold uppercase tracking-widest text-gold-2 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:bg-gold/10 active:scale-95"
           >
             Explore Directory
           </Link>

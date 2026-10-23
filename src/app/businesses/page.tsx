@@ -85,7 +85,7 @@ export default function BusinessesPage() {
           subtitle="Shops, services and startups run by BCBHS alumni. When you buy from a brother, the whole family grows."
         />
         <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
-          <Reveal className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
+          <Reveal className="card-lift rounded-3xl border border-ivory/10 bg-ink-2 p-6 transition-all duration-300 hover:border-gold/40">
             <div className="grid gap-4 sm:grid-cols-4">
               <input className={inputCls} placeholder="Search businesses…" value={query} onChange={(e) => setQuery(e.target.value)} />
               <select className={inputCls} value={category} onChange={(e) => setCategory(e.target.value)}>

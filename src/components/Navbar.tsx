@@ -33,12 +33,15 @@ export default function Navbar() {
 
   useEffect(() => scrollY.on("change", (v) => setScrolled(v > 40)), [scrollY]);
 
-  /* Close menus whenever the route changes. */
-  useEffect(() => {
+  /* Close menus whenever the route changes. Render-phase reset (the
+     React-documented pattern): no effect, so no cascading render. */
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
     setMenuOpen(false);
     setMoreOpen(false);
     setProfileOpen(false);
-  }, [pathname]);
+  }
 
   /* Close the profile dropdown on outside click / Escape. */
   useEffect(() => {
@@ -158,7 +161,7 @@ export default function Navbar() {
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  className={`group relative text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
+                  className={`group nav-underline relative text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
                     pathname === link.href ? "text-gold-2" : "text-ivory/80"
                   }`}
                 >
@@ -178,7 +181,7 @@ export default function Navbar() {
                   onClick={() => setMoreOpen((v) => !v)}
                   aria-haspopup="true"
                   aria-expanded={moreOpen}
-                  className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
+                  className={`nav-underline flex items-center gap-1 text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
                     moreOpen ? "text-gold-2" : "text-ivory/80"
                   }`}
                 >

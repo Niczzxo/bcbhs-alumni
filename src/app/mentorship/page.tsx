@@ -84,7 +84,7 @@ export default function MentorshipPage() {
             </Reveal>
           ) : (
             <>
-              <Reveal className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
+              <Reveal className="card-lift rounded-3xl border border-ivory/10 bg-ink-2 p-6 transition-all duration-300 hover:border-gold/40">
                 <input
                   className={inputCls}
                   placeholder="Search mentors, try “BCS”, “BUET”, “software”, “medicine”…"

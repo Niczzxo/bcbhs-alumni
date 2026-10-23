@@ -27,7 +27,7 @@ export default function MemoryWallPage() {
           ) : (
             <div className="columns-1 gap-6 sm:columns-2 lg:columns-3">
               {sorted.map((p, i) => (
-                <Reveal key={p.id} delay={Math.min(i % 6, 5) * 0.05} className="mb-6 break-inside-avoid overflow-hidden rounded-3xl border border-ivory/10 bg-ink-2">
+                <Reveal key={p.id} delay={Math.min(i % 6, 5) * 0.05} className="mb-6 break-inside-avoid overflow-hidden rounded-3xl border border-ivory/10 bg-ink-2 transition-colors duration-300 hover:border-gold/40">
                   <div className="relative w-full">
                     <Image
                       src={p.url}

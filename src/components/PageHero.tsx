@@ -22,7 +22,12 @@ export default function PageHero({ eyebrow, title, subtitle }: PageHeroProps) {
         >
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gold">{eyebrow}</p>
           <h1 className="font-display mt-4 text-4xl font-extrabold text-ivory sm:text-5xl">{title}</h1>
-          <div className="gold-rule mx-auto mt-6 w-48" />
+          <motion.div
+            className="gold-rule mx-auto mt-6 w-48 origin-center"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.35, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          />
           {subtitle && <p className="mx-auto mt-6 max-w-2xl text-muted">{subtitle}</p>}
         </motion.div>
       </div>

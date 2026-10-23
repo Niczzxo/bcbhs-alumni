@@ -86,8 +86,8 @@ function EventDetailModal({ e, onClose }: { e: PortalEvent; onClose: () => void 
 
   return (
     <div className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label={e.title}>
-      <button type="button" aria-label="Close details" onClick={onClose} className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
-      <div className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-ivory/10 bg-ink-2 shadow-[0_30px_80px_rgba(0,0,0,0.6)] sm:rounded-3xl">
+      <button type="button" aria-label="Close details" onClick={onClose} className="animate-fade-in absolute inset-0 bg-black/75 backdrop-blur-sm" />
+      <div className="animate-pop-in relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-ivory/10 bg-ink-2 shadow-[0_30px_80px_rgba(0,0,0,0.6)] sm:rounded-3xl">
         <button
           type="button"
           onClick={onClose}

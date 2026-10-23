@@ -102,7 +102,7 @@ export default function BloodDonorsPage() {
           subtitle="In an emergency, every minute counts. Find a verified alumni donor near you."
         />
         <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
-          <Reveal className="rounded-3xl border border-red-400/25 bg-ink-2 p-6">
+          <Reveal className="card-lift rounded-3xl border border-red-400/25 bg-ink-2 p-6 transition-all duration-300 hover:border-red-400/50">
             <div className="grid gap-4 sm:grid-cols-3">
               <select className={inputCls} value={group} onChange={(e) => setGroup(e.target.value)}>
                 <option value="">All blood groups</option>
@@ -149,7 +149,7 @@ export default function BloodDonorsPage() {
             {activeRequests.length > 0 ? (
               <div className="mt-8 grid gap-6 md:grid-cols-2">
                 {activeRequests.map((r, i) => (
-                  <Reveal key={r.id} delay={Math.min(i, 4) * 0.06} className="rounded-3xl border border-red-400/30 bg-ink-2 p-6">
+                  <Reveal key={r.id} delay={Math.min(i, 4) * 0.06} className="card-lift rounded-3xl border border-red-400/30 bg-ink-2 p-6 transition-all duration-300 hover:border-red-400/60">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="font-display text-xl font-bold text-ivory">{r.patientName}</p>

@@ -63,7 +63,7 @@ export default function BatchesPage() {
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {batches.map((b, i) => (
-                <Reveal key={b.batch} delay={Math.min(i % 6, 5) * 0.06} className="rounded-3xl border border-ivory/10 bg-ink-2 p-7">
+                <Reveal key={b.batch} delay={Math.min(i % 6, 5) * 0.06} className="card-lift rounded-3xl border border-ivory/10 bg-ink-2 p-7 transition-all duration-300 hover:border-gold/40">
                   <div className="flex items-baseline justify-between">
                     <p className="font-display text-4xl font-extrabold text-ivory">
                       {b.batch}

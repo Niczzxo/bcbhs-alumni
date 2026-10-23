@@ -33,10 +33,9 @@ export default function DirectoryPage() {
   /* Guests: show only the admin-picked preview members.
      Live mode fetches them from Firestore; demo mode filters the local list. */
   useEffect(() => {
-    if (!isGuest || !isFirebaseConfigured || !db) {
-      setGuestMembers(null);
-      return;
-    }
+    /* Signed-in visitors never read this state (the members memo below
+       only uses it for guests), so there is nothing to reset here. */
+    if (!isGuest || !isFirebaseConfigured || !db) return;
     let cancelled = false;
     (async () => {
       try {

@@ -27,7 +27,7 @@ export default function StoriesPage() {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {sorted.map((s, i) => (
-                <Reveal key={s.id} delay={Math.min(i % 6, 5) * 0.06} className="flex flex-col rounded-3xl border border-gold/20 bg-ink-2 p-7">
+                <Reveal key={s.id} delay={Math.min(i % 6, 5) * 0.06} className="card-lift flex flex-col rounded-3xl border border-gold/20 bg-ink-2 p-7 transition-all duration-300 hover:border-gold/50">
                   <div className="flex items-center gap-4">
                     <span className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-gold/40 bg-ink">
                       {s.photoURL ? (
