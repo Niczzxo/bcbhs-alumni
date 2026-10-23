@@ -3,6 +3,7 @@
 import { useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useSiteStats } from "@/lib/data";
+import { SCHOOL_FOUNDED_YEAR } from "@/lib/site";
 import Reveal from "./Reveal";
 
 /** Animated number that counts up when scrolled into view. */
@@ -37,11 +38,21 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
 /** Gold-on-navy stats band, live Firestore counts when configured. */
 export default function StatsBand() {
   const stats = useSiteStats();
+  /* School age, auto-advancing: the clock is read in an effect
+     (never during prerender), so the number rolls over every
+     January with no code change and no redeploy. */
+  const [year, setYear] = useState(2026);
+  useEffect(() => setYear(new Date().getFullYear()), []);
   const items = [
     { label: "Registered Members", value: stats.totalMembers, suffix: "+" },
     { label: "Living Abroad", value: stats.membersAbroad, suffix: "+" },
     { label: "Batches Connected", value: stats.batches, suffix: "" },
     { label: "Events & Reunions", value: stats.eventsHeld, suffix: "" },
+    {
+      label: "Years of Legacy",
+      value: Math.max(0, year - SCHOOL_FOUNDED_YEAR),
+      suffix: "",
+    },
   ];
   return (
     <section className="grain relative overflow-hidden border-y border-gold/20 bg-ink-2 py-16">
@@ -53,9 +64,13 @@ export default function StatsBand() {
           </p>
           <div className="gold-rule mx-auto mt-4 w-48" />
         </Reveal>
-        <div className="grid grid-cols-2 gap-10 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-10 lg:grid-cols-5">
           {items.map((s, i) => (
-            <Reveal key={s.label} delay={i * 0.12} className="text-center">
+            <Reveal
+              key={s.label}
+              delay={i * 0.12}
+              className={`text-center ${i === items.length - 1 ? "col-span-2 lg:col-span-1" : ""}`}
+            >
               <Counter to={s.value} suffix={s.suffix} />
               <p className="mt-3 text-sm font-medium uppercase tracking-[0.2em] text-muted">
                 {s.label}

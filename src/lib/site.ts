@@ -4,6 +4,11 @@
 /*  (Firestore) once the backend is set up.                            */
 /* ------------------------------------------------------------------ */
 
+/** The school's founding year. The "Years of Legacy" stat is the
+ *  current year minus this, so it rolls over on its own every
+ *  January (owner's rule, 2026-10-23: 50 in 2026, 51 in 2027). */
+export const SCHOOL_FOUNDED_YEAR = 1976;
+
 export const PLACEHOLDER_STATS = {
   /** Total registered alumni, TODO: read from Firestore `members` count */
   totalMembers: 1200,
