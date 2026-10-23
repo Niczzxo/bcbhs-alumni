@@ -446,17 +446,22 @@ export default function Navbar() {
                       </Link>
                     </motion.li>
                   )}
-                  {navLinks.map((link) => (
-                    <motion.li
-                      key={link.label}
-                      variants={{ hidden: { opacity: 0, x: 26 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } }}
-                    >
-                      <Link href={link.href} onClick={() => setMenuOpen(false)} className={drawerLinkCls(link.href)}>
-                        {link.label}
-                        <span className="text-muted/60 transition-transform duration-300 group-hover:translate-x-0.5">›</span>
-                      </Link>
-                    </motion.li>
-                  ))}
+                  {/* No Home row in the drawer (owner's call,
+                      2026-10-23): the logo already goes home. Desktop
+                      keeps its Home link. */}
+                  {navLinks
+                    .filter((link) => link.href !== "/")
+                    .map((link) => (
+                      <motion.li
+                        key={link.label}
+                        variants={{ hidden: { opacity: 0, x: 26 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } }}
+                      >
+                        <Link href={link.href} onClick={() => setMenuOpen(false)} className={drawerLinkCls(link.href)}>
+                          {link.label}
+                          <span className="text-muted/60 transition-transform duration-300 group-hover:translate-x-0.5">›</span>
+                        </Link>
+                      </motion.li>
+                    ))}
                   {isVerifiedMember && (
                     <>
                       <motion.li
