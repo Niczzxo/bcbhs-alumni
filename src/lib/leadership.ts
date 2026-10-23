@@ -20,14 +20,17 @@ const rank = (position?: string) => {
 };
 
 /**
- * THE leadership list (owner's merge rule, 2026-10-23): a person
- * given an official position on their profile appears automatically
- * in the Directory, on the Committee page and in the homepage
- * Leadership strip, no separate seat entry needed. Manually added
- * committee seats (for people without a portal account) are appended
- * after the position holders, skipping any whose name matches a
- * holder (the profile wins). Callers pass only the members the
- * viewer may see (guests get guest-visible profiles only).
+ * THE leadership list (owner's merge rule, 2026-10-23; ordering
+ * corrected 2026-10-24): a person given an official position on
+ * their profile appears automatically in the Directory, on the
+ * Committee page and in the homepage Leadership strip, no separate
+ * seat entry needed. Manually added committee seats (for people
+ * without a portal account) join the same list, skipping any whose
+ * name matches a holder (the profile wins). Holders and seats are
+ * sorted TOGETHER by position rank, the more powerful position
+ * first, name as tiebreak, so a President always leads the list
+ * however their entry was sourced. Callers pass only the members
+ * the viewer may see (guests get guest-visible profiles only).
  */
 export function mergeLeadership(
   members: UserProfile[],
@@ -58,7 +61,9 @@ export function mergeLeadership(
       note: s.note,
       photoURL: s.photoURL,
     }));
-  return [...holders, ...manual];
+  return [...holders, ...manual].sort(
+    (a, b) => rank(a.role) - rank(b.role) || a.name.localeCompare(b.name),
+  );
 }
 
 /**

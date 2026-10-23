@@ -173,7 +173,7 @@ export const POSITIONS: string[] = [
   "Organizing Secretary",
   "Treasurer",
   "Director",
-  "Executive Member",
+  "Executive",
 ];
 
 /** Granular admin permissions, toggled by the super admin. */
