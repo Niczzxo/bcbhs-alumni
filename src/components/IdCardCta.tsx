@@ -93,7 +93,7 @@ export default function IdCardCta() {
           </>
         ) : (
           <>
-        <Reveal>
+        <Reveal className="text-center lg:text-left">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gold">
             Membership
           </p>
@@ -115,12 +115,12 @@ export default function IdCardCta() {
 
           {approved && user ? (
             <>
-              <p className="mt-5 max-w-lg leading-relaxed text-muted">
+              <p className="mx-auto mt-5 max-w-lg leading-relaxed text-muted lg:mx-0">
                 Welcome back, {user.name.split(" ")[0]}, your verified digital
                 ID card is ready. Anyone can scan its QR code to confirm you
                 are a true BCBHSian. Print it, carry it, show it with pride.
               </p>
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
                 <Link href="/id-card" className={GOLD_BUTTON}>
                   View My ID Card
                 </Link>
@@ -129,7 +129,7 @@ export default function IdCardCta() {
                   Edit Profile
                 </Link>
               </div>
-              <ul className="mt-8 space-y-3 text-sm text-muted">
+              <ul className="mt-8 flex flex-col items-center space-y-3 text-sm text-muted lg:items-start">
                 <Tick>Member ID, {user.memberId ?? "-"}</Tick>
                 <Tick>Batch {user.batch} · {user.department ?? "Alumni"}</Tick>
                 <Tick>QR verification works even when printed</Tick>
@@ -137,18 +137,18 @@ export default function IdCardCta() {
             </>
           ) : pending && user ? (
             <>
-              <p className="mt-5 max-w-lg leading-relaxed text-muted">
+              <p className="mx-auto mt-5 max-w-lg leading-relaxed text-muted lg:mx-0">
                 Thanks for registering, {user.name.split(" ")[0]}. Your
                 application is with our admins for verification, this can
                 take up to 7 days. The moment you are approved, your official
                 ID card with its QR code appears right here.
               </p>
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
                 <Link href="/profile/edit" className={GOLD_BUTTON}>
                   View My Application
                 </Link>
               </div>
-              <ul className="mt-8 space-y-3 text-sm text-muted">
+              <ul className="mt-8 flex flex-col items-center space-y-3 text-sm text-muted lg:items-start">
                 <Tick>Registration received, Batch {user.batch}</Tick>
                 <Tick>Admin verification in progress</Tick>
                 <Tick>Your card activates automatically on approval</Tick>
@@ -156,18 +156,18 @@ export default function IdCardCta() {
             </>
           ) : (
             <>
-              <p className="mt-5 max-w-lg leading-relaxed text-muted">
+              <p className="mx-auto mt-5 max-w-lg leading-relaxed text-muted lg:mx-0">
                 Register with your batch and roll, get verified by our admins, and
                 your official digital ID card is generated automatically, complete
                 with a QR code anyone can scan to confirm you are a true BCBHSian.
                 Print it, carry it, show it with pride.
               </p>
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
                 <button onClick={() => openAuthModal("register")} className={GOLD_BUTTON}>
                   Register Now
                 </button>
               </div>
-              <ul className="mt-8 space-y-3 text-sm text-muted">
+              <ul className="mt-8 flex flex-col items-center space-y-3 text-sm text-muted lg:items-start">
                 <Tick>Free registration for all BCBHS graduates</Tick>
                 <Tick>Admin-verified, no fake members, ever</Tick>
                 <Tick>QR verification works even when printed</Tick>

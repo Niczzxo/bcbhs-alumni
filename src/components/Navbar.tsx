@@ -3,13 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, useScroll } from "framer-motion";
+import { AnimatePresence, motion, useScroll } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { PUBLIC_NAV_LINKS, MEMBER_NAV_LINKS, MEMBER_MORE_LINKS, MEMBER_PROFILE_LINK } from "@/lib/site";
+import { ROLE_META } from "@/lib/types";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
+import { Avatar } from "@/components/MemberCard";
 
-/** Sticky top navigation, transparent over the hero, solid navy after scroll. */
+/**
+ * Sticky top navigation, transparent over the hero, solid navy after
+ * scroll. Bar layout (owner's rules, 2026-10-23): the staff dashboard
+ * button sits LAST in the bar where Logout used to be; Logout lives
+ * at the very end of the mobile drawer. The mobile menu is a pro
+ * slide-in drawer whose link list scrolls inside the drawer (the
+ * page behind it never moves).
+ */
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -27,6 +36,22 @@ export default function Navbar() {
     setMenuOpen(false);
     setMoreOpen(false);
   }, [pathname]);
+
+  /* While the drawer is open, lock the page behind it (the drawer
+     list scrolls on its own) and let Escape close it. */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   /* Close the More dropdown on outside click. */
   useEffect(() => {
@@ -63,236 +88,351 @@ export default function Navbar() {
     }
   };
 
+  const drawerLinkCls = (href: string) =>
+    `group relative flex items-center justify-between rounded-xl px-4 py-3 text-[15px] font-medium tracking-wide transition-colors ${
+      pathname === href
+        ? "bg-gold/10 text-gold-2"
+        : "text-ivory/85 hover:bg-ivory/5 hover:text-gold-2"
+    }`;
+
   return (
-    <motion.header
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "border-b border-gold/20 bg-ink/90 shadow-[0_8px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl"
-          : "bg-transparent"
-      }`}
-    >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:px-8">
-        <Link href="/" onClick={handleLogoClick} className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
-          <span className="seal-ring relative block h-10 w-10 shrink-0 overflow-hidden rounded-full transition-transform duration-500 group-hover:rotate-[15deg] sm:h-12 sm:w-12">
-            <Image
-              src="/images/logo.jpg"
-              alt="BCBHS Alumni logo"
-              fill
-              className="object-cover"
-              priority
-            />
-          </span>
-          <span className="min-w-0 leading-tight">
-            <span className="font-display block truncate text-base font-bold tracking-wide text-ivory sm:text-lg">
-              BCBHS <span className="text-gold-gradient">Alumni</span>
-            </span>
-            <span className="hidden text-[10px] uppercase tracking-[0.28em] text-muted min-[400px]:block">
-              Est. 2023 · Bogura
-            </span>
-          </span>
-        </Link>
-
-        <ul className="hidden items-center gap-8 lg:flex">
-          {navLinks.map((link) => (
-            <li key={link.label}>
-              <Link
-                href={link.href}
-                className={`group relative text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
-                  pathname === link.href ? "text-gold-2" : "text-ivory/80"
-                }`}
-              >
-                {link.label}
-                <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-gold transition-all duration-300 group-hover:w-full" />
-              </Link>
-            </li>
-          ))}
-          {isVerifiedMember && (
-            <li
-              ref={moreRef}
-              className="relative"
-              onMouseEnter={() => setMoreOpen(true)}
-              onMouseLeave={() => setMoreOpen(false)}
-            >
-              <button
-                onClick={() => setMoreOpen((v) => !v)}
-                aria-haspopup="true"
-                aria-expanded={moreOpen}
-                className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
-                  moreOpen ? "text-gold-2" : "text-ivory/80"
-                }`}
-              >
-                More
-                <span className={`text-[10px] transition-transform duration-300 ${moreOpen ? "rotate-180" : ""}`}>▾</span>
-              </button>
-              <div
-                className={`absolute right-0 top-full pt-3 transition-all duration-200 ${
-                  moreOpen ? "visible opacity-100" : "invisible opacity-0"
-                }`}
-              >
-                <ul className="w-48 overflow-hidden rounded-2xl border border-gold/25 bg-ink-2/95 py-2 shadow-[0_18px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-                  {MEMBER_MORE_LINKS.map((link) => (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        onClick={() => setMoreOpen(false)}
-                        className={`block px-5 py-2.5 text-sm tracking-wide transition-colors hover:bg-gold/10 hover:text-gold-2 ${
-                          pathname === link.href ? "text-gold-2" : "text-ivory/80"
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-          )}
-          {isVerifiedMember && (
-            <li>
-              <Link
-                href={MEMBER_PROFILE_LINK.href}
-                className={`group relative text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
-                  pathname === MEMBER_PROFILE_LINK.href ? "text-gold-2" : "text-ivory/80"
-                }`}
-              >
-                {MEMBER_PROFILE_LINK.label}
-                <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-gold transition-all duration-300 group-hover:w-full" />
-              </Link>
-            </li>
-          )}
-        </ul>
-
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          {loading ? (
-            /* Auth still resolving, hold the space so a reload never
-             * flashes the logged-out buttons at a signed-in member. */
-            <div className="h-9 w-36" aria-hidden="true" />
-          ) : user ? (
-            <>
-              {/* Staff-only: the dashboard button appears solely for
-                  members a super admin has given an admin/editor role. */}
-              {isAdmin && (
-                <Link
-                  href={dashboardHref}
-                  className="hidden rounded-full border border-gold/40 px-5 py-2 text-xs font-bold uppercase tracking-wider text-gold-2 transition-colors hover:bg-gold/10 sm:block"
-                >
-                  {dashboardLabel}
-                </Link>
-              )}
-              <button
-                onClick={() => logout()}
-                className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-muted transition-colors hover:text-ivory"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => openAuthModal("login")}
-                className="hidden text-xs font-bold uppercase tracking-wider text-ivory/70 transition-colors hover:text-gold-2 sm:block"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => openAuthModal("register")}
-                className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-[0_0_24px_rgba(212,169,78,0.35)] transition-transform duration-300 hover:scale-105 sm:px-6 sm:py-2.5 sm:text-sm"
-              >
-                Register
-              </button>
-            </>
-          )}
-          {/* mobile hamburger */}
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-full border border-gold/30 text-gold-2 lg:hidden"
-          >
-            <span
-              className={`block h-0.5 w-5 bg-current transition-transform duration-300 ${menuOpen ? "translate-y-[4px] rotate-45" : ""}`}
-            />
-            <span
-              className={`block h-0.5 w-5 bg-current transition-opacity duration-300 ${menuOpen ? "opacity-0" : ""}`}
-            />
-            <span
-              className={`block h-0.5 w-5 bg-current transition-transform duration-300 ${menuOpen ? "-translate-y-[4px] -rotate-45" : ""}`}
-            />
-          </button>
-        </div>
-      </nav>
-
-      {/* mobile menu panel */}
-      <motion.div
-        initial={false}
-        animate={{ height: menuOpen ? "auto" : 0, opacity: menuOpen ? 1 : 0 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="overflow-hidden border-gold/20 bg-ink/95 backdrop-blur-xl lg:hidden"
-        style={{ borderBottomWidth: menuOpen ? 1 : 0 }}
+    <>
+      <motion.header
+        initial={{ y: -80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+          scrolled
+            ? "border-b border-gold/20 bg-ink/90 shadow-[0_8px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+            : "bg-transparent"
+        }`}
       >
-        <ul className="space-y-1 px-6 py-4">
-          {navLinks.map((link) => (
-            <li key={link.label}>
-              <Link
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className={`block rounded-xl px-4 py-3 text-sm font-medium tracking-wide transition-colors ${
-                  pathname === link.href
-                    ? "bg-gold/10 text-gold-2"
-                    : "text-ivory/80 hover:bg-ivory/5 hover:text-gold-2"
-                }`}
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-          {isVerifiedMember &&
-            MEMBER_MORE_LINKS.map((link) => (
+        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:px-8">
+          <Link href="/" onClick={handleLogoClick} className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
+            <span className="seal-ring relative block h-10 w-10 shrink-0 overflow-hidden rounded-full transition-transform duration-500 group-hover:rotate-[15deg] sm:h-12 sm:w-12">
+              <Image
+                src="/images/logo.jpg"
+                alt="BCBHS Alumni logo"
+                fill
+                className="object-cover"
+                priority
+              />
+            </span>
+            <span className="min-w-0 leading-tight">
+              <span className="font-display block truncate text-base font-bold tracking-wide text-ivory sm:text-lg">
+                BCBHS <span className="text-gold-gradient">Alumni</span>
+              </span>
+              <span className="hidden text-[10px] uppercase tracking-[0.28em] text-muted min-[400px]:block">
+                Est. 2023 · Bogura
+              </span>
+            </span>
+          </Link>
+
+          <ul className="hidden items-center gap-8 lg:flex">
+            {navLinks.map((link) => (
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className={`block rounded-xl px-4 py-3 pl-8 text-sm font-medium tracking-wide transition-colors ${
-                    pathname === link.href
-                      ? "bg-gold/10 text-gold-2"
-                      : "text-ivory/60 hover:bg-ivory/5 hover:text-gold-2"
+                  className={`group relative text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
+                    pathname === link.href ? "text-gold-2" : "text-ivory/80"
                   }`}
                 >
                   {link.label}
+                  <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-gold transition-all duration-300 group-hover:w-full" />
                 </Link>
               </li>
             ))}
-          {isVerifiedMember && (
-            <li>
-              <Link
-                href={MEMBER_PROFILE_LINK.href}
-                onClick={() => setMenuOpen(false)}
-                className={`block rounded-xl px-4 py-3 text-sm font-medium tracking-wide transition-colors ${
-                  pathname === MEMBER_PROFILE_LINK.href
-                    ? "bg-gold/10 text-gold-2"
-                    : "text-ivory/80 hover:bg-ivory/5 hover:text-gold-2"
-                }`}
+            {isVerifiedMember && (
+              <li
+                ref={moreRef}
+                className="relative"
+                onMouseEnter={() => setMoreOpen(true)}
+                onMouseLeave={() => setMoreOpen(false)}
               >
-                {MEMBER_PROFILE_LINK.label}
-              </Link>
-            </li>
-          )}
-          {user && isAdmin && (
-            <li>
-              <Link
-                href={dashboardHref}
-                onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-gold-2"
-              >
-                {dashboardLabel}
-              </Link>
-            </li>
-          )}
-        </ul>
-      </motion.div>
-    </motion.header>
+                <button
+                  onClick={() => setMoreOpen((v) => !v)}
+                  aria-haspopup="true"
+                  aria-expanded={moreOpen}
+                  className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
+                    moreOpen ? "text-gold-2" : "text-ivory/80"
+                  }`}
+                >
+                  More
+                  <span className={`text-[10px] transition-transform duration-300 ${moreOpen ? "rotate-180" : ""}`}>▾</span>
+                </button>
+                <div
+                  className={`absolute right-0 top-full pt-3 transition-all duration-200 ${
+                    moreOpen ? "visible opacity-100" : "invisible opacity-0"
+                  }`}
+                >
+                  <ul className="w-48 overflow-hidden rounded-2xl border border-gold/25 bg-ink-2/95 py-2 shadow-[0_18px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                    {MEMBER_MORE_LINKS.map((link) => (
+                      <li key={link.label}>
+                        <Link
+                          href={link.href}
+                          onClick={() => setMoreOpen(false)}
+                          className={`block px-5 py-2.5 text-sm tracking-wide transition-colors hover:bg-gold/10 hover:text-gold-2 ${
+                            pathname === link.href ? "text-gold-2" : "text-ivory/80"
+                          }`}
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            )}
+            {isVerifiedMember && (
+              <li>
+                <Link
+                  href={MEMBER_PROFILE_LINK.href}
+                  className={`group relative text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
+                    pathname === MEMBER_PROFILE_LINK.href ? "text-gold-2" : "text-ivory/80"
+                  }`}
+                >
+                  {MEMBER_PROFILE_LINK.label}
+                  <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-gold transition-all duration-300 group-hover:w-full" />
+                </Link>
+              </li>
+            )}
+          </ul>
+
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {loading ? (
+              /* Auth still resolving, hold the space so a reload never
+               * flashes the logged-out buttons at a signed-in member. */
+              <div className="h-9 w-36" aria-hidden="true" />
+            ) : user ? (
+              <>
+                {/* Logout is a quiet desktop action now; on phones it
+                    lives at the very end of the drawer. The dashboard
+                    button takes the LAST spot in the bar. */}
+                <button
+                  onClick={() => logout()}
+                  className="hidden rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-muted transition-colors hover:text-ivory sm:block"
+                >
+                  Logout
+                </button>
+                {isAdmin && (
+                  <Link
+                    href={dashboardHref}
+                    className="rounded-full border border-gold/40 px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-gold-2 transition-colors hover:bg-gold/10 sm:px-5 sm:text-xs"
+                  >
+                    {dashboardLabel}
+                  </Link>
+                )}
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => openAuthModal("login")}
+                  className="hidden text-xs font-bold uppercase tracking-wider text-ivory/70 transition-colors hover:text-gold-2 sm:block"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => openAuthModal("register")}
+                  className="btn-shimmer rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-[0_0_24px_rgba(212,169,78,0.35)] transition-transform duration-300 hover:scale-105 sm:px-6 sm:py-2.5 sm:text-sm"
+                >
+                  Register
+                </button>
+              </>
+            )}
+            {/* mobile hamburger */}
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-full border border-gold/30 text-gold-2 lg:hidden"
+            >
+              <span
+                className={`block h-0.5 w-5 bg-current transition-transform duration-300 ${menuOpen ? "translate-y-[4px] rotate-45" : ""}`}
+              />
+              <span
+                className={`block h-0.5 w-5 bg-current transition-opacity duration-300 ${menuOpen ? "opacity-0" : ""}`}
+              />
+              <span
+                className={`block h-0.5 w-5 bg-current transition-transform duration-300 ${menuOpen ? "-translate-y-[4px] -rotate-45" : ""}`}
+              />
+            </button>
+          </div>
+        </nav>
+      </motion.header>
+
+      {/* ---------------- Mobile drawer ---------------- */}
+      <AnimatePresence>
+        {menuOpen && (
+          <div className="fixed inset-0 z-[70] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+            <motion.button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setMenuOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="absolute inset-0 h-full w-full cursor-default bg-ink/70 backdrop-blur-sm"
+            />
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute right-0 top-0 flex h-full w-[330px] max-w-[88vw] flex-col border-l border-gold/25 bg-ink-2 shadow-[-24px_0_60px_rgba(0,0,0,0.55)]"
+            >
+              {/* drawer header */}
+              <div className="flex items-center gap-3 border-b border-ivory/10 px-5 py-4">
+                <span className="seal-ring relative block h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                  <Image src="/images/logo.jpg" alt="BCBHS Alumni logo" fill className="object-cover" />
+                </span>
+                <div className="min-w-0 flex-1 leading-tight">
+                  <p className="font-display truncate text-base font-bold text-ivory">
+                    BCBHS <span className="text-gold-gradient">Alumni</span>
+                  </p>
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-muted">Est. 2023 · Bogura</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Close menu"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ivory/15 text-lg text-muted transition-colors hover:border-gold/40 hover:text-gold-2"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* signed-in identity card */}
+              {user && (
+                <div className="border-b border-ivory/10 px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-ivory">{user.name}</p>
+                      <p className="text-xs text-muted">
+                        Batch {user.batch} · {ROLE_META[user.role].label}
+                      </p>
+                      {user.memberId && <p className="text-[11px] tracking-wide text-gold-2/80">{user.memberId}</p>}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* scrollable link list: the drawer scrolls, not the page */}
+              <nav aria-label="Mobile" className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3">
+                <motion.ul
+                  initial="hidden"
+                  animate="show"
+                  variants={{ show: { transition: { staggerChildren: 0.04, delayChildren: 0.08 } } }}
+                  className="space-y-0.5"
+                >
+                  {navLinks.map((link) => (
+                    <motion.li
+                      key={link.label}
+                      variants={{ hidden: { opacity: 0, x: 26 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } }}
+                    >
+                      <Link href={link.href} onClick={() => setMenuOpen(false)} className={drawerLinkCls(link.href)}>
+                        {link.label}
+                        <span className="text-muted/60 transition-transform duration-300 group-hover:translate-x-0.5">›</span>
+                      </Link>
+                    </motion.li>
+                  ))}
+                  {isVerifiedMember && (
+                    <>
+                      <motion.li
+                        variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.3 } } }}
+                        className="px-4 pb-1 pt-5 text-[10px] font-bold uppercase tracking-[0.28em] text-muted"
+                      >
+                        More
+                      </motion.li>
+                      {MEMBER_MORE_LINKS.map((link) => (
+                        <motion.li
+                          key={link.label}
+                          variants={{ hidden: { opacity: 0, x: 26 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } }}
+                        >
+                          <Link href={link.href} onClick={() => setMenuOpen(false)} className={drawerLinkCls(link.href)}>
+                            {link.label}
+                            <span className="text-muted/60">›</span>
+                          </Link>
+                        </motion.li>
+                      ))}
+                      <motion.li
+                        variants={{ hidden: { opacity: 0, x: 26 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } }}
+                      >
+                        <Link
+                          href={MEMBER_PROFILE_LINK.href}
+                          onClick={() => setMenuOpen(false)}
+                          className={drawerLinkCls(MEMBER_PROFILE_LINK.href)}
+                        >
+                          {MEMBER_PROFILE_LINK.label}
+                          <span className="text-muted/60">›</span>
+                        </Link>
+                      </motion.li>
+                    </>
+                  )}
+                  {user && isAdmin && (
+                    <motion.li
+                      variants={{ hidden: { opacity: 0, x: 26 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } }}
+                      className="pt-3"
+                    >
+                      <Link
+                        href={dashboardHref}
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center justify-between rounded-xl border border-gold/35 bg-gold/10 px-4 py-3 text-[15px] font-bold tracking-wide text-gold-2"
+                      >
+                        {dashboardLabel} Dashboard
+                        <span>›</span>
+                      </Link>
+                    </motion.li>
+                  )}
+                </motion.ul>
+              </nav>
+
+              {/* drawer footer: account actions, Logout LAST (owner's rule) */}
+              <div className="shrink-0 border-t border-ivory/10 px-5 py-4">
+                {user ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logout();
+                    }}
+                    className="w-full rounded-full border border-red-400/35 py-3 text-xs font-bold uppercase tracking-widest text-red-300 transition-colors hover:bg-red-500/10"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        openAuthModal("login");
+                      }}
+                      className="flex-1 rounded-full border border-ivory/20 py-3 text-xs font-bold uppercase tracking-widest text-ivory transition-colors hover:border-gold/50 hover:text-gold-2"
+                    >
+                      Login
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        openAuthModal("register");
+                      }}
+                      className="btn-shimmer flex-1 rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep py-3 text-xs font-bold uppercase tracking-widest text-ink"
+                    >
+                      Register
+                    </button>
+                  </div>
+                )}
+                <p className="mt-3 text-center text-[10px] uppercase tracking-[0.24em] text-muted/70">
+                  Once a BCBHSian, always a family
+                </p>
+              </div>
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

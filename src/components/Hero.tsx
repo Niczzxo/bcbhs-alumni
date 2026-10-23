@@ -45,14 +45,14 @@ export default function Hero() {
 
       <motion.div
         style={{ y: contentY, opacity: contentOpacity }}
-        className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-24 pt-36 sm:px-8"
+        className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-24 pt-36 text-center sm:px-8 lg:text-left"
       >
         {/* Seal emblem */}
         <motion.div
           initial={{ scale: 0.6, opacity: 0, rotate: -20 }}
           animate={{ scale: 1, opacity: 1, rotate: 0 }}
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          className="seal-ring mb-8 h-28 w-28 overflow-hidden rounded-full shadow-[0_0_60px_rgba(212,169,78,0.35)] sm:h-32 sm:w-32"
+          className="seal-ring mx-auto mb-8 h-28 w-28 overflow-hidden rounded-full shadow-[0_0_60px_rgba(212,169,78,0.35)] sm:h-32 sm:w-32 lg:mx-0"
         >
           <Image src="/images/logo.jpg" alt="BCBHS Alumni emblem" width={128} height={128} className="object-cover" />
         </motion.div>
@@ -70,7 +70,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="font-display max-w-4xl text-5xl font-extrabold leading-[1.05] text-ivory sm:text-6xl lg:text-7xl"
+          className="font-display mx-auto max-w-4xl text-5xl font-extrabold leading-[1.05] text-ivory sm:text-6xl lg:text-7xl lg:mx-0"
         >
           Once a <span className="text-gold-gradient">BCBHSian</span>,
           <br />
@@ -81,7 +81,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.7 }}
-          className="mt-6 max-w-2xl text-lg leading-relaxed text-ivory/80"
+          className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-ivory/80 lg:mx-0"
         >
           The official home of every BCBHS graduate, reconnect with batchmates,
           find seniors across the globe, and carry the spirit of our school
@@ -92,7 +92,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.78, duration: 0.7 }}
-          className="mt-10 flex flex-wrap items-center gap-4"
+          className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start"
         >
           {/* Members already joined, send them to their card/application, not registration.
               While auth is still resolving, hold an invisible placeholder so a reload
