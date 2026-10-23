@@ -84,18 +84,29 @@ export default function BatchesPage() {
                       <p className="text-[10px] uppercase tracking-wider text-muted">Abroad</p>
                     </div>
                   </div>
-                  {b.link ? (
-                    <a
-                      href={b.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-6 block rounded-full border border-gold/40 px-5 py-2.5 text-center text-xs font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
-                    >
-                      Join Batch WhatsApp Group
-                    </a>
+                  {/* Join link ONLY on your own batch's card (owner's
+                      rule, 2026-10-24): a member can join only their
+                      own batch group, other batches show no link at
+                      all, just a quiet note. Approved members only,
+                      per the site-wide WhatsApp gate. */}
+                  {user.status === "approved" && user.batch === b.batch ? (
+                    b.link ? (
+                      <a
+                        href={b.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-6 block rounded-full border border-gold/40 px-5 py-2.5 text-center text-xs font-bold uppercase tracking-widest text-gold-2 transition-colors hover:bg-gold/10"
+                      >
+                        Join Batch WhatsApp Group
+                      </a>
+                    ) : (
+                      <p className="mt-6 rounded-full bg-ivory/5 px-5 py-2.5 text-center text-xs text-muted/70">
+                        WhatsApp group link coming soon
+                      </p>
+                    )
                   ) : (
-                    <p className="mt-6 rounded-full bg-ivory/5 px-5 py-2.5 text-center text-xs text-muted/70">
-                      WhatsApp group link coming soon
+                    <p className="mt-6 px-5 py-2.5 text-center text-xs text-muted/60">
+                      Only Batch {b.batch} members can join this group
                     </p>
                   )}
                   {user.batch === b.batch && (
