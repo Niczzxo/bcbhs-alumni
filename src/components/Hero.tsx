@@ -8,7 +8,7 @@ import { useAuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth-context";
 
 const PRIMARY_CTA =
-  "btn-shimmer w-[280px] max-w-full self-center rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105 active:scale-95 sm:w-auto";
+  "btn-shimmer w-[270px] max-w-full self-center rounded-full border border-transparent bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-6 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105 active:scale-95";
 
 /** Full-viewport hero, campus photo with parallax, seal-ring emblem, gold CTAs. */
 export default function Hero() {
@@ -163,7 +163,7 @@ export default function Hero() {
           )}
           <Link
             href="/directory"
-            className="w-[280px] max-w-full self-center rounded-full border border-gold/50 px-9 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-gold-2 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:bg-gold/10 active:scale-95 sm:w-auto"
+            className="w-[270px] max-w-full self-center rounded-full border border-gold/50 px-6 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-gold-2 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:bg-gold/10 active:scale-95"
           >
             Explore Directory
           </Link>

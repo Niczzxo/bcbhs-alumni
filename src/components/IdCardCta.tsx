@@ -28,13 +28,13 @@ const TEASER_MEMBER: UserProfile = {
   createdAt: "2023-01-01T00:00:00.000Z",
 };
 
-/* Mobile button law (owner, 2026-10-23): every button on mobile
-   is the SAME size, full-width and stacked; text-hugging pills of
-   varying widths are gone. From sm up they size to their label. */
+/* Button law (owner, settled 2026-10-23): every CTA button is
+   the SAME moderate size on mobile and desktop alike, one fixed
+   270px width, never sized by its label, never full-width. */
 const GOLD_BUTTON =
-  "btn-shimmer w-[280px] max-w-full self-center rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105 sm:w-auto";
+  "btn-shimmer w-[270px] max-w-full self-center rounded-full border border-transparent bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-6 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105";
 const GHOST_BUTTON =
-  "w-[280px] max-w-full self-center rounded-full border border-gold/40 px-9 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:border-gold hover:bg-gold/10 sm:w-auto";
+  "w-[270px] max-w-full self-center rounded-full border border-gold/40 px-6 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:border-gold hover:bg-gold/10";
 
 function Tick({ children }: { children: React.ReactNode }) {
   return (
