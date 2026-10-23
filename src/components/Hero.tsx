@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useAuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth-context";
@@ -20,13 +20,15 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
   // Parallax: background drifts slower, headline lifts and fades.
-  // A light spring on the progress keeps the drift buttery instead
-  // of tracking the raw scroll 1:1.
-  const smooth = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 0.4 });
-  const bgY = useTransform(smooth, [0, 1], ["0%", "22%"]);
-  const bgYMobile = useTransform(smooth, [0, 1], ["0%", "12%"]);
-  const contentY = useTransform(smooth, [0, 1], ["0%", "60%"]);
-  const contentOpacity = useTransform(smooth, [0, 0.7], [1, 0]);
+  // The drift tracks the raw scroll progress 1:1 with NO spring:
+  // a spring made the photo trail behind the finger and keep
+  // gliding after the scroll stopped, which read as "not working
+  // properly" on the owner's phone (2026-10-23). Direct tracking
+  // feels connected; the ranges are generous enough to see.
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
+  const bgYMobile = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "60%"]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   /* Scroll motion runs on BOTH viewports (owner's direction,
    * 2026-10-23), shaped per device from his earlier screen
    * recording: on phones the giant TEXT layer cannot keep up with
