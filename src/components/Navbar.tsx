@@ -23,7 +23,9 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const moreRef = useRef<HTMLLIElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const { user, logout, isAdmin, isSuperAdmin, loading } = useAuth();
   const { openAuthModal } = useAuthModal();
@@ -35,7 +37,27 @@ export default function Navbar() {
   useEffect(() => {
     setMenuOpen(false);
     setMoreOpen(false);
+    setProfileOpen(false);
   }, [pathname]);
+
+  /* Close the profile dropdown on outside click / Escape. */
+  useEffect(() => {
+    if (!profileOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setProfileOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [profileOpen]);
 
   /* While the drawer is open, lock the page behind it (the drawer
      list scrolls on its own) and let Escape close it. */
@@ -205,18 +227,99 @@ export default function Navbar() {
             {loading ? (
               /* Auth still resolving, hold the space so a reload never
                * flashes the logged-out buttons at a signed-in member. */
-              <div className="h-9 w-36" aria-hidden="true" />
+              <div className="h-9 w-10 sm:w-44" aria-hidden="true" />
             ) : user ? (
               <>
-                {/* Logout is a quiet desktop action now; on phones it
-                    lives at the very end of the drawer. The dashboard
-                    button takes the LAST spot in the bar. */}
+                {/* Profile chip (owner's pick, 2026-10-23): photo +
+                    name + batch in the bar, like the big pro sites.
+                    On phones only the photo shows and it opens the
+                    drawer (which carries the full identity card); on
+                    desktop the chip opens a dropdown with Profile,
+                    ID Card, Dashboard and Logout at the end. The
+                    dashboard button stays LAST in the bar. */}
                 <button
-                  onClick={() => logout()}
-                  className="hidden rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-muted transition-colors hover:text-ivory sm:block"
+                  type="button"
+                  onClick={() => setMenuOpen(true)}
+                  aria-label="Open menu"
+                  className="shrink-0 rounded-full ring-gold/40 transition-shadow hover:ring-2 lg:hidden"
                 >
-                  Logout
+                  <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
                 </button>
+                <div className="relative hidden lg:block" ref={profileRef}>
+                  <button
+                    type="button"
+                    onClick={() => setProfileOpen((v) => !v)}
+                    aria-haspopup="menu"
+                    aria-expanded={profileOpen}
+                    className="flex items-center gap-3 rounded-full border border-ivory/10 bg-ink-2/70 py-1.5 pl-1.5 pr-4 transition-colors hover:border-gold/40"
+                  >
+                    <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
+                    <span className="max-w-44 text-left leading-tight">
+                      <span className="block truncate text-sm font-semibold text-ivory">{user.name}</span>
+                      <span className="block text-[11px] text-muted">Batch {user.batch}</span>
+                    </span>
+                    <span className={`text-[10px] text-muted transition-transform duration-300 ${profileOpen ? "rotate-180" : ""}`}>▾</span>
+                  </button>
+                  {profileOpen && (
+                    <div
+                      role="menu"
+                      className="absolute right-0 top-full z-50 mt-3 w-72 overflow-hidden rounded-3xl border border-gold/25 bg-ink-2/95 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl"
+                    >
+                      <div className="flex items-center gap-3 border-b border-ivory/10 px-5 py-4">
+                        <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-ivory">{user.name}</p>
+                          <p className="truncate text-xs text-muted">{user.email}</p>
+                          <p className="mt-0.5 text-[11px] tracking-wide text-gold-2/90">
+                            {ROLE_META[user.role].label} · Batch {user.batch}
+                            {user.memberId ? ` · ${user.memberId}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <Link
+                          href="/profile"
+                          role="menuitem"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm text-ivory/85 transition-colors hover:bg-gold/10 hover:text-gold-2"
+                        >
+                          Profile <span className="text-muted/60">›</span>
+                        </Link>
+                        <Link
+                          href="/id-card"
+                          role="menuitem"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm text-ivory/85 transition-colors hover:bg-gold/10 hover:text-gold-2"
+                        >
+                          My ID Card <span className="text-muted/60">›</span>
+                        </Link>
+                        {isAdmin && (
+                          <Link
+                            href={dashboardHref}
+                            role="menuitem"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm text-ivory/85 transition-colors hover:bg-gold/10 hover:text-gold-2"
+                          >
+                            {dashboardLabel} Dashboard <span className="text-muted/60">›</span>
+                          </Link>
+                        )}
+                      </div>
+                      <div className="border-t border-ivory/10 p-2">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setProfileOpen(false);
+                            logout();
+                          }}
+                          className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/10"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 {isAdmin && (
                   <Link
                     href={dashboardHref}
