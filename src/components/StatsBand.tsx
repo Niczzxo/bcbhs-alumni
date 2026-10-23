@@ -43,23 +43,22 @@ export default function StatsBand() {
      January with no code change and no redeploy. */
   const [year, setYear] = useState(2026);
   useEffect(() => setYear(new Date().getFullYear()), []);
-  /* Placement (owner's layout, 2026-10-23): Years of Legacy
-     stands in the MIDDLE on every viewport, flanked by two stats
-     on each side. On mobile that is explicit grid cells in a
-     3-column grid (Legacy spanning both rows, vertically
-     centered); on desktop the five run in a row with Legacy
-     third, two stats to its left and two to its right. */
-  const cell = "lg:col-start-auto lg:row-start-auto";
+  /* Placement (owner's final layout, 2026-10-23): Years of
+     Legacy stands in the MIDDLE on every viewport. On mobile:
+     two stats above, Legacy full-width in the middle, two stats
+     below. On desktop: the five run in a row with Legacy third,
+     two stats to its left and two to its right. One order scale
+     (1-5) drives both, Legacy spanning the mobile row only. */
   const items = [
-    { label: "Registered Members", value: stats.totalMembers, suffix: "+", cls: `order-1 col-start-1 row-start-1 ${cell}` },
-    { label: "Living Abroad", value: stats.membersAbroad, suffix: "+", cls: `order-2 col-start-3 row-start-1 ${cell}` },
-    { label: "Batches Connected", value: stats.batches, suffix: "", cls: `order-4 col-start-1 row-start-2 ${cell}` },
-    { label: "Events & Reunions", value: stats.eventsHeld, suffix: "", cls: `order-5 col-start-3 row-start-2 ${cell}` },
+    { label: "Registered Members", value: stats.totalMembers, suffix: "+", cls: "order-1" },
+    { label: "Living Abroad", value: stats.membersAbroad, suffix: "+", cls: "order-2" },
+    { label: "Batches Connected", value: stats.batches, suffix: "", cls: "order-4" },
+    { label: "Events & Reunions", value: stats.eventsHeld, suffix: "", cls: "order-5" },
     {
       label: "Years of Legacy",
       value: Math.max(0, year - SCHOOL_FOUNDED_YEAR),
       suffix: "",
-      cls: `order-3 col-start-2 row-start-1 row-span-2 self-center ${cell} lg:row-span-1`,
+      cls: "order-3 col-span-2 lg:col-span-1",
     },
   ];
   return (
@@ -72,7 +71,7 @@ export default function StatsBand() {
           </p>
           <div className="gold-rule mx-auto mt-4 w-48" />
         </Reveal>
-        <div className="grid grid-cols-3 gap-x-4 gap-y-10 sm:gap-x-10 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-10 lg:grid-cols-5">
           {items.map((s, i) => (
             <Reveal
               key={s.label}
