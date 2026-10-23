@@ -7,10 +7,12 @@ import MemoriesSection from "@/components/MemoriesSection";
 import IdCardCta from "@/components/IdCardCta";
 import Features from "@/components/Features";
 import Footer from "@/components/Footer";
+import HomeReloadTop from "@/components/HomeReloadTop";
 
 export default function Home() {
   return (
     <>
+      <HomeReloadTop />
       <Navbar />
       <main>
         <Hero />
