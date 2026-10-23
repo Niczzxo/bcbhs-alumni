@@ -428,6 +428,24 @@ export default function Navbar() {
                   variants={{ show: { transition: { staggerChildren: 0.04, delayChildren: 0.08 } } }}
                   className="space-y-0.5"
                 >
+                  {/* Profile sits FIRST, right under the identity card
+                      (owner's order, 2026-10-23: it used to be last in
+                      the list); it opens the profile edit page. */}
+                  {user && (
+                    <motion.li
+                      variants={{ hidden: { opacity: 0, x: 26 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } }}
+                      className="pb-2"
+                    >
+                      <Link
+                        href={MEMBER_PROFILE_LINK.href}
+                        onClick={() => setMenuOpen(false)}
+                        className={drawerLinkCls(MEMBER_PROFILE_LINK.href)}
+                      >
+                        {MEMBER_PROFILE_LINK.label}
+                        <span className="text-muted/60">›</span>
+                      </Link>
+                    </motion.li>
+                  )}
                   {navLinks.map((link) => (
                     <motion.li
                       key={link.label}
@@ -458,18 +476,6 @@ export default function Navbar() {
                           </Link>
                         </motion.li>
                       ))}
-                      <motion.li
-                        variants={{ hidden: { opacity: 0, x: 26 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } }}
-                      >
-                        <Link
-                          href={MEMBER_PROFILE_LINK.href}
-                          onClick={() => setMenuOpen(false)}
-                          className={drawerLinkCls(MEMBER_PROFILE_LINK.href)}
-                        >
-                          {MEMBER_PROFILE_LINK.label}
-                          <span className="text-muted/60">›</span>
-                        </Link>
-                      </motion.li>
                     </>
                   )}
                   {user && isAdmin && (
