@@ -25,7 +25,11 @@ export function Avatar({
   const dims = size === "lg" ? "h-28 w-28 text-3xl" : size === "sm" ? "h-10 w-10 text-sm" : "h-20 w-20 text-xl";
   if (photoURL) {
     return (
-      <span className={`seal-ring ${dims} shrink-0 overflow-hidden rounded-full`}>
+      /* `block` is load-bearing: without it the span stays inline, the
+       * h/w classes are ignored and the photo renders at natural size
+       * (the mobile navbar avatar bug, 2026-10-23: fine inside flex
+       * parents, giant inside the plain mobile avatar button). */
+      <span className={`seal-ring relative block ${dims} shrink-0 overflow-hidden rounded-full`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={photoURL} alt={name} className="h-full w-full object-cover" />
       </span>
