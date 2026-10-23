@@ -58,7 +58,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                   <Avatar name={member.name} photoURL={member.photoURL} size="lg" />
                   <div>
                     <h2 className="font-display text-3xl font-extrabold text-ivory">{member.name}</h2>
-                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.25em] text-gold">
+                    <p className="mt-1 whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.16em] text-gold sm:text-xs sm:tracking-[0.25em]">
                       Batch of {member.batch} · {member.memberId}
                     </p>
                     {member.position && (
@@ -70,35 +70,53 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                     )}
                   </div>
                 </div>
-                <div className="gold-rule my-8" />
-                <dl className="grid gap-5 text-center sm:grid-cols-2 sm:text-left">
-                  {[
-                    ["Location", member.isAbroad ? `${member.country ?? "Abroad"} 🌍` : member.district],
-                    ["Profession", member.profession ?? "-"],
-                    ["Organization", member.company ?? "-"],
-                    ["Blood group", member.isDonor ? `${member.bloodGroup ?? "-"} · donor 🩸` : (member.bloodGroup ?? "-")],
-                  ].map(([k, v]) => (
-                    <div key={k}>
-                      <dt className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted">{k}</dt>
-                      <dd className="mt-1 text-ivory/90">{v}</dd>
+                {/* Centered ornament divider */}
+                <div className="mx-auto my-8 flex max-w-[210px] items-center gap-3" aria-hidden="true">
+                  <span className="gold-rule flex-1" />
+                  <span className="h-1.5 w-1.5 rotate-45 bg-gold" />
+                  <span className="gold-rule flex-1" />
+                </div>
+                {/* Details as a hairline stat panel: four cells,
+                    label over value, everything centered. */}
+                <div className="overflow-hidden rounded-2xl border border-ivory/10">
+                  <dl className="grid grid-cols-2 gap-px bg-ivory/10">
+                    {[
+                      ["Location", member.isAbroad ? `${member.country ?? "Abroad"} 🌍` : member.district],
+                      ["Profession", member.profession ?? "-"],
+                      ["Organization", member.company ?? "-"],
+                      ["Blood group", member.isDonor ? `${member.bloodGroup ?? "-"} · donor 🩸` : (member.bloodGroup ?? "-")],
+                    ].map(([k, v]) => (
+                      <div key={k} className="bg-ink px-3 py-4 text-center">
+                        <dt className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted">{k}</dt>
+                        <dd className="mt-1.5 text-[15px] font-medium leading-snug text-ivory/90">{v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+                {/* Actions in hierarchy order: chat first (primary,
+                    full width on phones), then Back, then the two
+                    quiet actions sharing one row. */}
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                  {member.whatsapp && canContact && (
+                    <div className="w-full sm:w-auto [&>a]:w-full [&>a]:justify-center">
+                      <WhatsAppButton whatsapp={member.whatsapp} labeled />
                     </div>
-                  ))}
-                </dl>
-                <div className="mt-8 flex flex-wrap justify-center gap-4 sm:justify-start">
-                  <Link href="/directory" className="rounded-full border border-gold/40 px-6 py-3 text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10">
+                  )}
+                  <Link href="/directory" className="rounded-full border border-gold/40 px-6 py-3 text-center text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10 sm:text-left">
                     Back to Directory
                   </Link>
-                  {member.whatsapp && canContact && <WhatsAppButton whatsapp={member.whatsapp} labeled />}
-                  {isOwn && (
-                    <Link href="/profile/edit" className="rounded-full border border-ivory/15 px-6 py-3 text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory">
-                      Edit profile
-                    </Link>
-                  )}
-                  {member.memberId && (
-                    <Link href={`/verify/${member.memberId}`} className="rounded-full border border-ivory/15 px-6 py-3 text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory">
-                      Verify membership
-                    </Link>
-                  )}
+                  <div className="flex gap-3 sm:contents">
+                    {isOwn && (
+                      <Link href="/profile/edit" className="flex-1 rounded-full border border-ivory/15 px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory sm:flex-none sm:px-6">
+                        Edit profile
+                      </Link>
+                    )}
+                    {member.memberId && (
+                      <Link href={`/verify/${member.memberId}`} className="flex-1 rounded-full border border-ivory/15 px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory sm:flex-none sm:px-6">
+                        Verify membership
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </Reveal>
               <Reveal delay={0.1} className="flex flex-col items-center lg:col-span-2 lg:items-start">
