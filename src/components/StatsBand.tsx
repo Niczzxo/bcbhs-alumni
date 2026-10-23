@@ -7,7 +7,7 @@ import { SCHOOL_FOUNDED_YEAR } from "@/lib/site";
 import Reveal from "./Reveal";
 
 /** Animated number that counts up when scrolled into view. */
-function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
+function Counter({ to, suffix = "", big = false }: { to: number; suffix?: string; big?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   const [value, setValue] = useState(0);
@@ -28,7 +28,7 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   }, [inView, to]);
 
   return (
-    <span ref={ref} className="font-display text-gold-gradient text-5xl font-extrabold sm:text-6xl">
+    <span ref={ref} className={`font-display text-gold-gradient font-extrabold ${big ? "text-7xl sm:text-8xl" : "text-5xl sm:text-6xl"}`}>
       {value.toLocaleString()}
       {suffix}
     </span>
@@ -59,6 +59,7 @@ export default function StatsBand() {
       value: Math.max(0, year - SCHOOL_FOUNDED_YEAR),
       suffix: "",
       cls: "order-3 col-span-2 lg:col-span-1",
+      hero: true,
     },
   ];
   return (
@@ -71,15 +72,23 @@ export default function StatsBand() {
           </p>
           <div className="gold-rule mx-auto mt-4 w-48" />
         </Reveal>
-        <div className="grid grid-cols-2 gap-10 lg:grid-cols-5">
+        <div className="grid grid-cols-2 items-center gap-10 lg:grid-cols-5">
           {items.map((s, i) => (
             <Reveal
               key={s.label}
               delay={i * 0.12}
-              className={`text-center ${s.cls}`}
+              className={`text-center ${s.cls} ${
+                s.hero
+                  ? "rounded-[2rem] border border-gold/40 bg-gold/[0.07] px-4 py-7 shadow-[0_0_50px_rgba(212,169,78,0.22)]"
+                  : ""
+              }`}
             >
-              <Counter to={s.value} suffix={s.suffix} />
-              <p className="mt-3 text-sm font-medium uppercase tracking-[0.2em] text-muted">
+              <Counter to={s.value} suffix={s.suffix} big={s.hero} />
+              <p
+                className={`mt-3 text-sm uppercase tracking-[0.2em] ${
+                  s.hero ? "font-bold text-gold-2" : "font-medium text-muted"
+                }`}
+              >
                 {s.label}
               </p>
             </Reveal>
