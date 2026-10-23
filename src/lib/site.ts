@@ -61,9 +61,7 @@ export const MEMBER_MORE_LINKS = [
   { label: "Batch Groups", href: "/batches" },
   { label: "Success Stories", href: "/stories" },
   { label: "Businesses", href: "/businesses" },
-  { label: "Memory Wall", href: "/memory-wall" },
   { label: "Scholarship Fund", href: "/fund" },
-  { label: "About", href: "/about" },
   { label: "Committee", href: "/committee" },
 ];
 
