@@ -208,19 +208,9 @@ export default function Navbar() {
                 </div>
               </li>
             )}
-            {isVerifiedMember && (
-              <li>
-                <Link
-                  href={MEMBER_PROFILE_LINK.href}
-                  className={`group relative text-sm font-medium tracking-wide transition-colors hover:text-gold-2 ${
-                    pathname === MEMBER_PROFILE_LINK.href ? "text-gold-2" : "text-ivory/80"
-                  }`}
-                >
-                  {MEMBER_PROFILE_LINK.label}
-                  <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-gold transition-all duration-300 group-hover:w-full" />
-                </Link>
-              </li>
-            )}
+            {/* No standalone Profile link here: Profile lives in the
+                profile chip's dropdown only (owner's fix, 2026-10-23,
+                it was showing twice). */}
           </ul>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -293,16 +283,17 @@ export default function Navbar() {
                         >
                           My ID Card <span className="text-muted/60">›</span>
                         </Link>
-                        {isAdmin && (
-                          <Link
-                            href={dashboardHref}
-                            role="menuitem"
-                            onClick={() => setProfileOpen(false)}
-                            className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm text-ivory/85 transition-colors hover:bg-gold/10 hover:text-gold-2"
-                          >
-                            {dashboardLabel} Dashboard <span className="text-muted/60">›</span>
-                          </Link>
-                        )}
+                        {/* About sits here instead of a second Dashboard
+                            entry: the dashboard already has its own bar
+                            button, last in the bar (owner's fix). */}
+                        <Link
+                          href="/about"
+                          role="menuitem"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm text-ivory/85 transition-colors hover:bg-gold/10 hover:text-gold-2"
+                        >
+                          About <span className="text-muted/60">›</span>
+                        </Link>
                       </div>
                       <div className="border-t border-ivory/10 p-2">
                         <button
