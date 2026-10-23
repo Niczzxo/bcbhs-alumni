@@ -54,7 +54,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
           ) : (
             <div className="grid gap-8 lg:grid-cols-5">
               <Reveal className="lg:col-span-3 rounded-3xl border border-ivory/10 bg-ink-2 p-8 sm:p-10">
-                <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
+                <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:text-left">
                   <Avatar name={member.name} photoURL={member.photoURL} size="lg" />
                   <div>
                     <h2 className="font-display text-3xl font-extrabold text-ivory">{member.name}</h2>
@@ -71,7 +71,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                   </div>
                 </div>
                 <div className="gold-rule my-8" />
-                <dl className="grid gap-5 sm:grid-cols-2">
+                <dl className="grid gap-5 text-center sm:grid-cols-2 sm:text-left">
                   {[
                     ["Location", member.isAbroad ? `${member.country ?? "Abroad"} 🌍` : member.district],
                     ["Profession", member.profession ?? "-"],
@@ -84,7 +84,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                     </div>
                   ))}
                 </dl>
-                <div className="mt-8 flex flex-wrap gap-4">
+                <div className="mt-8 flex flex-wrap justify-center gap-4 sm:justify-start">
                   <Link href="/directory" className="rounded-full border border-gold/40 px-6 py-3 text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10">
                     Back to Directory
                   </Link>
@@ -101,8 +101,8 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                   )}
                 </div>
               </Reveal>
-              <Reveal delay={0.1} className="lg:col-span-2">
-                <p className="mb-4 text-xs font-bold uppercase tracking-[0.25em] text-gold">Official ID card</p>
+              <Reveal delay={0.1} className="flex flex-col items-center lg:col-span-2 lg:items-start">
+                <p className="mb-4 text-center text-xs font-bold uppercase tracking-[0.25em] text-gold lg:text-left">Official ID card</p>
                 {loading ? (
                   <div className="aspect-[53.98/85.6] w-full max-w-[340px] animate-pulse rounded-[18px] bg-ivory/[0.06]" />
                 ) : canViewCard ? (
