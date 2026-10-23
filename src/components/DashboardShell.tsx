@@ -23,11 +23,23 @@ export interface DashSection {
 export default function DashboardShell({
   sections,
   defaultKey,
+  activeKey,
+  onActiveChange,
 }: {
   sections: DashSection[];
   defaultKey?: string;
+  /** Controlled mode (optional): the page owns the active section,
+      e.g. so the Overview's quick actions can jump to a section.
+      Omit both props and the shell manages it internally as before. */
+  activeKey?: string;
+  onActiveChange?: (key: string) => void;
 }) {
-  const [active, setActive] = useState(defaultKey ?? sections[0]?.key);
+  const [internalActive, setInternalActive] = useState(defaultKey ?? sections[0]?.key);
+  const active = activeKey ?? internalActive;
+  const setActive = (key: string) => {
+    if (onActiveChange) onActiveChange(key);
+    else setInternalActive(key);
+  };
   const [visited, setVisited] = useState<ReadonlySet<string>>(
     () => new Set([defaultKey ?? sections[0]?.key].filter(Boolean) as string[]),
   );
@@ -62,6 +74,14 @@ export default function DashboardShell({
     setVisited((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
     setSheetOpen(false);
   };
+
+  /* Controlled jumps (quick actions) must also mark the target
+     visited so it renders instead of staying unmounted. */
+  useEffect(() => {
+    if (active) {
+      setVisited((prev) => (prev.has(active) ? prev : new Set(prev).add(active)));
+    }
+  }, [active]);
 
   /* While the section sheet is open, lock the page behind it and
      let Escape close it (same behaviour as the nav drawer). */

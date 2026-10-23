@@ -312,6 +312,26 @@ service cloud.firestore {
       allow read: if isSuperAdmin();
     }
 
+    match /visits/{visitId} {
+      // Visitor analytics (owner, 2026-10-24): the site's own tracker
+      // appends one doc per (browser session, page) so the staff
+      // Overview can show traffic + who visited. Guests may write, so
+      // the shape is locked down: a guest visit is always anonymous,
+      // and a named visit must belong to the signed-in writer. Only
+      // admins read the trail; entries are never edited or deleted.
+      allow create: if request.resource.data.keys().hasOnly(['path', 'uid', 'name', 'role', 'device', 'ts'])
+        && request.resource.data.path is string
+        && request.resource.data.path.size() <= 200
+        && request.resource.data.device in ['mobile', 'desktop']
+        && request.resource.data.ts is timestamp
+        && ((request.resource.data.uid == null
+              && request.resource.data.name == null
+              && request.resource.data.role == null)
+            || (signedIn() && request.auth.uid == request.resource.data.uid));
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
     match /verify/{memberId} {
       // Public ID-card verification registry. Holds ONLY the facts
       // printed on the card itself (name, batch, photo, position), so

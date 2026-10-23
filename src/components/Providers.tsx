@@ -9,6 +9,7 @@ import { ContentProvider } from "@/lib/content-context";
 import StatsSync from "@/components/StatsSync";
 import VerifySync from "@/components/VerifySync";
 import BannedGate from "@/components/BannedGate";
+import VisitTracker from "@/components/VisitTracker";
 
 /** Client-side providers wrapper for the root layout. */
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       </Suspense>
       <AuthProvider>
       <ContentProvider>
+        <VisitTracker />
         <StatsSync />
         <VerifySync />
         <BannedGate />

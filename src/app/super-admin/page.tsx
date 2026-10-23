@@ -9,6 +9,7 @@ import ContentManager from "@/components/content/ContentManager";
 import V2Manager, { V2_SECTIONS } from "@/components/content/V2Manager";
 import AboutEditor from "@/components/content/AboutEditor";
 import SettingsManager from "@/components/content/SettingsManager";
+import OverviewPanel from "@/components/content/OverviewPanel";
 import { useAuth } from "@/lib/auth-context";
 import { PERMISSIONS, ROLE_META, POSITIONS } from "@/lib/types";
 import type { MemberRole, UserProfile } from "@/lib/types";
@@ -28,6 +29,7 @@ export default function SuperAdminPage() {
   /* All Members search (owner's request, 2026-10-23): a name field
      (quietly also matches email / member ID when pasted) plus a
      batch picker; both filters combine. */
+  const [dashKey, setDashKey] = useState("overview");
   const [memberQuery, setMemberQuery] = useState("");
   const [memberBatch, setMemberBatch] = useState("");
   const memberBatches = [...new Set(approved.map((m) => m.batch))].sort().reverse();
@@ -208,19 +210,15 @@ export default function SuperAdminPage() {
       key: "overview",
       label: "Overview",
       content: (
-        <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-          {[
-            ["Approved members", approved.length],
-            ["Pending approvals", pending.length],
-            ["Batch Reps", admins.length],
-            ["Editors", editors.length],
-          ].map(([label, value], i) => (
-            <Reveal key={label as string} delay={i * 0.07} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6 text-center">
-              <p className="font-display text-gold-gradient text-4xl font-extrabold">{value}</p>
-              <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted">{label}</p>
-            </Reveal>
-          ))}
-        </div>
+        <OverviewPanel
+          approved={approved.length}
+          pending={pending.length}
+          banned={banned.length}
+          batchReps={admins.length}
+          editors={editors.length}
+          members={members}
+          onJump={setDashKey}
+        />
       ),
     },
     {
@@ -425,7 +423,7 @@ export default function SuperAdminPage() {
 
   return (
     <RequireRole role="super_admin" eyebrow="Full access" title={<>Super Admin <span className="text-gold-gradient">Dashboard</span></>}>
-      <DashboardShell sections={sections} />
+      <DashboardShell sections={sections} activeKey={dashKey} onActiveChange={setDashKey} />
     </RequireRole>
   );
 }
