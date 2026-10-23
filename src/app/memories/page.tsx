@@ -20,11 +20,15 @@ export default function MemoriesPage() {
   const router = useRouter();
   const isGuest = !user;
   const photos = isGuest ? gallery.slice(0, PREVIEW_COUNT) : gallery;
-  // Deal photos across four marquees: left, right, up, down.
-  // (A marquee with no photos renders nothing, so fall back to the full set.)
-  const groups: typeof photos[] = [[], [], [], []];
-  photos.forEach((p, i) => groups[i % 4].push(p));
-  const filled = groups.map((g) => (g.length > 0 ? g : photos));
+  // Four marquees (left, right, up, down), each showing the FULL set
+  // rotated by its strip index so no strip is starved into repeating
+  // one or two photos over and over (owner's report, 2026-10-23: the
+  // old round-robin split left strips with a single photo repeated
+  // across the whole row). Guests still only ever see the preview
+  // set; rotation reorders, never adds.
+  const filled = [0, 1, 2, 3].map((k) =>
+    photos.map((_, i) => photos[(i + k) % photos.length]),
+  );
 
   return (
     <>

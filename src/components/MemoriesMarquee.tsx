@@ -47,7 +47,20 @@ export default function MemoriesMarquee({
     return () => io.disconnect();
   }, []);
 
-  if (photos.length === 0) return null;
+  // Never show the same picture twice in one strip: if the source
+  // list itself repeats an uploaded photo (identical data URL, e.g.
+  // the same file uploaded twice), keep only its first occurrence
+  // so a duplicate can never sit beside itself. Path/URL photos are
+  // left untouched (shared placeholders are a content choice).
+  const seenData = new Set<string>();
+  const unique = photos.filter((p) => {
+    if (!p.src.startsWith("data:")) return true;
+    if (seenData.has(p.src)) return false;
+    seenData.add(p.src);
+    return true;
+  });
+  if (unique.length === 0) return null;
+  photos = unique;
 
   const vertical = direction === "up" || direction === "down";
   const pitch = vertical ? PITCH_Y : PITCH_X;
