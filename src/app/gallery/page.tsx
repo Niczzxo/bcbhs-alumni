@@ -22,7 +22,8 @@ interface Album {
  * its photos, and clicking a photo opens it full-screen.
  */
 export default function GalleryPage() {
-  const { gallery, loading } = useContent();
+  const { gallery, loading: allLoading, ready } = useContent();
+  const loading = allLoading && !ready.has("gallery");
   const [albumName, setAlbumName] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
 

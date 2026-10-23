@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export interface DashSection {
   key: string;
@@ -33,6 +33,29 @@ export default function DashboardShell({
   );
   const [sheetOpen, setSheetOpen] = useState(false);
   const current = sections.find((s) => s.key === active) ?? sections[0];
+
+  /* Warm-mount every section in the background (owner's complaint,
+     2026-10-23: switching sections "took a load" first). Sections
+     mount one by one on a short stagger shortly after the dashboard
+     opens, so by the time a section is tapped it is already mounted
+     with its data, and switching is instant from the first tap. */
+  const keysSig = sections.map((s) => s.key).join(",");
+  const warmedRef = useRef(false);
+  useEffect(() => {
+    if (warmedRef.current) return;
+    warmedRef.current = true;
+    const keys = keysSig.split(",").filter(Boolean);
+    let i = 0;
+    let timer: number | undefined;
+    const step = () => {
+      if (i >= keys.length) return;
+      const key = keys[i++];
+      setVisited((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+      timer = window.setTimeout(step, 450);
+    };
+    timer = window.setTimeout(step, 800);
+    return () => window.clearTimeout(timer);
+  }, [keysSig]);
 
   const open = (key: string) => {
     setActive(key);

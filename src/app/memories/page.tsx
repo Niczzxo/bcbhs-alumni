@@ -14,7 +14,8 @@ const PREVIEW_COUNT = 6;
 
 /** Memories & Souvenirs, the full memory wall. */
 export default function MemoriesPage() {
-  const { gallery, loading } = useContent();
+  const { gallery, loading: allLoading, ready } = useContent();
+  const loading = allLoading && !ready.has("gallery");
   const { user } = useAuth();
   const router = useRouter();
   const isGuest = !user;

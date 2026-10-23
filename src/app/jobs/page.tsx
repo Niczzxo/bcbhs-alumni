@@ -182,7 +182,8 @@ function JobCard({
 export default function JobsPage() {
   const { user, loading, isAdmin } = useAuth();
   const { openAuthModal } = useAuthModal();
-  const { jobs, loading: contentLoading, addJob, updateJob, removeJob } = useContent();
+  const { jobs, loading: allLoading, ready, addJob, updateJob, removeJob } = useContent();
+  const contentLoading = allLoading && !ready.has("jobs");
 
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("All");

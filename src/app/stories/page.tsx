@@ -9,7 +9,8 @@ import { useContent } from "@/lib/content-context";
 
 /** Hall of Fame, success stories of notable BCBHS alumni. */
 export default function StoriesPage() {
-  const { stories, loading } = useContent();
+  const { stories, loading: allLoading, ready } = useContent();
+  const loading = allLoading && !ready.has("stories");
   const sorted = [...stories].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return (

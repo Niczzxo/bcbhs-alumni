@@ -104,6 +104,9 @@ interface ContentContextValue {
   jobs: JobPost[];
   siteContent: SiteContent;
   loading: boolean;
+  /** Collections whose first snapshot has arrived; pages gate on
+      their own slice instead of waiting for all sixteen. */
+  ready: ReadonlySet<string>;
   addEvent: (e: Omit<PortalEvent, "id">) => Promise<void>;
   updateEvent: (id: string, e: Partial<PortalEvent>) => Promise<void>;
   removeEvent: (id: string) => Promise<void>;
@@ -182,11 +185,18 @@ function emptyContent(): DemoContent {
   };
 }
 
+const CONTENT_KEYS = [
+  "events", "gallery", "committee", "announcements", "jobs", "bloodRequests",
+  "polls", "pollVotes", "stories", "businesses", "wallPhotos", "mentors",
+  "fundDonors", "batchLinks", "fundInfo", "siteContent",
+] as const;
+
 export function ContentProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<DemoContent>(() =>
     isFirebaseConfigured ? emptyContent() : seedContent(),
   );
   const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState<ReadonlySet<string>>(new Set());
   const persistArmed = useRef(false);
 
   /* Rehydrate demo store (client only). */
@@ -205,6 +215,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       /* corrupted storage, fall back to seed data */
     }
     setLoading(false);
+    setReady(new Set(CONTENT_KEYS));
   }, []);
 
   /* Persist demo mutations (never on the effect's first run). */
@@ -235,16 +246,18 @@ export function ContentProvider({ children }: { children: ReactNode }) {
            yet" while the first fetch is in flight (perf fix, 2026-10-23). */
         const TOTAL_SUBS = 16;
         let arrived = 0;
-        const markArrived = () => {
+        const markArrived = (key: string) => {
           arrived += 1;
           if (arrived >= TOTAL_SUBS && !cancelled) setLoading(false);
+          if (!cancelled)
+            setReady((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
         };
         const fallback = setTimeout(() => {
           if (!cancelled) setLoading(false);
         }, 6000);
         const unsubs = [
           onSnapshot(collection(db, "events"), (snap) => {
-            markArrived();
+            markArrived("events");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -252,7 +265,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "gallery"), (snap) => {
-            markArrived();
+            markArrived("gallery");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -260,7 +273,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "committee"), (snap) => {
-            markArrived();
+            markArrived("committee");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -268,7 +281,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "announcements"), (snap) => {
-            markArrived();
+            markArrived("announcements");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -279,7 +292,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "jobs"), (snap) => {
-            markArrived();
+            markArrived("jobs");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -290,7 +303,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "requests"), (snap) => {
-            markArrived();
+            markArrived("bloodRequests");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -301,7 +314,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "polls"), (snap) => {
-            markArrived();
+            markArrived("polls");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -309,7 +322,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "pollVotes"), (snap) => {
-            markArrived();
+            markArrived("pollVotes");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -320,7 +333,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "stories"), (snap) => {
-            markArrived();
+            markArrived("stories");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -331,7 +344,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "businesses"), (snap) => {
-            markArrived();
+            markArrived("businesses");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -342,7 +355,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "wallPhotos"), (snap) => {
-            markArrived();
+            markArrived("wallPhotos");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -353,7 +366,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "mentors"), (snap) => {
-            markArrived();
+            markArrived("mentors");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -364,7 +377,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "fundDonors"), (snap) => {
-            markArrived();
+            markArrived("fundDonors");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -375,7 +388,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(collection(db, "batchLinks"), (snap) => {
-            markArrived();
+            markArrived("batchLinks");
             if (cancelled) return;
             setContent((p) => ({
               ...p,
@@ -386,12 +399,12 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             }));
           }),
           onSnapshot(doc(db, "site", "fund"), (snap) => {
-            markArrived();
+            markArrived("fundInfo");
             if (cancelled || !snap.exists()) return;
             setContent((p) => ({ ...p, fundInfo: { ...DEFAULT_FUND_INFO, ...(snap.data() as FundInfo) } }));
           }),
           onSnapshot(doc(db, "site", "content"), (snap) => {
-            markArrived();
+            markArrived("siteContent");
             if (cancelled || !snap.exists()) return;
             setContent((p) => ({ ...p, siteContent: snap.data() as SiteContent }));
           }),
@@ -402,6 +415,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         };
       } catch {
         setLoading(false);
+        setReady(new Set(CONTENT_KEYS));
       }
     })();
     return () => {
@@ -472,6 +486,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       jobs: content.jobs,
       siteContent: content.siteContent,
       loading,
+      ready,
       addEvent: (e) => mutate("events", "add", null, e as Record<string, unknown>),
       updateEvent: (id, e) => mutate("events", "update", id, e as Record<string, unknown>),
       removeEvent: (id) => mutate("events", "remove", id),
@@ -598,7 +613,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         await setDoc(doc(db, "site", "content"), c as unknown as Record<string, unknown>);
       },
     }),
-    [content, loading, mutate],
+    [content, loading, ready, mutate],
   );
 
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>;

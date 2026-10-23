@@ -23,7 +23,8 @@ const PLACEHOLDER_SEATS = [
  */
 export default function Committee() {
   const leaders = useLeadership();
-  const { loading } = useContent();
+  const { loading: allLoading, ready } = useContent();
+  const loading = allLoading && !ready.has("committee");
   const hasSeats = leaders.length > 0;
 
   return (

@@ -15,7 +15,8 @@ import { useContent } from "@/lib/content-context";
  */
 export default function CommitteePage() {
   const leaders = useLeadership();
-  const { loading } = useContent();
+  const { loading: allLoading, ready } = useContent();
+  const loading = allLoading && !ready.has("committee");
   return (
     <>
       <Navbar />
