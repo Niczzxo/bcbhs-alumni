@@ -296,6 +296,14 @@ export default function Navbar() {
                         >
                           My ID Card <span className="text-muted/60">›</span>
                         </Link>
+                        <Link
+                          href="/settings"
+                          role="menuitem"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm text-ivory/85 transition-colors hover:bg-gold/10 hover:text-gold-2"
+                        >
+                          Settings <span className="text-muted/60">›</span>
+                        </Link>
                         {/* About sits here instead of a second Dashboard
                             entry: the dashboard already has its own
                             button in the bar (owner's fix). */}
@@ -498,6 +506,14 @@ export default function Navbar() {
               {/* drawer footer: account actions, Logout LAST (owner's rule) */}
               <div className="shrink-0 border-t border-ivory/10 px-5 py-4">
                 {user ? (
+                  <div className="grid gap-3">
+                    <Link
+                      href="/settings"
+                      onClick={() => setMenuOpen(false)}
+                      className="w-full rounded-full border border-ivory/20 py-3 text-center text-xs font-bold uppercase tracking-widest text-ivory transition-colors hover:border-gold/50 hover:text-gold-2"
+                    >
+                      Settings
+                    </Link>
                   <button
                     type="button"
                     onClick={() => {
@@ -508,6 +524,7 @@ export default function Navbar() {
                   >
                     Logout
                   </button>
+                  </div>
                 ) : (
                   <div className="flex gap-3">
                     <button

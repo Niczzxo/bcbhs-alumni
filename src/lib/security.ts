@@ -35,6 +35,8 @@ export type SecurityEventType =
   | "role_changed"
   | "permissions_changed"
   | "position_changed"
+  | "password_changed"
+  | "email_change_requested"
   | "guest_visibility_changed";
 
 export interface SecurityEventDetails {

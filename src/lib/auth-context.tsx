@@ -67,6 +67,12 @@ interface AuthContextValue {
   /** Toggle whether a member shows in the public (logged-out) directory (staff only). */
   setGuestVisible: (id: string, visible: boolean) => Promise<void>;
   updateProfile: (input: ProfileUpdateInput) => Promise<{ ok: boolean; error?: string }>;
+  /** Account settings: the member's own WhatsApp number (users_private). */
+  updatePhone: (phone: string) => Promise<{ ok: boolean; error?: string }>;
+  /** Account settings: verification-first email change (reauth required). */
+  changeEmail: (currentPassword: string, newEmail: string) => Promise<{ ok: boolean; error?: string }>;
+  /** Account settings: password change (reauth required). */
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ ok: boolean; error?: string }>;
   hasPermission: (perm: string) => boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
@@ -136,6 +142,28 @@ function readCachedProfile(): UserProfile | null {
 function nextMemberId(batch: string, members: UserProfile[]): string {
   const seq = members.filter((m) => m.memberId).length + 1;
   return `BCBHS-${batch}-${String(seq).padStart(4, "0")}`;
+}
+
+/** Friendly messages for the account-settings flows (reauth + update). */
+function settingsError(e: unknown): string {
+  const code = (e as { code?: string })?.code ?? "";
+  switch (code) {
+    case "auth/wrong-password":
+    case "auth/invalid-credential":
+      return "Current password is incorrect.";
+    case "auth/email-already-in-use":
+      return "That email is already used by another account.";
+    case "auth/invalid-email":
+      return "Enter a valid email address.";
+    case "auth/weak-password":
+      return "The new password is too weak. Use at least 6 characters.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Please wait a while and try again.";
+    case "auth/requires-recent-login":
+      return "Please log out and log in again, then try once more.";
+    default:
+      return "Something went wrong. Please try again.";
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -253,7 +281,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     const load = async () => {
       const { onAuthStateChanged } = await import("firebase/auth");
-      const { doc, getDoc, collection, getDocs, query, where } = await import("firebase/firestore");
+      const { doc, getDoc, updateDoc, collection, getDocs, query, where } = await import("firebase/firestore");
       return onAuthStateChanged(liveAuth, async (fbUser) => {
         if (cancelled) return;
         try {
@@ -273,9 +301,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
              * collection is still downloading. */
             const snap = await getDoc(doc(liveDb, "users", fbUser.uid));
             if (cancelled) return;
-            const own = snap.exists()
+            let own = snap.exists()
               ? ({ id: snap.id, ...(snap.data() as Omit<UserProfile, "id">) } as UserProfile)
               : null;
+            /* Email self-sync (Settings email change): Firebase moves
+               the sign-in email only after the member verifies the new
+               inbox, so mirror it into the profile doc on the next
+               sign-in and directory/admin views stay in agreement. */
+            if (own && fbUser.email && own.email !== fbUser.email) {
+              own = { ...own, email: fbUser.email };
+              void updateDoc(doc(liveDb, "users", fbUser.uid), { email: fbUser.email }).catch(
+                () => undefined,
+              );
+            }
             if (own) setUser(own);
             setLoading(false);
             /* Role-aware list fetch. Firestore denies a query whose
@@ -623,6 +661,102 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await updateDoc(doc(db, "users", id), { guestVisible: visible }).catch(() => undefined);
   }, []);
 
+  /* Account settings (owner, 2026-10-24): the member's own phone,
+     email and password, edited from the /settings page. Email and
+     password changes re-authenticate with the current password
+     first; the email change itself is verification-first. */
+  const updatePhone = useCallback(
+    async (phone: string): Promise<{ ok: boolean; error?: string }> => {
+      if (!user) return { ok: false, error: "Please log in first." };
+      const value = phone.trim();
+      if (!value) return { ok: false, error: "Enter your WhatsApp number." };
+      if (!isFirebaseConfigured || !db) {
+        setMembers((prev) => prev.map((m) => (m.id === user.id ? { ...m, phone: value } : m)));
+        setUser((u) => (u ? { ...u, phone: value } : u));
+        return { ok: true };
+      }
+      try {
+        const { doc, setDoc } = await import("firebase/firestore");
+        await setDoc(doc(db, "users_private", user.id), { phone: value });
+        setUser((u) => (u ? { ...u, phone: value } : u));
+        return { ok: true };
+      } catch {
+        return { ok: false, error: "Could not save the number. Please try again." };
+      }
+    },
+    [user],
+  );
+
+  const changePassword = useCallback(
+    async (
+      currentPassword: string,
+      newPassword: string,
+    ): Promise<{ ok: boolean; error?: string }> => {
+      if (!user) return { ok: false, error: "Please log in first." };
+      if (newPassword.length < 6)
+        return { ok: false, error: "New password must be at least 6 characters." };
+      if (!isFirebaseConfigured || !auth) {
+        void logSecurityEvent("password_changed", {});
+        return { ok: true };
+      }
+      try {
+        const { EmailAuthProvider, reauthenticateWithCredential, updatePassword } =
+          await import("firebase/auth");
+        const current = auth.currentUser;
+        if (!current || !current.email)
+          return { ok: false, error: "Session expired. Please log in again." };
+        await reauthenticateWithCredential(
+          current,
+          EmailAuthProvider.credential(current.email, currentPassword),
+        );
+        await updatePassword(current, newPassword);
+        void logSecurityEvent("password_changed", {});
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: settingsError(e) };
+      }
+    },
+    [user],
+  );
+
+  const changeEmail = useCallback(
+    async (
+      currentPassword: string,
+      newEmail: string,
+    ): Promise<{ ok: boolean; error?: string }> => {
+      if (!user) return { ok: false, error: "Please log in first." };
+      const clean = newEmail.trim().toLowerCase();
+      if (!clean || !clean.includes("@"))
+        return { ok: false, error: "Enter a valid email address." };
+      if (clean === user.email.toLowerCase())
+        return { ok: false, error: "That is already your current email." };
+      if (!isFirebaseConfigured || !auth) {
+        /* Demo mode has no real mailbox: apply immediately. */
+        setMembers((prev) => prev.map((m) => (m.id === user.id ? { ...m, email: clean } : m)));
+        setUser((u) => (u ? { ...u, email: clean } : u));
+        void logSecurityEvent("email_change_requested", { identifier: clean });
+        return { ok: true };
+      }
+      try {
+        const { EmailAuthProvider, reauthenticateWithCredential, verifyBeforeUpdateEmail } =
+          await import("firebase/auth");
+        const current = auth.currentUser;
+        if (!current || !current.email)
+          return { ok: false, error: "Session expired. Please log in again." };
+        await reauthenticateWithCredential(
+          current,
+          EmailAuthProvider.credential(current.email, currentPassword),
+        );
+        await verifyBeforeUpdateEmail(current, clean);
+        void logSecurityEvent("email_change_requested", { identifier: clean });
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: settingsError(e) };
+      }
+    },
+    [user],
+  );
+
   const hasPermission = useCallback(
     (perm: string) => {
       if (!user) return false;
@@ -717,11 +851,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPosition,
       setGuestVisible,
       updateProfile,
+      updatePhone,
+      changeEmail,
+      changePassword,
       hasPermission,
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, setGuestVisible, updateProfile, hasPermission],
+    [user, members, loading, login, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, setGuestVisible, updateProfile, updatePhone, changeEmail, changePassword, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
