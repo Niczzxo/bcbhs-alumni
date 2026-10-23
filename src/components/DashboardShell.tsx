@@ -3,6 +3,46 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+/* Section icons for the sidebar + mobile sheet (owner's reference
+   layout, 2026-10-24). Unknown keys fall back to a plain dot. */
+const ic = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.8,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: "h-[18px] w-[18px]",
+} as const;
+
+const SECTION_ICONS: Record<string, React.ReactNode> = {
+  overview: (<svg {...ic}><path d="M4 11l8-7 8 7" /><path d="M6 9.5V20h12V9.5" /></svg>),
+  approvals: (<svg {...ic}><circle cx="12" cy="12" r="9" /><path d="M8.5 12.5l2.4 2.4 4.8-5.4" /></svg>),
+  roles: (<svg {...ic}><circle cx="8" cy="14" r="4" /><path d="M11 11l9-9M17 4l2.5 2.5M14.5 6.5L17 9" /></svg>),
+  "all-members": (<svg {...ic}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5" /><path d="M16 5.5a3.5 3.5 0 0 1 0 6.5M18.5 15.6c1.6.7 2.7 2 3.1 4.4" /></svg>),
+  members: (<svg {...ic}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5" /><path d="M16 5.5a3.5 3.5 0 0 1 0 6.5M18.5 15.6c1.6.7 2.7 2 3.1 4.4" /></svg>),
+  banned: (<svg {...ic}><circle cx="12" cy="12" r="9" /><path d="M6 6l12 12" /></svg>),
+  events: (<svg {...ic}><rect x="3.5" y="5" width="17" height="16" rx="2.5" /><path d="M3.5 10h17M8 3v4M16 3v4" /></svg>),
+  announcements: (<svg {...ic}><path d="M4 10v4l3 .5V9.5L4 10zM7 9.5L19 5v13l-12-3.5" /><path d="M9 15l1.2 5" /></svg>),
+  gallery: (<svg {...ic}><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><circle cx="9" cy="10" r="1.8" /><path d="M4 18l5-5 3.5 3.5L16 13l4 4" /></svg>),
+  committee: (<svg {...ic}><path d="M4 20h16M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6H3z" /></svg>),
+  blood: (<svg {...ic}><path d="M12 20.5s-7.5-4.6-9.3-9C1.3 8 3.2 4.9 6.5 4.9c2 0 3.6 1.1 5.5 3.4 1.9-2.3 3.5-3.4 5.5-3.4 3.3 0 5.2 3.1 3.8 6.6-1.8 4.4-9.3 9-9.3 9z" /></svg>),
+  stories: (<svg {...ic}><circle cx="12" cy="9" r="5.5" /><path d="M8.8 13.5L7 21l5-2.6L17 21l-1.8-7.5" /></svg>),
+  listings: (<svg {...ic}><rect x="3" y="7.5" width="18" height="12.5" rx="2.5" /><path d="M9 7.5V6a3 3 0 0 1 6 0v1.5M3 13h18" /></svg>),
+  fund: (<svg {...ic}><circle cx="12" cy="12" r="8.5" /><path d="M12 7v10M15 9.2c-.6-1-1.7-1.5-3-1.5-1.8 0-3 .9-3 2.2 0 3 6 1.6 6 4.3 0 1.3-1.3 2.2-3 2.2-1.4 0-2.6-.6-3.2-1.6" /></svg>),
+  batches: (<svg {...ic}><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H9l-5 4V6z" /></svg>),
+  about: (<svg {...ic}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 7.8v.4" /></svg>),
+  settings: (<svg {...ic}><circle cx="12" cy="12" r="3.2" /><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3M6 6l2.1 2.1M15.9 15.9L18 18M18 6l-2.1 2.1M8.1 15.9L6 18" /></svg>),
+};
+
+function sectionIcon(key: string): React.ReactNode {
+  return (
+    SECTION_ICONS[key.replace(/^v2-/, "")] ?? (
+      <svg {...ic}><circle cx="12" cy="12" r="4" /></svg>
+    )
+  );
+}
+
 export interface DashSection {
   key: string;
   label: string;
@@ -150,6 +190,7 @@ export default function DashboardShell({
                     : "border border-ivory/10 bg-ink-2 text-muted hover:border-gold/40 hover:text-gold-2"
                 }`}
               >
+                <span className={isActive ? "text-ink" : "text-gold-2/75"}>{sectionIcon(s.key)}</span>
                 <span className="flex-1">{s.label}</span>
                 {badgePill(s, isActive)}
               </button>
@@ -224,6 +265,7 @@ export default function DashboardShell({
                               : "text-ivory/85 hover:bg-ivory/5 hover:text-gold-2"
                           }`}
                         >
+                          <span className="text-gold-2/75">{sectionIcon(s.key)}</span>
                           <span className="flex-1">{s.label}</span>
                           {badgePill(s, false)}
                           {isActive && <span className="text-gold-2">✓</span>}
