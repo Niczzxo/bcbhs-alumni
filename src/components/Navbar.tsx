@@ -103,7 +103,10 @@ export default function Navbar() {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "border-b border-gold/20 bg-ink/90 shadow-[0_8px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+            ? /* Lighter blur on phones: a full-strength backdrop blur
+                 over scrolling content is a classic mobile scroll-lag
+                 source (owner's report, 2026-10-23). */
+              "border-b border-gold/20 bg-ink/95 shadow-[0_8px_30px_rgba(0,0,0,0.45)] backdrop-blur-md lg:backdrop-blur-xl"
             : "bg-transparent"
         }`}
       >

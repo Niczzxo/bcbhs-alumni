@@ -26,8 +26,10 @@ export default function Hero() {
 
   return (
     <section ref={ref} id="top" className="relative flex min-h-svh items-center overflow-hidden">
-      {/* Parallax campus backdrop */}
-      <motion.div style={{ y: bgY }} className="absolute inset-0 -bottom-24">
+      {/* Parallax campus backdrop. will-change keeps both parallax
+          layers on their own compositor layers, so scrolling the
+          hero does not repaint the photo every frame (mobile lag). */}
+      <motion.div style={{ y: bgY }} className="absolute inset-0 -bottom-24 will-change-transform">
         <Image
           src="/images/school.jpg"
           alt="Bogura Cantonment Board High School campus"
@@ -45,7 +47,7 @@ export default function Hero() {
 
       <motion.div
         style={{ y: contentY, opacity: contentOpacity }}
-        className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-24 pt-36 text-center sm:px-8 lg:text-left"
+        className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-24 pt-36 text-center will-change-transform sm:px-8 lg:text-left"
       >
         {/* Seal emblem */}
         <motion.div

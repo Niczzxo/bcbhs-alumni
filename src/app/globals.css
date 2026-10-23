@@ -299,6 +299,16 @@ body {
   animation-play-state: paused;
 }
 
+/* Off-screen strips pause too (toggled by IntersectionObserver in
+   MemoriesMarquee): constant animation of large photos makes page
+   scrolling feel laggy on phones. */
+.marquee-offscreen .animate-marquee-left,
+.marquee-offscreen .animate-marquee-right,
+.marquee-offscreen .animate-marquee-up,
+.marquee-offscreen .animate-marquee-down {
+  animation-play-state: paused;
+}
+
 /* Hide scrollbars on horizontal chip rails (the mobile dashboard
    nav): the rail still scrolls, the grey line never shows. */
 .no-scrollbar {

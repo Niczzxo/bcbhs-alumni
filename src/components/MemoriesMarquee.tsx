@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import type { GalleryPhoto } from "@/lib/types";
 
 /** Card pitch in px (card size + margin), one seamless unit. */
@@ -30,6 +31,22 @@ export default function MemoriesMarquee({
   direction = "left",
   duration,
 }: MemoriesMarqueeProps) {
+  /* Smooth-scroll guard (owner's report, 2026-10-23): an endlessly
+     animating photo strip taxes the phone even while it is off
+     screen, so pause the animation whenever the strip is out of
+     view and resume it when it comes back. */
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => el.classList.toggle("marquee-offscreen", !entry.isIntersecting),
+      { rootMargin: "120px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   if (photos.length === 0) return null;
 
   const vertical = direction === "up" || direction === "down";
@@ -44,6 +61,7 @@ export default function MemoriesMarquee({
 
   return (
     <div
+      ref={rootRef}
       className={`marquee relative overflow-hidden ${
         vertical ? "marquee-mask-y h-[560px]" : "marquee-mask"
       }`}
