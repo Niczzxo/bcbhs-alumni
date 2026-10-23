@@ -13,7 +13,7 @@ export function Avatar({
   photoURL,
 }: {
   name: string;
-  size?: "sm" | "ml" | "md" | "lg";
+  size?: "xs" | "sm" | "ml" | "md" | "lg";
   photoURL?: string | null;
 }) {
   const initials = name
@@ -22,7 +22,7 @@ export function Avatar({
     .slice(0, 2)
     .join("")
     .toUpperCase();
-  const dims = size === "lg" ? "h-28 w-28 text-3xl" : size === "sm" ? "h-10 w-10 text-sm" : size === "ml" ? "h-16 w-16 text-lg" : "h-20 w-20 text-xl";
+  const dims = size === "lg" ? "h-28 w-28 text-3xl" : size === "sm" ? "h-10 w-10 text-sm" : size === "ml" ? "h-16 w-16 text-lg" : size === "xs" ? "h-7 w-7 text-[10px]" : "h-20 w-20 text-xl";
   if (photoURL) {
     return (
       /* `block` is load-bearing: without it the span stays inline, the

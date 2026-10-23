@@ -217,7 +217,7 @@ export default function Navbar() {
             {loading ? (
               /* Auth still resolving, hold the space so a reload never
                * flashes the logged-out buttons at a signed-in member. */
-              <div className="h-9 w-10 sm:w-44" aria-hidden="true" />
+              <div className="h-8 w-10 sm:h-10 sm:w-44" aria-hidden="true" />
             ) : user ? (
               <>
                 {/* Bar order (owner's swap, 2026-10-23): the staff
@@ -230,7 +230,7 @@ export default function Navbar() {
                 {isAdmin && (
                   <Link
                     href={dashboardHref}
-                    className="btn-shimmer flex h-10 items-center rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-3.5 text-[10px] font-extrabold uppercase tracking-wider text-ink shadow-[0_0_28px_rgba(212,169,78,0.4)] transition-transform duration-300 hover:scale-[1.03] sm:px-5 sm:text-xs lg:h-[54px] lg:px-6"
+                    className="btn-shimmer flex items-center rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-[0_0_24px_rgba(212,169,78,0.35)] transition-transform duration-300 hover:scale-105 sm:px-6 sm:py-2.5 sm:text-sm"
                   >
                     {dashboardLabel}
                   </Link>
@@ -241,12 +241,12 @@ export default function Navbar() {
                     onClick={() => setProfileOpen((v) => !v)}
                     aria-haspopup="menu"
                     aria-expanded={profileOpen}
-                    className="flex h-[54px] items-center gap-3 rounded-full border border-ivory/10 bg-white/[0.04] py-1.5 pl-1.5 pr-4 shadow-[0_6px_20px_rgba(0,0,0,0.25)] backdrop-blur transition-colors hover:border-gold/50"
+                    className="flex h-10 items-center gap-2.5 rounded-full border border-ivory/10 bg-white/[0.04] pl-1 pr-3.5 shadow-[0_6px_20px_rgba(0,0,0,0.25)] backdrop-blur transition-colors hover:border-gold/50"
                   >
-                    <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
+                    <Avatar name={user.name} photoURL={user.photoURL} size="xs" />
                     <span className="max-w-44 text-left leading-tight">
-                      <span className="block truncate text-sm font-semibold text-ivory">{user.name}</span>
-                      <span className="block text-[11px] font-medium tracking-wide text-gold-2/80">Batch {user.batch}</span>
+                      <span className="block truncate text-[13px] font-semibold text-ivory">{user.name}</span>
+                      <span className="block text-[10px] font-medium tracking-wide text-gold-2/80">Batch {user.batch}</span>
                     </span>
                     <span className={`text-[10px] text-gold-2/80 transition-transform duration-300 ${profileOpen ? "rotate-180" : ""}`}>▾</span>
                   </button>
