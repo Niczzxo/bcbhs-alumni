@@ -48,7 +48,7 @@ export default function LoginForm({
     setBusy(false);
     if (res.ok) {
       setNotice(
-        "Password reset link sent. Check your inbox (and the spam folder) for an email from Firebase, then follow its link to set a new password.",
+        "If an account exists for this email, a password reset link is on its way. Check your inbox (and the spam folder), then follow the link to set a new password.",
       );
     } else {
       setError(res.error ?? "Could not send the reset email.");

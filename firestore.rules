@@ -297,6 +297,33 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
+    match /security_logs/{logId} {
+      // Append-only security audit log (2026-10-23). Clients may only
+      // CREATE entries; nobody can edit or delete them from a client,
+      // and only the super admin can read the trail. Two write shapes:
+      // signed-in actors write about their own actions (actorUid must
+      // be their own uid), and pre-auth events (failed login, reset
+      // request) carry actorUid null plus a HASHED identifier only —
+      // raw emails, passwords and tokens never appear here.
+      allow create: if request.resource.data.keys().hasOnly(
+          ['type', 'actorUid', 'targetUid', 'identifierHash', 'meta', 'createdAt'])
+        && (
+          (signedIn()
+            && request.resource.data.actorUid == request.auth.uid
+            && request.resource.data.type in [
+              'login_success', 'logout',
+              'member_approved', 'member_rejected', 'member_banned', 'member_unbanned',
+              'role_changed', 'permissions_changed', 'position_changed',
+              'guest_visibility_changed'])
+          || (request.resource.data.actorUid == null
+            && request.resource.data.type in [
+              'login_failed', 'login_throttled', 'password_reset_requested']
+            && request.resource.data.identifierHash is string)
+        );
+      allow read: if isSuperAdmin();
+      allow update, delete: if false;
+    }
+
     match /verify/{memberId} {
       // Public ID-card verification registry. Holds ONLY the facts
       // printed on the card itself (name, batch, photo, position), so

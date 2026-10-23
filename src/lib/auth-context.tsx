@@ -21,6 +21,7 @@ import {
   type ReactNode,
 } from "react";
 import { isFirebaseConfigured, auth, db } from "./firebase";
+import { logSecurityEvent, loginThrottle, friendlyAuthError } from "@/lib/security";
 import { DEMO_USERS } from "./demo-data";
 import type { UserProfile } from "./types";
 
@@ -315,7 +316,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!isFirebaseConfigured || !auth || !db) {
         /* Demo mode: match by email; any password is accepted. */
         const found = members.find((m) => m.email.toLowerCase() === clean);
-        if (!found) return { ok: false, error: "No account found for this email in demo mode." };
+        if (!found) {
+          void logSecurityEvent("login_failed", { identifier: clean });
+          return { ok: false, error: "No account found for this email in demo mode." };
+        }
         if (found.status === "rejected")
           return { ok: false, error: "This registration was rejected. Please contact the admin." };
         setUser(found);
@@ -324,21 +328,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           /* session persistence unavailable, in-memory only */
         }
+        void logSecurityEvent("login_success", {});
         return { ok: true };
       }
+      /* Progressive cooldown (client layer over Firebase Auth's own
+         server-side throttling): after repeated failures this browser
+         must wait before another password is even sent. Checked
+         BEFORE the expensive verification, keyed on the normalized
+         email, and a success clears only this account's counter. */
+      const waitMs = loginThrottle.check(clean);
+      if (waitMs > 0) {
+        void logSecurityEvent("login_throttled", {
+          identifier: clean,
+          meta: { waitSeconds: Math.ceil(waitMs / 1000) },
+        });
+        return {
+          ok: false,
+          error: `Too many failed attempts. Please wait ${Math.ceil(waitMs / 1000)} seconds and try again.`,
+        };
+      }
+      const { signInWithEmailAndPassword } = await import("firebase/auth");
+      const { doc, getDoc } = await import("firebase/firestore");
+      let cred;
       try {
-        const { signInWithEmailAndPassword } = await import("firebase/auth");
-        const { doc, getDoc } = await import("firebase/firestore");
-        const cred = await signInWithEmailAndPassword(auth, clean, _password);
+        cred = await signInWithEmailAndPassword(auth, clean, _password);
+      } catch (e) {
+        loginThrottle.recordFailure(clean);
+        void logSecurityEvent("login_failed", { identifier: clean });
+        /* Never surface the raw provider message: it can reveal
+           whether the account exists. */
+        return { ok: false, error: friendlyAuthError(e) };
+      }
+      loginThrottle.recordSuccess(clean);
+      try {
         const snap = await getDoc(doc(db, "users", cred.user.uid));
         if (!snap.exists()) return { ok: false, error: "Profile not found." };
         const profile = { id: snap.id, ...(snap.data() as Omit<UserProfile, "id">) };
         if (profile.status === "rejected")
           return { ok: false, error: "This registration was rejected. Please contact the admin." };
         setUser(profile);
+        void logSecurityEvent("login_success", {});
         return { ok: true };
-      } catch (e) {
-        return { ok: false, error: e instanceof Error ? e.message : "Login failed." };
+      } catch {
+        return { ok: false, error: "Signed in, but your profile could not be loaded. Please try again." };
       }
     },
     [members],
@@ -348,20 +380,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
      a reset link; following it lets the member set a new password.
      In demo mode any password works, so there is nothing to reset. */
   const resetPassword = useCallback(async (email: string) => {
+    const clean = email.trim().toLowerCase();
+    void logSecurityEvent("password_reset_requested", { identifier: clean });
     if (!isFirebaseConfigured || !auth) return { ok: true };
     try {
       const { sendPasswordResetEmail } = await import("firebase/auth");
-      await sendPasswordResetEmail(auth, email.trim());
-      return { ok: true };
+      await sendPasswordResetEmail(auth, clean);
     } catch {
-      return {
-        ok: false,
-        error: "Could not send the reset email. Check the email address and try again.",
-      };
+      /* Deliberately swallowed: the response is identical whether or
+         not an account exists for this email, so this flow cannot be
+         used to enumerate registered addresses. Firebase's own
+         per-address and per-IP reset throttling still applies. */
     }
+    return { ok: true };
   }, []);
 
   const logout = useCallback(async () => {
+    void logSecurityEvent("logout", {});
     if (isFirebaseConfigured && auth) {
       const { signOut } = await import("firebase/auth");
       await signOut(auth).catch(() => undefined);
@@ -462,6 +497,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         prev.map((m) => (m.id === id ? { ...m, status: "approved", memberId } : m)),
       );
       setUser((u) => (u && u.id === id ? { ...u, status: "approved", memberId } : u));
+      void logSecurityEvent("member_approved", { targetUid: id });
       if (!isFirebaseConfigured || !db) return;
       const { doc, updateDoc } = await import("firebase/firestore");
       await updateDoc(doc(db, "users", id), { status: "approved", memberId }).catch(() => undefined);
@@ -479,6 +515,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const target = members.find((m) => m.id === id);
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "rejected" } : m)));
     setUser((u) => (u && u.id === id ? { ...u, status: "rejected" } : u));
+      void logSecurityEvent("member_rejected", { targetUid: id });
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { status: "rejected" }).catch(() => undefined);
@@ -495,6 +532,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const target = members.find((m) => m.id === id);
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "banned" } : m)));
     setUser((u) => (u && u.id === id ? { ...u, status: "banned" } : u));
+      void logSecurityEvent("member_banned", { targetUid: id });
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { status: "banned" }).catch(() => undefined);
@@ -507,6 +545,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const target = members.find((m) => m.id === id);
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "approved" } : m)));
     setUser((u) => (u && u.id === id ? { ...u, status: "approved" } : u));
+      void logSecurityEvent("member_unbanned", { targetUid: id });
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { status: "approved" }).catch(() => undefined);
@@ -523,6 +562,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isEditor = target?.role === "editor";
     const patch = isEditor ? { permissions, permissionsCustom: true } : { permissions };
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+    void logSecurityEvent("permissions_changed", { targetUid: id, meta: { count: permissions.length } });
     setUser((u) => (u && u.id === id ? { ...u, ...patch } : u));
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
@@ -541,6 +581,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           : { role };
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
     setUser((u) => (u && u.id === id ? { ...u, ...patch } : u));
+    void logSecurityEvent("role_changed", { targetUid: id, meta: { role } });
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), patch).catch(() => undefined);
@@ -550,6 +591,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const clean = position.trim() || undefined;
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, position: clean } : m)));
     setUser((u) => (u && u.id === id ? { ...u, position: clean } : u));
+      void logSecurityEvent("position_changed", { targetUid: id, meta: { position: clean ?? "" } });
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { position: clean ?? null }).catch(() => undefined);
@@ -564,6 +606,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setGuestVisible = useCallback(async (id: string, visible: boolean) => {
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, guestVisible: visible } : m)));
     setUser((u) => (u && u.id === id ? { ...u, guestVisible: visible } : u));
+      void logSecurityEvent("guest_visibility_changed", { targetUid: id, meta: { visible } });
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), { guestVisible: visible }).catch(() => undefined);
