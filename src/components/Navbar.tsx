@@ -258,9 +258,10 @@ export default function Navbar() {
                       transition={{ duration: 0.18, ease: "easeOut" }}
                       className="absolute right-0 top-full z-50 mt-3 w-72 origin-top-right overflow-hidden rounded-3xl border border-gold/25 bg-ink/95 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl"
                     >
-                      {/* Header: name, email, then a tidy meta row with
-                          the role as a gold pill (owner's fix: the old
-                          single line wrapped mid-way and looked messy). */}
+                      {/* Header (unified with the drawer identity card,
+                          owner's spec, 2026-10-23): photo, name, email;
+                          then the Batch · Member ID line; the role as a
+                          gold pill BELOW that line. */}
                       <div className="border-b border-gold/15 bg-gold/[0.06] px-5 py-4">
                         <div className="flex items-center gap-3">
                           <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
@@ -269,15 +270,13 @@ export default function Navbar() {
                             <p className="truncate text-xs text-muted">{user.email}</p>
                           </div>
                         </div>
-                        <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-                          <span className="rounded-full border border-gold/40 bg-gold/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-2">
-                            {ROLE_META[user.role].label}
-                          </span>
-                          <span className="text-[11px] tracking-wide text-muted">
-                            Batch {user.batch}
-                            {user.memberId ? ` · ${user.memberId}` : ""}
-                          </span>
-                        </div>
+                        <p className="mt-3 text-[11px] tracking-wide text-muted">
+                          Batch {user.batch}
+                          {user.memberId ? ` · ${user.memberId}` : ""}
+                        </p>
+                        <span className="mt-2 inline-block rounded-full border border-gold/40 bg-gold/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-2">
+                          {ROLE_META[user.role].label}
+                        </span>
                       </div>
                       <div className="p-2">
                         <Link
@@ -404,19 +403,26 @@ export default function Navbar() {
                 </button>
               </div>
 
-              {/* signed-in identity card */}
+              {/* signed-in identity card: same layout as the desktop
+                  dropdown header (owner's spec, 2026-10-23): photo,
+                  name, email; Batch · Member ID line; the role as a
+                  gold pill below it. */}
               {user && (
                 <div className="border-b border-ivory/10 px-5 py-4">
                   <div className="flex items-center gap-3">
                     <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-ivory">{user.name}</p>
-                      <p className="text-xs text-muted">
-                        Batch {user.batch} · {ROLE_META[user.role].label}
-                      </p>
-                      {user.memberId && <p className="text-[11px] tracking-wide text-gold-2/80">{user.memberId}</p>}
+                      <p className="truncate text-xs text-muted">{user.email}</p>
                     </div>
                   </div>
+                  <p className="mt-3 text-[11px] tracking-wide text-muted">
+                    Batch {user.batch}
+                    {user.memberId ? ` · ${user.memberId}` : ""}
+                  </p>
+                  <span className="mt-2 inline-block rounded-full border border-gold/40 bg-gold/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-2">
+                    {ROLE_META[user.role].label}
+                  </span>
                 </div>
               )}
 
