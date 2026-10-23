@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useAuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth-context";
@@ -20,17 +20,24 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
   // Parallax: background drifts slower, headline lifts and fades.
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
-  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "60%"]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  /* Scroll-linked parallax is DESKTOP ONLY (owner's screen recording,
-   * 2026-10-23): on phones the giant text layer cannot keep up with
-   * the scroll, it sticks, jumps and ghosts over the next section.
-   * Below lg the hero is fully static and scrolls natively. */
-  const [fx, setFx] = useState(false);
+  // A light spring on the progress keeps the drift buttery instead
+  // of tracking the raw scroll 1:1.
+  const smooth = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 0.4 });
+  const bgY = useTransform(smooth, [0, 1], ["0%", "22%"]);
+  const bgYMobile = useTransform(smooth, [0, 1], ["0%", "12%"]);
+  const contentY = useTransform(smooth, [0, 1], ["0%", "60%"]);
+  const contentOpacity = useTransform(smooth, [0, 0.7], [1, 0]);
+  /* Scroll motion runs on BOTH viewports (owner's direction,
+   * 2026-10-23), shaped per device from his earlier screen
+   * recording: on phones the giant TEXT layer cannot keep up with
+   * the scroll (it sticks, jumps and ghosts over the next
+   * section), so below lg only the campus PHOTO drifts, gently
+   * and transform-only, while the text scrolls natively with the
+   * page. Desktop keeps the full treatment (photo + content). */
+  const [wide, setWide] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
-    const apply = () => setFx(mq.matches);
+    const apply = () => setWide(mq.matches);
     apply();
     mq.addEventListener("change", apply);
     return () => mq.removeEventListener("change", apply);
@@ -38,8 +45,9 @@ export default function Hero() {
 
   return (
     <section ref={ref} id="top" className="relative flex min-h-svh items-center overflow-hidden">
-      {/* Parallax campus backdrop (desktop only, see fx above). */}
-      <motion.div style={fx ? { y: bgY } : undefined} className={`absolute inset-0 -bottom-24 ${fx ? "will-change-transform" : ""}`}>
+      {/* Parallax campus backdrop: full drift on desktop, gentler
+          photo-only drift on mobile (see the note above). */}
+      <motion.div style={{ y: wide ? bgY : bgYMobile }} className="absolute inset-0 -bottom-24 will-change-transform">
         {/* One-time cinematic settle zoom on load (both viewports):
             the campus eases from 1.12x to rest and then stays still,
             so it costs nothing while scrolling. */}
@@ -67,8 +75,8 @@ export default function Hero() {
       <div className="sunburst animate-drift pointer-events-none absolute -right-40 top-1/2 hidden h-[640px] w-[640px] -translate-y-1/2 lg:block" />
 
       <motion.div
-        style={fx ? { y: contentY, opacity: contentOpacity } : undefined}
-        className={`relative z-10 mx-auto w-full px-5 pb-24 pt-36 text-center sm:px-10 lg:px-[3vw] lg:text-left ${fx ? "will-change-transform" : ""}`}
+        style={wide ? { y: contentY, opacity: contentOpacity } : undefined}
+        className={`relative z-10 mx-auto w-full px-5 pb-24 pt-36 text-center sm:px-10 lg:px-[3vw] lg:text-left ${wide ? "will-change-transform" : ""}`}
       >
         {/* Seal emblem */}
         <motion.div
