@@ -73,7 +73,7 @@ export default function FundPage() {
           </div>
 
           <Reveal className="mt-10 rounded-3xl border border-ivory/10 bg-ink-2 p-8">
-            <h2 className="font-display text-2xl font-bold text-ivory">Honour Roll 💛</h2>
+            <h2 className="font-display text-2xl font-bold text-ivory">Honour Roll</h2>
             {donors.length === 0 ? (
               <p className="mt-4 text-sm text-muted">Be the first name on this wall of kindness.</p>
             ) : (
