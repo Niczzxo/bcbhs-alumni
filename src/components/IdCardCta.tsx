@@ -32,9 +32,9 @@ const TEASER_MEMBER: UserProfile = {
    is the SAME size, full-width and stacked; text-hugging pills of
    varying widths are gone. From sm up they size to their label. */
 const GOLD_BUTTON =
-  "btn-shimmer w-full rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-4 text-center text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105 sm:w-auto";
+  "btn-shimmer w-[280px] max-w-full self-center rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-9 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-ink shadow-[0_0_36px_rgba(212,169,78,0.45)] transition-transform duration-300 hover:scale-105 sm:w-auto";
 const GHOST_BUTTON =
-  "w-full rounded-full border border-gold/40 px-9 py-4 text-center text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:border-gold hover:bg-gold/10 sm:w-auto";
+  "w-[280px] max-w-full self-center rounded-full border border-gold/40 px-9 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-gold-2 transition-all duration-300 hover:border-gold hover:bg-gold/10 sm:w-auto";
 
 function Tick({ children }: { children: React.ReactNode }) {
   return (
