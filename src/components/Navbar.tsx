@@ -258,22 +258,26 @@ export default function Navbar() {
                       transition={{ duration: 0.18, ease: "easeOut" }}
                       className="absolute right-0 top-full z-50 mt-3 w-72 origin-top-right overflow-hidden rounded-3xl border border-gold/25 bg-ink/95 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl"
                     >
-                      {/* Header (owner's alignment spec, 2026-10-23,
-                          from his reference crop): ONE row, a large
-                          avatar on the left and everything serial in a
-                          column beside it: name, Batch · Role, then the
-                          member ID in gold. Same as the drawer card. */}
-                      <div className="flex items-center gap-3.5 border-b border-gold/15 bg-gold/[0.06] px-5 py-4">
-                        <Avatar name={user.name} photoURL={user.photoURL} size="ml" />
-                        <div className="min-w-0">
-                          <p className="truncate text-[15px] font-semibold text-ivory">{user.name}</p>
-                          <p className="mt-0.5 truncate text-xs text-muted">
-                            Batch {user.batch} · {ROLE_META[user.role].label}
-                          </p>
-                          {user.memberId && (
-                            <p className="mt-0.5 truncate text-[11px] font-medium tracking-wide text-gold-2">{user.memberId}</p>
-                          )}
+                      {/* Header (owner's final spec, 2026-10-23, from
+                          his reference image): avatar + name + email on
+                          top; below it the role HIGHLIGHTED as a gold
+                          pill; the Batch · Member ID line last. Same as
+                          the drawer identity card. */}
+                      <div className="border-b border-gold/15 bg-gold/[0.06] px-5 py-4">
+                        <div className="flex items-center gap-3.5">
+                          <Avatar name={user.name} photoURL={user.photoURL} size="ml" />
+                          <div className="min-w-0">
+                            <p className="truncate text-[15px] font-semibold text-ivory">{user.name}</p>
+                            <p className="mt-0.5 truncate text-xs text-muted">{user.email}</p>
+                          </div>
                         </div>
+                        <span className="mt-3 inline-block rounded-full border border-gold/50 bg-gold/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold-2 shadow-[0_0_16px_rgba(212,169,78,0.25)]">
+                          {ROLE_META[user.role].label}
+                        </span>
+                        <p className="mt-2.5 text-[11px] tracking-wide text-muted">
+                          Batch {user.batch}
+                          {user.memberId ? ` · ${user.memberId}` : ""}
+                        </p>
                       </div>
                       <div className="p-2">
                         <Link
@@ -400,22 +404,26 @@ export default function Navbar() {
                 </button>
               </div>
 
-              {/* signed-in identity card: same single-row serial
-                  layout as the desktop dropdown header (owner's
-                  alignment spec, 2026-10-23): large avatar left, then
-                  name, Batch · Role, gold member ID beside it. */}
+              {/* signed-in identity card: same layout as the desktop
+                  dropdown header (owner's final spec, 2026-10-23):
+                  avatar + name + email; the role highlighted as a
+                  gold pill below; Batch · Member ID line last. */}
               {user && (
-                <div className="flex items-center gap-3.5 border-b border-ivory/10 px-5 py-4">
-                  <Avatar name={user.name} photoURL={user.photoURL} size="ml" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[15px] font-semibold text-ivory">{user.name}</p>
-                    <p className="mt-0.5 truncate text-xs text-muted">
-                      Batch {user.batch} · {ROLE_META[user.role].label}
-                    </p>
-                    {user.memberId && (
-                      <p className="mt-0.5 truncate text-[11px] font-medium tracking-wide text-gold-2">{user.memberId}</p>
-                    )}
+                <div className="border-b border-ivory/10 px-5 py-4">
+                  <div className="flex items-center gap-3.5">
+                    <Avatar name={user.name} photoURL={user.photoURL} size="ml" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-semibold text-ivory">{user.name}</p>
+                      <p className="mt-0.5 truncate text-xs text-muted">{user.email}</p>
+                    </div>
                   </div>
+                  <span className="mt-3 inline-block rounded-full border border-gold/50 bg-gold/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold-2 shadow-[0_0_16px_rgba(212,169,78,0.25)]">
+                    {ROLE_META[user.role].label}
+                  </span>
+                  <p className="mt-2.5 text-[11px] tracking-wide text-muted">
+                    Batch {user.batch}
+                    {user.memberId ? ` · ${user.memberId}` : ""}
+                  </p>
                 </div>
               )}
 
