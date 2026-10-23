@@ -136,28 +136,60 @@ export async function logSecurityEvent(
 /** The shared client-side login throttle (one per browser session). */
 export const loginThrottle = new LoginThrottle();
 
+/** The login field a sign-in failure belongs to, when known. */
+export type AuthErrorField = "email" | "password";
+
+export interface AuthErrorInfo {
+  message: string;
+  /** Set when Firebase names the failing field; the login form then
+   *  marks ONLY that field instead of showing a shared banner. */
+  field?: AuthErrorField;
+}
+
 /**
- * Map a Firebase Auth failure to a safe, generic message. The raw
- * provider message is never shown: it can reveal whether an account
- * exists and exposes internal error codes.
+ * Map a Firebase Auth failure to a user-facing message, attached to
+ * the field that caused it whenever Firebase reports one distinctly
+ * (owner's instruction, 2026-10-24: whichever is wrong, email or
+ * password, show "incorrect" for that one only). Only our own mapped
+ * messages are ever shown, never the raw provider text.
+ *
+ * Live-project reality (REST-verified 2026-10-24): this project's
+ * email enumeration protection is ON. A wrong password and an
+ * unknown email BOTH fail sign-in with auth/invalid-credential, and
+ * fetchSignInMethodsForEmail (createAuthUri) deliberately answers
+ * identically for both, so credential failures cannot be told apart
+ * on the client; they keep the one shared message. The per-field
+ * mapping engages wherever Firebase does report the failure
+ * distinctly (auth/user-not-found, auth/wrong-password,
+ * auth/invalid-email, e.g. if enumeration protection is ever
+ * switched off for the project).
  */
-export function friendlyAuthError(e: unknown): string {
+export function authErrorInfo(e: unknown): AuthErrorInfo {
   const code =
     typeof e === "object" && e !== null && "code" in e ? String((e as { code: unknown }).code) : "";
   switch (code) {
-    case "auth/invalid-credential":
     case "auth/user-not-found":
+      return { field: "email", message: "This email is not registered." };
     case "auth/wrong-password":
-      return "Email or password is incorrect.";
-    case "auth/too-many-requests":
-      return "Too many attempts from this network. Please wait a few minutes and try again.";
-    case "auth/network-request-failed":
-      return "Network problem. Check your connection and try again.";
-    case "auth/user-disabled":
-      return "This account has been disabled. Please contact the admin.";
+      return { field: "password", message: "Password is incorrect." };
+    case "auth/invalid-credential":
+      return { message: "Email or password is incorrect." };
     case "auth/invalid-email":
-      return "That email address does not look valid.";
+      return { field: "email", message: "That email address does not look valid." };
+    case "auth/too-many-requests":
+      return {
+        message: "Too many attempts from this network. Please wait a few minutes and try again.",
+      };
+    case "auth/network-request-failed":
+      return { message: "Network problem. Check your connection and try again." };
+    case "auth/user-disabled":
+      return { message: "This account has been disabled. Please contact the admin." };
     default:
-      return "Login failed. Please try again.";
+      return { message: "Login failed. Please try again." };
   }
+}
+
+/** Message-only view of authErrorInfo (kept for existing callers). */
+export function friendlyAuthError(e: unknown): string {
+  return authErrorInfo(e).message;
 }

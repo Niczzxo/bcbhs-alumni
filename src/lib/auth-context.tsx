@@ -21,7 +21,7 @@ import {
   type ReactNode,
 } from "react";
 import { isFirebaseConfigured, auth, db } from "./firebase";
-import { logSecurityEvent, loginThrottle, friendlyAuthError } from "@/lib/security";
+import { logSecurityEvent, loginThrottle, authErrorInfo, type AuthErrorField } from "@/lib/security";
 import { DEMO_USERS } from "./demo-data";
 import type { UserProfile } from "./types";
 
@@ -49,7 +49,10 @@ interface AuthContextValue {
   members: UserProfile[];
   loading: boolean;
   isDemo: boolean;
-  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string; field?: AuthErrorField }>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
   register: (input: RegisterInput) => Promise<{ ok: boolean; error?: string }>;
@@ -311,14 +314,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (email: string, _password: string): Promise<{ ok: boolean; error?: string }> => {
+    async (
+      email: string,
+      _password: string,
+    ): Promise<{ ok: boolean; error?: string; field?: AuthErrorField }> => {
       const clean = email.trim().toLowerCase();
       if (!isFirebaseConfigured || !auth || !db) {
         /* Demo mode: match by email; any password is accepted. */
         const found = members.find((m) => m.email.toLowerCase() === clean);
         if (!found) {
           void logSecurityEvent("login_failed", { identifier: clean });
-          return { ok: false, error: "No account found for this email in demo mode." };
+          return { ok: false, field: "email", error: "No account found for this email in demo mode." };
         }
         if (found.status === "rejected")
           return { ok: false, error: "This registration was rejected. Please contact the admin." };
@@ -355,9 +361,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         loginThrottle.recordFailure(clean);
         void logSecurityEvent("login_failed", { identifier: clean });
-        /* Never surface the raw provider message: it can reveal
-           whether the account exists. */
-        return { ok: false, error: friendlyAuthError(e) };
+        /* Mapped messages only, never the raw provider text. When
+           Firebase names the failing field the form marks that
+           field alone (owner's instruction, 2026-10-24); on this
+           project enumeration protection merges both credential
+           failures into auth/invalid-credential, which authErrorInfo
+           keeps as the one shared message. */
+        const info = authErrorInfo(e);
+        return { ok: false, error: info.message, field: info.field };
       }
       loginThrottle.recordSuccess(clean);
       try {

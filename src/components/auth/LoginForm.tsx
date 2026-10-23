@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
+import type { AuthErrorField } from "@/lib/security";
 import { inputCls, labelCls } from "./ui";
+
+/** inputCls with the border recoloured for a field-level error. */
+const errInputCls = inputCls
+  .replace("border-ivory/15", "border-red-400/70")
+  .replace("focus:border-gold/60", "focus:border-red-400/80");
 
 /** Shared login form, used by the /login page and the auth modal. */
 export default function LoginForm({
@@ -17,23 +23,39 @@ export default function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  /* Which field the current error belongs to (owner, 2026-10-24:
+     only the wrong field is marked). Null = shared banner below. */
+  const [errorField, setErrorField] = useState<AuthErrorField | null>(null);
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+
+  /** Editing the marked field clears its error. */
+  function clearFieldError(field: AuthErrorField) {
+    if (errorField === field) {
+      setError("");
+      setErrorField(null);
+    }
+  }
 
   async function doLogin(e: FormEvent | null, em: string, pw: string) {
     e?.preventDefault();
     setError("");
+    setErrorField(null);
     setNotice("");
     setBusy(true);
     const res = await login(em, pw);
     setBusy(false);
     if (res.ok) onSuccess?.();
-    else setError(res.error ?? "Login failed.");
+    else {
+      setError(res.error ?? "Login failed.");
+      setErrorField(res.field ?? null);
+    }
   }
 
   /* Forgot password: Firebase emails a link that sets a new one. */
   async function doReset() {
     setError("");
+    setErrorField(null);
     setNotice("");
     if (isDemo) {
       setNotice("Demo mode: any password works here, nothing to reset.");
@@ -63,21 +85,33 @@ export default function LoginForm({
             <label className={labelCls}>Email</label>
             <input
               type="email"
-              className={inputCls}
+              className={errorField === "email" ? errInputCls : inputCls}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearFieldError("email");
+              }}
               placeholder="you@example.com"
             />
+            {errorField === "email" && error && (
+              <p className="mt-2 text-sm text-red-300">{error}</p>
+            )}
           </div>
           <div>
             <label className={labelCls}>Password</label>
             <input
               type="password"
-              className={inputCls}
+              className={errorField === "password" ? errInputCls : inputCls}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                clearFieldError("password");
+              }}
               placeholder="••••••••"
             />
+            {errorField === "password" && error && (
+              <p className="mt-2 text-sm text-red-300">{error}</p>
+            )}
             <p className="mt-2 text-right">
               <button
                 type="button"
@@ -91,7 +125,7 @@ export default function LoginForm({
           </div>
         </div>
 
-        {error && (
+        {error && !errorField && (
           <p className="mt-5 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
             {error}
           </p>
