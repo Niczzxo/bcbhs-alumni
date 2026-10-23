@@ -12,6 +12,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import { useAuthModal } from "@/components/AuthModal";
 import { useMember } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
+import { ROLE_META } from "@/lib/types";
 
 /** Public alumni profile, consumes the route-params promise via `use()`. */
 export default function MemberView({ params }: { params: Promise<{ id: string }> }) {
@@ -54,20 +55,26 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
           ) : (
             <div className="grid gap-8 lg:grid-cols-5">
               <Reveal className="lg:col-span-3 rounded-3xl border border-ivory/10 bg-ink-2 p-8 sm:p-10">
-                <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:text-left">
+                {/* Identity stack (owner's spec, 2026-10-23, same on
+                    desktop and mobile): big avatar on top, then in
+                    order the name, the Batch line, the member ID in
+                    gold, and the position/role as a highlighted gold
+                    pill with a soft glow, all in one centered column. */}
+                <div className="flex flex-col items-center gap-5 text-center">
                   <Avatar name={member.name} photoURL={member.photoURL} size="lg" />
                   <div>
                     <h2 className="font-display text-3xl font-extrabold text-ivory">{member.name}</h2>
-                    <p className="mt-1 whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.16em] text-gold sm:text-xs sm:tracking-[0.25em]">
-                      Batch of {member.batch} · {member.memberId}
+                    <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.22em] text-gold sm:text-xs sm:tracking-[0.25em]">
+                      Batch of {member.batch}
                     </p>
-                    {member.position && (
-                      <p className="mt-2">
-                        <span className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gold-2">
-                          ★ {member.position}
-                        </span>
-                      </p>
+                    {member.memberId && (
+                      <p className="mt-1.5 text-[13px] font-semibold tracking-[0.14em] text-gold-2">{member.memberId}</p>
                     )}
+                    <p className="mt-3">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-gold/50 bg-gold/15 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gold-2 shadow-[0_0_16px_rgba(212,169,78,0.25)]">
+                        ★ {member.position ?? ROLE_META[member.role].label}
+                      </span>
+                    </p>
                   </div>
                 </div>
                 {/* Centered ornament divider */}
