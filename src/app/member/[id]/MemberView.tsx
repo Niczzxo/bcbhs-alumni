@@ -93,30 +93,39 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                     ))}
                   </dl>
                 </div>
-                {/* Actions in hierarchy order: chat first (primary,
-                    full width on phones), then Back, then the two
-                    quiet actions sharing one row. */}
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                {/* Actions as one aligned button grid (owner's fix,
+                    2026-10-23): phones stack Chat and Back full-width
+                    with Edit/Verify sharing a row; desktop gets a tidy
+                    2x2 of equal buttons. Every label sits on ONE line
+                    at one shared height. */}
+                <div className="mt-8 grid grid-cols-2 gap-3">
                   {member.whatsapp && canContact && (
-                    <div className="w-full sm:w-auto [&>a]:w-full [&>a]:justify-center">
+                    <div className="col-span-2 sm:col-span-1 [&>a]:flex [&>a]:h-11 [&>a]:w-full [&>a]:justify-center [&>a]:whitespace-nowrap [&>a]:px-4 [&>a]:text-[11px] [&>a]:tracking-[0.14em] sm:[&>a]:text-xs sm:[&>a]:tracking-widest">
                       <WhatsAppButton whatsapp={member.whatsapp} labeled />
                     </div>
                   )}
-                  <Link href="/directory" className="rounded-full border border-gold/40 px-6 py-3 text-center text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10 sm:text-left">
+                  <Link
+                    href="/directory"
+                    className="col-span-2 flex h-11 items-center justify-center whitespace-nowrap rounded-full border border-gold/40 px-4 text-[11px] font-bold uppercase tracking-[0.14em] text-gold-2 hover:bg-gold/10 sm:col-span-1 sm:text-xs sm:tracking-widest"
+                  >
                     Back to Directory
                   </Link>
-                  <div className="flex gap-3 sm:contents">
-                    {isOwn && (
-                      <Link href="/profile/edit" className="flex-1 rounded-full border border-ivory/15 px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory sm:flex-none sm:px-6">
-                        Edit profile
-                      </Link>
-                    )}
-                    {member.memberId && (
-                      <Link href={`/verify/${member.memberId}`} className="flex-1 rounded-full border border-ivory/15 px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-muted hover:text-ivory sm:flex-none sm:px-6">
-                        Verify membership
-                      </Link>
-                    )}
-                  </div>
+                  {isOwn && (
+                    <Link
+                      href="/profile/edit"
+                      className="flex h-11 items-center justify-center whitespace-nowrap rounded-full border border-ivory/15 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted hover:text-ivory sm:px-4 sm:text-xs sm:tracking-widest"
+                    >
+                      Edit profile
+                    </Link>
+                  )}
+                  {member.memberId && (
+                    <Link
+                      href={`/verify/${member.memberId}`}
+                      className="flex h-11 items-center justify-center whitespace-nowrap rounded-full border border-ivory/15 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted hover:text-ivory sm:px-4 sm:text-xs sm:tracking-widest"
+                    >
+                      Verify membership
+                    </Link>
+                  )}
                 </div>
               </Reveal>
               <Reveal delay={0.1} className="flex flex-col items-center lg:col-span-2 lg:items-start">
