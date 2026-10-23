@@ -299,6 +299,16 @@ body {
   animation-play-state: paused;
 }
 
+/* Hide scrollbars on horizontal chip rails (the mobile dashboard
+   nav): the rail still scrolls, the grey line never shows. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Card hover lift, only where a true hover exists (desktop mouse).
    On touch screens a tap would otherwise make the card visibly jump. */
 @media (hover: hover) and (pointer: fine) {
