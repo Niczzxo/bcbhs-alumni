@@ -8,6 +8,7 @@ import { Avatar } from "@/components/MemberCard";
 import ContentManager from "@/components/content/ContentManager";
 import V2Manager, { V2_SECTIONS } from "@/components/content/V2Manager";
 import AboutEditor from "@/components/content/AboutEditor";
+import SettingsManager from "@/components/content/SettingsManager";
 import { useAuth } from "@/lib/auth-context";
 import { PERMISSIONS, ROLE_META, POSITIONS } from "@/lib/types";
 import type { MemberRole, UserProfile } from "@/lib/types";
@@ -419,6 +420,7 @@ export default function SuperAdminPage() {
       ),
     })),
     { key: "about", label: "About Page", content: <AboutEditor /> },
+    { key: "settings", label: "Settings", content: <SettingsManager /> },
   ];
 
   return (

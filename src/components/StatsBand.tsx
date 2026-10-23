@@ -4,6 +4,7 @@ import { useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useSiteStats } from "@/lib/data";
 import { SCHOOL_FOUNDED_YEAR } from "@/lib/site";
+import { useContent } from "@/lib/content-context";
 import Reveal from "./Reveal";
 
 /** Animated number that counts up when scrolled into view. */
@@ -38,6 +39,13 @@ function Counter({ to, suffix = "", big = false }: { to: number; suffix?: string
 /** Gold-on-navy stats band, live Firestore counts when configured. */
 export default function StatsBand() {
   const stats = useSiteStats();
+  /* Founding year is a site setting (super-admin Settings section);
+     the site.ts constant is the fallback. */
+  const { siteContent } = useContent();
+  const foundedYear =
+    siteContent.foundedYear && siteContent.foundedYear >= 1800
+      ? siteContent.foundedYear
+      : SCHOOL_FOUNDED_YEAR;
   /* School age, auto-advancing: the clock is read in an effect
      (never during prerender), so the number rolls over every
      January with no code change and no redeploy. */
@@ -57,7 +65,7 @@ export default function StatsBand() {
     { label: "Events & Reunions", value: stats.eventsHeld, suffix: "", cls: "order-5" },
     {
       label: "Years of Legacy",
-      value: Math.max(0, year - SCHOOL_FOUNDED_YEAR),
+      value: Math.max(0, year - foundedYear),
       suffix: "",
       cls: "order-3 col-span-2 lg:col-span-1",
       hero: true,

@@ -11,6 +11,7 @@ import { SITE_SCHOOL } from "@/lib/site";
 /** About the BCBHS Alumni Association, content editable by the super admin. */
 export default function AboutPage() {
   const { siteContent: c } = useContent();
+  const schoolUrl = c.schoolUrl?.trim() || SITE_SCHOOL;
 
   return (
     <>
@@ -68,7 +69,7 @@ export default function AboutPage() {
           {/* Affiliation, the whole card links to the school's official site */}
           <Reveal className="mt-14 rounded-3xl border border-ivory/10 bg-ink-2 p-8 transition-colors duration-300 hover:border-gold/40 sm:p-10">
             <a
-              href={SITE_SCHOOL}
+              href={schoolUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left"

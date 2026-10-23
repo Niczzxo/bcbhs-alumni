@@ -33,6 +33,7 @@ export default function AboutEditor() {
     e.preventDefault();
     setBusy(true);
     await saveSiteContent({
+      ...siteContent,
       aboutEyebrow: f.aboutEyebrow.trim() || DEFAULT_SITE_CONTENT.aboutEyebrow,
       aboutTitle: f.aboutTitle.trim() || DEFAULT_SITE_CONTENT.aboutTitle,
       aboutIntro: f.aboutIntro.trim(),

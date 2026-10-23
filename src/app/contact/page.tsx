@@ -6,6 +6,7 @@ import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { WhatsAppIcon } from "@/components/Footer";
 import { useAuth } from "@/lib/auth-context";
+import { useContent } from "@/lib/content-context";
 import { SITE_FACEBOOK, SITE_INSTAGRAM, SITE_WHATSAPP, SITE_EMAIL } from "@/lib/site";
 
 const FacebookIcon = () => (
@@ -32,28 +33,33 @@ const MailIcon = () => (
 /** Contact the BCBHS Alumni Association, official channels. */
 export default function ContactPage() {
   const { user } = useAuth();
+  const { siteContent } = useContent();
+  const email = siteContent.contactEmail?.trim() || SITE_EMAIL;
+  const facebook = siteContent.facebookUrl?.trim() || SITE_FACEBOOK;
+  const instagram = siteContent.instagramUrl?.trim() || SITE_INSTAGRAM;
+  const whatsapp = siteContent.whatsappUrl?.trim() || SITE_WHATSAPP;
   // WhatsApp community link is for verified (approved) members only: hidden from guests and pending accounts.
   const isVerified = user?.status === "approved";
   const channels = [
     {
       icon: <MailIcon />,
       title: "Email us",
-      detail: SITE_EMAIL,
-      href: `mailto:${SITE_EMAIL}`,
+      detail: email,
+      href: `mailto:${email}`,
       blurb: "For membership queries, verifications, and official correspondence.",
     },
     {
       icon: <FacebookIcon />,
       title: "Facebook",
       detail: "BCBHS Alumni, official page",
-      href: SITE_FACEBOOK,
+      href: facebook,
       blurb: "Announcements, event photos, and community updates.",
     },
     {
       icon: <InstagramIcon />,
       title: "Instagram",
       detail: "@bcbhsalumni",
-      href: SITE_INSTAGRAM,
+      href: instagram,
       blurb: "Moments in gold, follow the visual story of the community.",
     },
     // WhatsApp community link is verified-members-only: hidden from logged-out guests and pending accounts.
@@ -63,7 +69,7 @@ export default function ContactPage() {
             icon: <WhatsAppIcon />,
             title: "WhatsApp community",
             detail: "Members-only group",
-            href: SITE_WHATSAPP,
+            href: whatsapp,
             blurb: "Daily adda, urgent notices, and blood requests, for verified members.",
           },
         ]

@@ -94,6 +94,16 @@ export interface AnnouncementItem {
 }
 
 export interface SiteContent {
+  /* Site settings (owner, 2026-10-24), edited from the super-admin
+     dashboard's Settings section. All optional: every consumer
+     falls back to the matching constant in site.ts when a field
+     is unset, so older stored docs keep working. */
+  contactEmail?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  whatsappUrl?: string;
+  schoolUrl?: string;
+  foundedYear?: number;
   aboutEyebrow: string;
   aboutTitle: string;
   aboutIntro: string;

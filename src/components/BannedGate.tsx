@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
+import { useContent } from "@/lib/content-context";
 import { SITE_EMAIL } from "@/lib/site";
 
 /**
@@ -10,6 +11,8 @@ import { SITE_EMAIL } from "@/lib/site";
  */
 export default function BannedGate() {
   const { user, logout } = useAuth();
+  const { siteContent } = useContent();
+  const email = siteContent.contactEmail?.trim() || SITE_EMAIL;
   if (!user || user.status !== "banned") return null;
 
   return (
@@ -22,8 +25,8 @@ export default function BannedGate() {
         <p className="mt-4 text-sm leading-relaxed text-muted">
           Your BCBHS alumni account has been suspended by the administration, so member
           areas are closed to you for now. If you believe this is a mistake, write to{" "}
-          <a href={`mailto:${SITE_EMAIL}`} className="text-gold-2 hover:underline">
-            {SITE_EMAIL}
+          <a href={`mailto:${email}`} className="text-gold-2 hover:underline">
+            {email}
           </a>
           .
         </p>

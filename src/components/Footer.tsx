@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { NAV_LINKS, SITE_FACEBOOK, SITE_INSTAGRAM, SITE_WHATSAPP, SITE_EMAIL } from "@/lib/site";
 import { useAuth } from "@/lib/auth-context";
+import { useContent } from "@/lib/content-context";
 
 export const WhatsAppIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 shrink-0" aria-hidden="true">
@@ -40,6 +41,11 @@ export default function Footer() {
   // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time client hydration
   useEffect(() => setYear(new Date().getFullYear()), []);
   const { user } = useAuth();
+  const { siteContent } = useContent();
+  const email = siteContent.contactEmail?.trim() || SITE_EMAIL;
+  const facebook = siteContent.facebookUrl?.trim() || SITE_FACEBOOK;
+  const instagram = siteContent.instagramUrl?.trim() || SITE_INSTAGRAM;
+  const whatsapp = siteContent.whatsappUrl?.trim() || SITE_WHATSAPP;
   return (
     <footer className="border-t border-gold/20 bg-[#070b1c]">
       <div className="mx-auto w-full px-5 py-10 sm:px-10 sm:py-12 lg:px-[3vw]">
@@ -92,7 +98,7 @@ export default function Footer() {
             <ul className="mt-4 space-y-3">
               <li>
                 <a
-                  href={SITE_FACEBOOK}
+                  href={facebook}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 text-sm text-muted transition-colors hover:text-gold-2"
@@ -108,7 +114,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href={SITE_INSTAGRAM}
+                  href={instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 text-sm text-muted transition-colors hover:text-gold-2"
@@ -126,7 +132,7 @@ export default function Footer() {
               {user?.status === "approved" && (
                 <li>
                   <a
-                    href={SITE_WHATSAPP}
+                    href={whatsapp}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-center gap-3 text-sm text-muted transition-colors hover:text-gold-2"
@@ -143,7 +149,7 @@ export default function Footer() {
               )}
               <li>
                 <a
-                  href={`mailto:${SITE_EMAIL}`}
+                  href={`mailto:${email}`}
                   className="group flex items-center gap-3 text-sm text-muted transition-colors hover:text-gold-2"
                 >
                   <span className="flex h-10 w-10 items-center justify-center rounded-full border border-ivory/15 text-muted transition-all group-hover:border-gold/60 group-hover:text-gold-2">
@@ -151,7 +157,7 @@ export default function Footer() {
                   </span>
                   <span>
                     <span className="block font-semibold text-ivory/90 group-hover:text-gold-2">Email</span>
-                    <span className="block break-all text-xs text-muted/70">{SITE_EMAIL}</span>
+                    <span className="block break-all text-xs text-muted/70">{email}</span>
                   </span>
                 </a>
               </li>

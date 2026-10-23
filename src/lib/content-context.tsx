@@ -352,7 +352,10 @@ export function ContentProvider({ children }: { children: ReactNode }) {
           onSnapshot(doc(db, "site", "content"), (snap) => {
             markArrived("siteContent");
             if (cancelled || !snap.exists()) return;
-            setContent((p) => ({ ...p, siteContent: snap.data() as SiteContent }));
+            setContent((p) => ({
+              ...p,
+              siteContent: { ...DEFAULT_SITE_CONTENT, ...(snap.data() as SiteContent) },
+            }));
           }),
         ];
         return () => {

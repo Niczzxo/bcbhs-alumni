@@ -3,11 +3,14 @@
 import Reveal from "@/components/Reveal";
 import { WhatsAppIcon } from "@/components/Footer";
 import { useAuth } from "@/lib/auth-context";
+import { useContent } from "@/lib/content-context";
 import { SITE_WHATSAPP } from "@/lib/site";
 
 /** WhatsApp community banner, visible only to logged-in members. */
 export default function CommunityBanner() {
   const { user } = useAuth();
+  const { siteContent } = useContent();
+  const whatsapp = siteContent.whatsappUrl?.trim() || SITE_WHATSAPP;
   if (!user) return null;
 
   return (
@@ -33,7 +36,7 @@ export default function CommunityBanner() {
                 </div>
               </div>
               <a
-                href={SITE_WHATSAPP}
+                href={whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="shrink-0 rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-ink transition-transform duration-300 hover:scale-105"

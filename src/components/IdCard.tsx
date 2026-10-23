@@ -7,6 +7,7 @@ import { toPng } from "html-to-image";
 import DottedQr from "./DottedQr";
 import type { UserProfile } from "@/lib/types";
 import { SITE_EMAIL } from "@/lib/site";
+import { useContent } from "@/lib/content-context";
 
 /**
  * Official BCBHS Alumni ID card, portrait CR80 (53.98 × 85.6 mm).
@@ -243,6 +244,8 @@ function ContactRow({ icon, text }: { icon: React.ReactNode; text: string }) {
 }
 
 function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: string }) {
+  const { siteContent } = useContent();
+  const email = siteContent.contactEmail?.trim() || SITE_EMAIL;
   return (
     <CardShell>
       <div className="relative h-full w-full">
@@ -292,7 +295,7 @@ function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: st
           {/* contact rows */}
           <div className="mt-[2.1cqw] w-full">
             <ContactRow icon={<PinIcon />} text="Bogura Cantonment, Bogura, Bangladesh" />
-            <ContactRow icon={<MailIcon />} text={SITE_EMAIL} />
+            <ContactRow icon={<MailIcon />} text={email} />
             <ContactRow icon={<GlobeIcon />} text="bcbhsalumni.vercel.app" />
           </div>
 
