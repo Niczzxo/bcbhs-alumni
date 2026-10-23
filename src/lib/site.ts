@@ -25,7 +25,6 @@ export const NAV_LINKS = [
   { label: "Blood Donors", href: "/blood-donors" },
   { label: "Success Stories", href: "/stories" },
   { label: "Businesses", href: "/businesses" },
-  { label: "Memory Wall", href: "/memory-wall" },
   { label: "Scholarship Fund", href: "/fund" },
 ];
 
