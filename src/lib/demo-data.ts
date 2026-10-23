@@ -80,7 +80,10 @@ export const DEMO_USERS: UserProfile[] = [
     company: "BCBHS Alumni Association",
     status: "approved",
     role: "editor",
-    permissions: [],
+    /* Granted by the super admin (the demo editor's working set).
+       Editors start with NO access; this list is their grant. */
+    permissions: ["manage_events", "manage_gallery", "post_announcements", "manage_committee"],
+    permissionsCustom: true,
     memberId: "BCBHS-2018-0010",
     createdAt: "2023-03-05T00:00:00.000Z",
   },

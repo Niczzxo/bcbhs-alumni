@@ -22,7 +22,6 @@ import {
 } from "react";
 import { isFirebaseConfigured, auth, db } from "./firebase";
 import { DEMO_USERS } from "./demo-data";
-import { EDITOR_PERMISSIONS } from "./types";
 import type { UserProfile } from "./types";
 
 export interface RegisterInput {
@@ -518,8 +517,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [members]);
 
   const setPermissions = useCallback(async (id: string, permissions: string[]) => {
-    /* Customizing an EDITOR also flips permissionsCustom, so their
-       toggled list (not the standard bundle) governs from now on. */
+    /* Granting an EDITOR also flips permissionsCustom, marking that
+       the super admin has configured this editor's grants. */
     const target = membersRef.current.find((m) => m.id === id);
     const isEditor = target?.role === "editor";
     const patch = isEditor ? { permissions, permissionsCustom: true } : { permissions };
@@ -531,8 +530,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setRole = useCallback(async (id: string, role: UserProfile["role"]) => {
-    /* A fresh editor starts on the standard bundle: clear any old
-       list and the custom flag whenever the editor role is (re)given. */
+    /* A fresh editor starts with NO access at all: clear any old
+       list whenever the editor role is (re)given, so the super admin
+       grants each section explicitly (owner's rule, 2026-10-23). */
     const patch =
       role === "editor"
         ? { role, permissions: [] as string[], permissionsCustom: false }
@@ -576,13 +576,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user.role === "super_admin") return true;
       if (user.role === "admin") return user.permissions.includes(perm);
       if (user.role === "editor")
-        /* Editors start on the standard bundle; once the super admin
-           customizes an editor (permissionsCustom), their own toggled
-           list governs, exactly like a Batch Rep's (owner's rule,
-           2026-10-23). */
-        return user.permissionsCustom
-          ? user.permissions.includes(perm)
-          : (EDITOR_PERMISSIONS as readonly string[]).includes(perm);
+        /* Editors hold ONLY what the super admin granted them: their
+           own permissions list, and nothing by default (owner's rule,
+           2026-10-23). An editor is the super admin's helping hand
+           for exactly the sections switched on for them. */
+        return user.permissions.includes(perm);
       return false;
     },
     [user],

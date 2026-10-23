@@ -15,9 +15,9 @@ rules_version = '2';
 /*    admin) may change status / role / permissions / memberId.        */
 /*  - The super admin (role == "super_admin") has full write access    */
 /*    and may assign any role (member / editor / admin / super_admin). */
-/*  - Editors (role == "editor") carry a fixed content bundle:         */
-/*    manage_events, manage_gallery, post_announcements,               */
-/*    manage_committee.                                                */
+/*  - Editors (role == "editor") hold ONLY the permissions the super   */
+/*    admin grants them (their own permissions list); they start       */
+/*    with none.                                                       */
 /*                                                                     */
 /*  NOTE: the client additionally hides phone numbers unless the       */
 /*  viewer is the owner or has the `view_member_data` permission —     */
@@ -47,17 +47,13 @@ service cloud.firestore {
       return signedIn() && me().role == 'editor';
     }
 
-    function editorPerms() {
-      return ['manage_events', 'manage_gallery', 'post_announcements', 'manage_committee'];
-    }
-
     function can(perm) {
       return isSuperAdmin()
         || (signedIn() && me().role == 'admin' && perm in me().permissions)
-        || (isEditor() && perm in editorPerms())
-        /* A customized editor's own toggled list governs, exactly as
-           in the app (permissionsCustom set by the super admin). */
-        || (isEditor() && me().get('permissionsCustom', false) == true && perm in me().permissions);
+        /* Editors hold ONLY what the super admin granted them: their
+           own permissions list, no default bundle (owner's rule,
+           2026-10-23). */
+        || (isEditor() && perm in me().permissions);
     }
 
     function onlyStatusFieldsChanged() {

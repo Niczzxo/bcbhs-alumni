@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { compressImageToDataURL } from "@/lib/image";
 import { useContent } from "@/lib/content-context";
+import { useAuth } from "@/lib/auth-context";
 import { inputCls, labelCls } from "@/components/auth/ui";
 import type {
   AnnouncementItem,
@@ -12,6 +13,16 @@ import type {
 } from "@/lib/types";
 
 export type ContentKind = "events" | "gallery" | "committee" | "announcements";
+
+/* Each manager kind is guarded by its own permission: staff work
+   ONLY on what the super admin granted them (owner's rule,
+   2026-10-23). The Firestore rules enforce the same boundary. */
+const KIND_PERM: Record<ContentKind, string> = {
+  events: "manage_events",
+  gallery: "manage_gallery",
+  announcements: "post_announcements",
+  committee: "manage_committee",
+};
 
 const KIND_META: Record<ContentKind, { title: string; blurb: string; addLabel: string }> = {
   events: {
@@ -414,6 +425,7 @@ function AnnouncementForm({ initial, onDone }: { initial?: AnnouncementItem; onD
 
 export default function ContentManager({ kind }: { kind: ContentKind }) {
   const meta = KIND_META[kind];
+  const { hasPermission } = useAuth();
   const {
     events, gallery, committee, announcements, loading,
     removeEvent, removePhoto, removeSeat, removeAnnouncement,
@@ -444,6 +456,20 @@ export default function ContentManager({ kind }: { kind: ContentKind }) {
   };
 
   const editingItem = editingId ? items.find((it) => it.id === editingId) ?? null : null;
+
+  /* Permission gate (owner's rule, 2026-10-23): without the grant for
+     this kind, the manager is a lock note, not a read-only peek. */
+  if (!hasPermission(KIND_PERM[kind])) {
+    return (
+      <div className="rounded-3xl border border-ivory/10 bg-ink-2 p-6 sm:p-8">
+        <h3 className="font-display text-xl font-bold text-ivory">{meta.title}</h3>
+        <p className="mt-3 rounded-2xl border border-gold/25 bg-gold/5 px-4 py-3 text-sm text-gold-2">
+          🔒 The super admin has not given you access to {meta.title} yet. Staff can only
+          work on the sections the super admin grants them.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-3xl border border-ivory/10 bg-ink-2 p-6 sm:p-8">

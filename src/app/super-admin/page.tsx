@@ -9,7 +9,7 @@ import ContentManager from "@/components/content/ContentManager";
 import V2Manager from "@/components/content/V2Manager";
 import AboutEditor from "@/components/content/AboutEditor";
 import { useAuth } from "@/lib/auth-context";
-import { PERMISSIONS, EDITOR_PERMISSIONS, ROLE_META, POSITIONS } from "@/lib/types";
+import { PERMISSIONS, ROLE_META, POSITIONS } from "@/lib/types";
 import type { MemberRole, UserProfile } from "@/lib/types";
 
 /**
@@ -48,12 +48,10 @@ export default function SuperAdminPage() {
   const admins = members.filter((m) => m.role === "admin" || m.role === "super_admin");
   const editors = members.filter((m) => m.role === "editor");
 
-  /* The permissions a person effectively holds: a Batch Rep's own
-     toggled list; an editor's toggled list once customized, and the
-     standard editor bundle until then. Toggles start from THIS list,
-     so customizing an editor never loses the bundle by accident. */
-  const effectivePerms = (m: UserProfile): string[] =>
-    m.role === "editor" && !m.permissionsCustom ? [...EDITOR_PERMISSIONS] : m.permissions;
+  /* The permissions a person holds are exactly their toggled list,
+     for Batch Reps and editors alike. Editors start EMPTY: the super
+     admin grants each section explicitly (owner's rule, 2026-10-23). */
+  const effectivePerms = (m: UserProfile): string[] => m.permissions;
 
   const togglePerm = (m: UserProfile, key: string) => {
     const base = effectivePerms(m);
@@ -194,10 +192,9 @@ export default function SuperAdminPage() {
               );
             })}
           </div>
-          {m.role === "editor" && !m.permissionsCustom && (
-            <p className="mt-3 text-[11px] text-muted/70">
-              This editor is on the standard bundle (events, gallery, announcements, committee).
-              Flip any switch to customize this editor individually.
+          {m.role === "editor" && m.permissions.length === 0 && (
+            <p className="mt-3 text-[11px] text-gold-2/80">
+              This editor has no access yet. Switch on exactly what they may work on; they can do nothing else.
             </p>
           )}
         </div>
@@ -270,8 +267,8 @@ export default function SuperAdminPage() {
           <p className="mt-2 text-sm text-muted">
             Only the people who hold a role live here. Give someone a role from the
             All Members section and they appear here automatically. Batch reps and editors
-            each get exactly the permissions you toggle; a new editor starts with the standard
-            content bundle until you customize them. Super admin always has full access.
+            each get exactly the permissions you toggle, nothing more; a new editor starts
+            with no access at all until you switch sections on for them. Super admin always has full access.
           </p>
           <div className="gold-rule mt-4 w-32" />
           <div className="mt-8 space-y-5">

@@ -5,14 +5,6 @@
 export type MemberStatus = "pending" | "approved" | "rejected" | "banned";
 export type MemberRole = "member" | "editor" | "admin" | "super_admin";
 
-/** Fixed permission bundle for the editor role (content staff). */
-export const EDITOR_PERMISSIONS = [
-  "manage_events",
-  "manage_gallery",
-  "post_announcements",
-  "manage_committee",
-] as const;
-
 /** Display metadata per role for admin UIs. */
 export const ROLE_META: Record<
   MemberRole,
@@ -26,7 +18,7 @@ export const ROLE_META: Record<
   editor: {
     label: "Editor",
     badge: "bg-sky-400/15 text-sky-300",
-    blurb: "Content staff, manages events, gallery, announcements & committee. No member approvals.",
+    blurb: "Editor: the super admin's helping hand. Works only on the sections the super admin grants, nothing more.",
   },
   admin: {
     label: "Batch Rep",
@@ -63,7 +55,7 @@ export interface UserProfile {
   status: MemberStatus;
   role: MemberRole;
   permissions: string[]; // granular permissions, granted per person by the super admin
-  permissionsCustom?: boolean; // editors: true once the super admin customized this editor's permissions (until then the standard editor bundle applies)
+  permissionsCustom?: boolean; // editors: true once the super admin has configured this editor's granted permissions
   memberId?: string; // e.g. "BCBHS-2015-0001", assigned on approval
   createdAt: string; // ISO date
 }
