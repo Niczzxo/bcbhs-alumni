@@ -18,7 +18,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* Next 16 only serves allowlisted image qualities; 90 is the hero /
+   * campus photo quality (owner wants it high on desktop AND mobile),
+   * 75 stays the default for everything else. */
+  images: { qualities: [75, 90] },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

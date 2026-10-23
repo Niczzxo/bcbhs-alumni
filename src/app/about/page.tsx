@@ -26,7 +26,7 @@ export default function AboutPage() {
         <section className="mx-auto max-w-4xl px-5 py-14 sm:px-8">
           <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
             <Reveal className="relative h-80 overflow-hidden rounded-3xl border border-ivory/10 lg:h-[26rem]">
-              <Image src="/images/school.jpg" alt="BCBHS campus" fill className="object-cover" />
+              <Image src="/images/school.jpg" alt="BCBHS campus" fill quality={90} className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
             </Reveal>
             <div>

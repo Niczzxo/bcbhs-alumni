@@ -45,6 +45,7 @@ export default function Hero() {
           alt="Bogura Cantonment Board High School campus"
           fill
           className="object-cover"
+          quality={90}
           priority
         />
       </motion.div>
