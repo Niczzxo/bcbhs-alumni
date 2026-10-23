@@ -243,6 +243,25 @@ function fmtWhen(ts: number): string {
   );
 }
 
+/**
+ * Guest trails fold identical (page, device) visits into one row
+ * with a count — a wall of '/' rows helps nobody (owner, 2026-10-24).
+ */
+function aggregateGuestTrail(visits: Visit[]): (Visit & { times: number })[] {
+  const map = new Map<string, Visit & { times: number }>();
+  for (const v of visits) {
+    const key = v.path + "|" + v.device;
+    const cur = map.get(key);
+    if (cur) {
+      cur.times += 1;
+      cur.ts = Math.max(cur.ts, v.ts);
+    } else {
+      map.set(key, { ...v, times: 1 });
+    }
+  }
+  return [...map.values()].sort((a, b) => b.ts - a.ts);
+}
+
 interface VisitorGroup {
   key: string;
   name: string;
@@ -284,11 +303,16 @@ function VisitorsModal({
     }
     const list = [...map.values()];
     for (const g of list) g.visits.sort((a, b) => b.ts - a.ts);
-    list.sort((a, b) => (b.visits[0]?.ts ?? 0) - (a.visits[0]?.ts ?? 0));
+    // Members first (most recent first); the anonymous guest group
+    // always sits last (owner, 2026-10-24).
+    list.sort((a, b) => {
+      if (a.guest !== b.guest) return a.guest ? 1 : -1;
+      return (b.visits[0]?.ts ?? 0) - (a.visits[0]?.ts ?? 0);
+    });
     return list;
   }, [visits, members]);
 
-  const [open, setOpen] = useState<string | null>(groups[0]?.key ?? null);
+  const [open, setOpen] = useState<string | null>(null);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -356,11 +380,16 @@ function VisitorsModal({
                     </button>
                     {expanded && (
                       <div className="border-t border-ivory/[0.07] px-4 py-2">
-                        {g.visits.map((v) => (
-                          <div key={v.id} className="flex items-center gap-3 border-b border-ivory/[0.05] py-2.5 last:border-0">
+                        {(g.guest ? aggregateGuestTrail(g.visits) : g.visits.map((v) => ({ ...v, times: 1 }))).map((v) => (
+                          <div key={v.path + v.device + v.ts} className="flex items-center gap-3 border-b border-ivory/[0.05] py-2.5 last:border-0">
                             <span className="min-w-0 flex-1 truncate rounded-lg bg-ivory/[0.04] px-2.5 py-1 font-mono text-[11px] text-gold-2">
                               {v.path}
                             </span>
+                            {v.times > 1 && (
+                              <span className="shrink-0 rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-extrabold text-gold-2">
+                                ×{v.times}
+                              </span>
+                            )}
                             <span className="shrink-0 text-[11px] text-muted">{v.device}</span>
                             <span className="shrink-0 text-[11px] font-medium text-ivory/75">{fmtWhen(v.ts)}</span>
                           </div>

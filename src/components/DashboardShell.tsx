@@ -1,7 +1,6 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /* Section icons for the sidebar + mobile sheet (owner's reference
@@ -201,24 +200,6 @@ export default function DashboardShell({
       </aside>
 
       <div className="min-w-0 flex-1">
-        {/* Brand banner: full width, on EVERY section of every
-            dashboard (owner, 2026-10-24 — it lives in the shell, not
-            in a single section). */}
-        <div className="relative mb-6 h-28 overflow-hidden rounded-3xl border border-gold/25 sm:h-36 lg:h-44">
-          <Image src="/images/school.jpg" alt="BCBHS campus" fill sizes="1100px" className="object-cover object-center brightness-[0.82]" />
-          <div className="absolute inset-0 bg-ink/40" />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/70 via-ink/20 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-ink/85 to-transparent" />
-          <div className="absolute bottom-3.5 right-5 text-right sm:bottom-5 sm:right-7">
-            <p className="font-display text-xl font-black leading-none tracking-wide text-ivory sm:text-3xl">
-              BCBHS <span className="text-gold-gradient">ALUMNI</span>
-            </p>
-            <p className="mt-1.5 text-[9px] font-bold uppercase tracking-[0.32em] text-gold-2 sm:text-[10px]">
-              Est. 2023 · Bogura
-            </p>
-          </div>
-        </div>
-
         {sections
           .filter((s) => visited.has(s.key))
           .map((s) => (
