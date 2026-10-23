@@ -141,6 +141,7 @@ function VisitsChart({ days, avg }: { days: DayPoint[]; avg: number }) {
     .join(" ");
   const area = `${line} L ${pts[pts.length - 1].x} ${T + ih} L ${pts[0].x} ${T + ih} Z`;
   const gridVals = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(yMax * f));
+  const dense = days.length > 10;
   const a = active !== null ? days[active] : null;
   const ax = active !== null ? pts[active].x : 0;
   const ay = active !== null ? pts[active].y : 0;
@@ -189,25 +190,29 @@ function VisitsChart({ days, avg }: { days: DayPoint[]; avg: number }) {
 
       {pts.map((pt, i) => (
         <g key={i}>
-          <circle cx={pt.x} cy={pt.y} r={active === i ? 6 : 4} fill="#0a1430" stroke="#e9c766" strokeWidth="2.4" />
+          <circle cx={pt.x} cy={pt.y} r={active === i ? (dense ? 5 : 6) : dense ? 3 : 4} fill="#0a1430" stroke="#e9c766" strokeWidth="2.4" />
           <circle
             cx={pt.x}
             cy={pt.y}
-            r="16"
+            r={dense ? "9" : "16"}
             fill="transparent"
             onMouseEnter={() => setActive(i)}
             onClick={() => setActive(i)}
             style={{ cursor: "pointer" }}
           />
+          {!dense && (
           <g pointerEvents="none">
             <rect x={pt.x - 12} y={pt.y - 27} width="24" height="15" rx="4.5" fill="#101c42" stroke="rgba(233,199,102,0.35)" />
             <text x={pt.x} y={pt.y - 16} textAnchor="middle" fontSize="9" fontWeight="700" fill="#f4ead6">
               {days[i].count}
             </text>
           </g>
-          <text x={pt.x} y={T + ih + 16} textAnchor="middle" fontSize="9.5" fill="rgba(163,163,180,0.9)">
-            {days[i].dateLabel}
-          </text>
+          )}
+          {(!dense || i % 5 === 0 || i === days.length - 1) && (
+            <text x={pt.x} y={T + ih + 16} textAnchor="middle" fontSize="9.5" fill="rgba(163,163,180,0.9)">
+              {days[i].dateLabel}
+            </text>
+          )}
         </g>
       ))}
 
@@ -397,6 +402,7 @@ export default function OverviewPanel({
   const content = useContent();
   const [dateLine, setDateLine] = useState("");
   const [showAll, setShowAll] = useState(false);
+  const [period, setPeriod] = useState<7 | 30>(7);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client clock read, mirrors Footer/StatsBand
     setDateLine(
@@ -416,26 +422,32 @@ export default function OverviewPanel({
     const d30 = todayStart - 29 * 86_400_000;
     const inRange = (v: Visit, from: number) => v.ts >= from;
     const last7 = visits.filter((v) => inRange(v, d7));
-    const days: DayPoint[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const dayStart = todayStart - i * 86_400_000;
-      const dayEnd = dayStart + 86_400_000;
-      const dayDate = new Date(dayStart);
-      days.push({
-        label: dayDate.toLocaleDateString("en-US", { weekday: "narrow" }),
-        weekday: dayDate.toLocaleDateString("en-US", { weekday: "short" }),
-        dateLabel: dayDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
-        count: visits.filter((v) => v.ts >= dayStart && v.ts < dayEnd).length,
-      });
-    }
+    const buildSeries = (n: number): DayPoint[] => {
+      const out: DayPoint[] = [];
+      for (let i = n - 1; i >= 0; i--) {
+        const dayStart = todayStart - i * 86_400_000;
+        const dayDate = new Date(dayStart);
+        out.push({
+          label: dayDate.toLocaleDateString("en-US", { weekday: "narrow" }),
+          weekday: dayDate.toLocaleDateString("en-US", { weekday: "short" }),
+          dateLabel: dayDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+          count: visits.filter((v) => v.ts >= dayStart && v.ts < dayStart + 86_400_000).length,
+        });
+      }
+      return out;
+    };
+    const days = buildSeries(7);
+    const days30 = buildSeries(30);
     return {
       today: visits.filter((v) => inRange(v, todayStart)).length,
       last7: last7.length,
       last30: visits.filter((v) => inRange(v, d30)).length,
       membersSeen: new Set(last7.map((v) => v.uid).filter(Boolean)).size,
       days,
+      days30,
       maxDay: Math.max(1, ...days.map((d) => d.count)),
       avg: last7.length / 7,
+      avg30: visits.filter((v) => inRange(v, d30)).length / 30,
     };
   }, [visits]);
 
@@ -544,7 +556,7 @@ export default function OverviewPanel({
     <div className="grid gap-6">
       {/* header */}
       <Reveal>
-        <div className="flex flex-wrap items-stretch justify-between gap-5">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-60 flex-1">
             <p className={eyebrowCls}>{dateLine || "Dashboard"}</p>
             <h2 className="font-display mt-2 text-3xl font-bold text-ivory sm:text-4xl">
@@ -570,21 +582,6 @@ export default function OverviewPanel({
                 Review {pending} pending
               </button>
             )}
-          </div>
-          {/* Campus banner, echoes the reference layout (owner, 2026-10-24). */}
-          <div className="relative hidden w-80 shrink-0 overflow-hidden rounded-3xl border border-gold/25 md:block lg:w-[26rem]">
-            <Image src="/images/school.jpg" alt="BCBHS campus" fill sizes="416px" className="object-cover" />
-            <div className="absolute inset-0 bg-ink/35" />
-            <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/25 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-ink/85 to-transparent" />
-            <div className="absolute bottom-3.5 right-5 text-right">
-              <p className="font-display text-xl font-black leading-none tracking-wide text-ivory">
-                BCBHS <span className="text-gold-gradient">ALUMNI</span>
-              </p>
-              <p className="mt-1.5 text-[9px] font-bold uppercase tracking-[0.32em] text-gold-2">
-                Est. 2023 · Bogura
-              </p>
-            </div>
           </div>
         </div>
       </Reveal>
@@ -674,14 +671,23 @@ export default function OverviewPanel({
                   <span className="flex h-8 w-8 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-gold-2">
                     <EyeIcon />
                   </span>
-                  <span className="font-display text-base font-bold text-ivory">Visits – Last 7 Days</span>
+                  <span className="font-display text-base font-bold text-ivory">Visits – Last {period} Days</span>
                 </p>
-                <span className="shrink-0 rounded-full border border-ivory/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted">
-                  Last 7 Days ▾
-                </span>
+                <label className="relative shrink-0">
+                  <span className="sr-only">Chart period</span>
+                  <select
+                    value={period}
+                    onChange={(e) => setPeriod(Number(e.target.value) as 7 | 30)}
+                    className="cursor-pointer appearance-none rounded-full border border-ivory/15 bg-ink-2 py-1.5 pl-3.5 pr-8 text-[10px] font-bold uppercase tracking-widest text-muted outline-none transition-colors hover:border-gold/40 hover:text-gold-2 focus:border-gold/50"
+                  >
+                    <option value={7}>Last 7 Days</option>
+                    <option value={30}>Last 30 Days</option>
+                  </select>
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-muted">▾</span>
+                </label>
               </div>
               <div className="mt-2">
-                <VisitsChart days={traffic.days} avg={traffic.avg} />
+                <VisitsChart days={period === 7 ? traffic.days : traffic.days30} avg={period === 7 ? traffic.avg : traffic.avg30} />
               </div>
               <p className="text-[11px] leading-relaxed text-muted/70">
                 One visit is counted per person per page in a browsing session. Portal content so far:{" "}
