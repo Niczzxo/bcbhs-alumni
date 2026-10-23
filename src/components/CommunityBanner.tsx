@@ -12,7 +12,7 @@ export default function CommunityBanner() {
 
   return (
     <section className="bg-ink">
-      <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+      <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl border border-gold/25 bg-gradient-to-br from-ink-2 via-ink-3 to-ink p-8 sm:p-12">
             <div className="sunburst absolute inset-0 opacity-40" />

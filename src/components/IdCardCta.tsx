@@ -73,7 +73,7 @@ export default function IdCardCta() {
         </span>
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-2">
+      <div className="relative mx-auto grid w-full items-center gap-12 px-5 sm:px-10 lg:grid-cols-2 lg:px-[3vw]">
         {loading ? (
           /* Auth still resolving, skeleton in the exact layout, so a
            * reload never flashes the guest pitch + sample card at a

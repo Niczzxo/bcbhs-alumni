@@ -101,7 +101,7 @@ export default function BloodDonorsPage() {
           title={<>Blood <span className="text-gold-gradient">Donor Network</span></>}
           subtitle="In an emergency, every minute counts. Find a verified alumni donor near you."
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           <Reveal className="rounded-3xl border border-red-400/25 bg-ink-2 p-6">
             <div className="grid gap-4 sm:grid-cols-3">
               <select className={inputCls} value={group} onChange={(e) => setGroup(e.target.value)}>

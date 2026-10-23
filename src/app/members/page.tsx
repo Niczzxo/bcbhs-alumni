@@ -54,7 +54,7 @@ export default function MembersPage() {
           title={<>All <span className="text-gold-gradient">Members</span></>}
           subtitle="Every verified alumnus registered on the portal, searchable by name, batch, district, profession or blood group."
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {loading ? (
             <p className="text-center text-muted">Loading…</p>
           ) : !canBrowse ? (

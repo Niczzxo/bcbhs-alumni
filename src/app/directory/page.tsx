@@ -99,7 +99,7 @@ export default function DirectoryPage() {
               : `${holders.length} alumni hold official positions in the association. Every registered member is on the Members page.`
           }
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {/* No filters here by the owner's rule (2026-10-23): this page
               is a simple showcase of position holders; searching and
               filtering live on the members-only /members page. */}

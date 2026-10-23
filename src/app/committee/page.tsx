@@ -25,7 +25,7 @@ export default function CommitteePage() {
           title={<>Guided by <span className="text-gold-gradient">our own</span></>}
           subtitle="The elected alumni committee, keeping the spirit alive: events, welfare, and the bond between batches."
         />
-        <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {leaders.length === 0 ? (
             <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
               {loading ? "Loading the committee…" : "Committee seats will be announced soon."}

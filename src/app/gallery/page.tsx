@@ -76,7 +76,7 @@ export default function GalleryPage() {
               : "Every event, its own album. Pick an album to step inside."
           }
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {gallery.length === 0 ? (
             <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
               {loading ? "Loading the gallery…" : "No photos yet, check back soon."}

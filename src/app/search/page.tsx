@@ -28,7 +28,7 @@ export default function SearchPage() {
           title={<>Who&apos;s in <span className="text-gold-gradient">your district?</span></>}
           subtitle="New in town? Search a district to find fellow BCBHSians around you, perfect for meetups."
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           <Reveal className="mx-auto max-w-xl rounded-3xl border border-ivory/10 bg-ink-2 p-6">
             <label className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-muted">
               Choose a district

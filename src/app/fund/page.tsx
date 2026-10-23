@@ -27,7 +27,7 @@ export default function FundPage() {
           title={<>Scholarship &amp; <span className="text-gold-gradient">Donation Fund</span></>}
           subtitle="No BCBHSian should drop out for want of money. The alumni family stands beside its students, quietly, quickly, with dignity."
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map((s, i) => (
               <Reveal key={s.label} delay={i * 0.06} className="rounded-3xl border border-gold/25 bg-ink-2 p-6 text-center">

@@ -21,7 +21,7 @@ export default function StoriesPage() {
           title={<>Success <span className="text-gold-gradient">Stories</span></>}
           subtitle="BCBHSians who make us proud, in service, business, academia and beyond. Their journeys light the way for every junior."
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {sorted.length === 0 ? (
             <p className="text-center text-sm text-muted">{loading ? "Loading stories…" : "The first stories are being written, check back soon."}</p>
           ) : (

@@ -152,7 +152,7 @@ export default function EventsPage() {
           title={<>Events & <span className="text-gold-gradient">Reunions</span></>}
           subtitle="From grand reunions to blood drives, never miss a moment with your batchmates. Tap any photo to read the full story."
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           <h2 className="font-display text-2xl font-bold text-ivory">Upcoming</h2>
           <div className="gold-rule mt-4 w-32" />
           {upcoming.length === 0 ? (

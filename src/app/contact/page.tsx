@@ -79,7 +79,7 @@ export default function ContactPage() {
           title={<>Contact <span className="text-gold-gradient">the association</span></>}
           subtitle="Questions about membership, events, or verification, reach us on any official channel."
         />
-        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
+        <div className="mx-auto w-full px-5 py-14 sm:px-10 lg:px-[3vw]">
           <div className={`grid gap-6 sm:grid-cols-2 ${isVerified ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
             {channels.map((c, i) => (
               <Reveal key={c.title} delay={i * 0.08} className="h-full">

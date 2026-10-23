@@ -38,19 +38,19 @@ export default function MemoriesPage() {
               : "Classrooms, playgrounds, reunions, the visual memory of BCBHS, kept alive by the community."
           }
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {photos.length === 0 ? (
             <p className="rounded-3xl border border-ivory/10 bg-ink-2 p-10 text-center text-sm text-muted">
               {loading ? "Loading memories…" : "No memories yet, check back soon."}
             </p>
           ) : (
             <div className="space-y-5">
-              <div className="-mx-5 sm:-mx-8">
+              <div className="-mx-5 sm:-mx-10 lg:-mx-[3vw]">
                 <Reveal>
                   <MemoriesMarquee photos={filled[0]} direction="left" duration={50} />
                 </Reveal>
               </div>
-              <div className="-mx-5 sm:-mx-8">
+              <div className="-mx-5 sm:-mx-10 lg:-mx-[3vw]">
                 <Reveal>
                   <MemoriesMarquee photos={filled[1]} direction="right" duration={60} />
                 </Reveal>

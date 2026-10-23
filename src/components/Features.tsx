@@ -88,7 +88,7 @@ const FEATURES: Feature[] = [
 export default function Features() {
   return (
     <section id="features" className="relative py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+      <div className="mx-auto w-full px-5 sm:px-10 lg:px-[3vw]">
         <Reveal className="mb-16 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gold">
             What the portal gives you

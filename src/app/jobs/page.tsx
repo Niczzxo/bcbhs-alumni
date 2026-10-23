@@ -303,7 +303,7 @@ export default function JobsPage() {
           subtitle="Circulars posted by fellow alumni, juniors find seniors, seniors refer juniors. One tap opens a WhatsApp chat with the poster."
         />
 
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {loading ? (
             <p className="text-center text-muted">Loading…</p>
           ) : !user ? (

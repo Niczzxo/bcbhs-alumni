@@ -21,7 +21,7 @@ export default function MemoryWallPage() {
           title={<>Memory <span className="text-gold-gradient">Wall</span></>}
           subtitle="Old photos, golden days. The classrooms, the field, the friends, the school as we remember it."
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {sorted.length === 0 ? (
             <p className="text-center text-sm text-muted">The wall is being prepared, old photos will appear here soon.</p>
           ) : (

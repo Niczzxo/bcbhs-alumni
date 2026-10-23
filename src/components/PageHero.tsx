@@ -14,7 +14,7 @@ export default function PageHero({ eyebrow, title, subtitle }: PageHeroProps) {
   return (
     <section className="grain relative overflow-hidden border-b border-gold/20 bg-ink-2 pb-16 pt-36">
       <div className="sunburst pointer-events-none absolute left-1/2 top-0 h-full w-[1000px] -translate-x-1/2 opacity-70" />
-      <div className="relative mx-auto max-w-7xl px-5 text-center sm:px-8">
+      <div className="relative mx-auto w-full px-5 text-center sm:px-10 lg:px-[3vw]">
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}

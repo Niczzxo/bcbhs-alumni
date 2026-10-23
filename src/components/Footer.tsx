@@ -42,7 +42,7 @@ export default function Footer() {
   const { user } = useAuth();
   return (
     <footer className="border-t border-gold/20 bg-[#070b1c]">
-      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-12">
+      <div className="mx-auto w-full px-5 py-10 sm:px-10 sm:py-12 lg:px-[3vw]">
         <div className="grid gap-9 md:grid-cols-3 md:gap-10">
           {/* Brand + affiliation: centered on phones (owner's rule,
               2026-10-23), left-aligned from md up. */}

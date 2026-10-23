@@ -44,7 +44,7 @@ export default function BatchesPage() {
           title={<>Batch <span className="text-gold-gradient">Groups</span></>}
           subtitle="Find your own batch's corner of the family, member counts, donors, and the batch WhatsApp group."
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {!user ? (
             <Reveal className="mx-auto max-w-2xl rounded-3xl border border-gold/30 bg-ink-2 p-10 text-center">
               <p className="font-display text-2xl font-bold text-ivory">Members only</p>

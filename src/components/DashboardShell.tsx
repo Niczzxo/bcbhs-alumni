@@ -69,7 +69,7 @@ export default function DashboardShell({
 
   return (
     <div className="lg:flex lg:items-start lg:gap-10">
-      <aside className="sticky top-16 z-30 -mx-5 mb-8 shrink-0 px-5 py-2.5 sm:-mx-8 sm:px-8 lg:top-24 lg:mx-0 lg:mb-0 lg:w-60 lg:px-0 lg:py-0">
+      <aside className="sticky top-16 z-30 -mx-5 mb-8 shrink-0 px-5 py-2.5 sm:-mx-10 sm:px-10 lg:top-24 lg:mx-0 lg:mb-0 lg:w-60 lg:px-0 lg:py-0">
         {/* Mobile: dropdown selector bar (sticks under the navbar) */}
         <div className="border-b border-gold/15 bg-ink/90 pb-2.5 backdrop-blur-xl lg:hidden">
           <button

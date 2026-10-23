@@ -57,7 +57,7 @@ export default function RequireRole({
       <Navbar />
       <main className="min-h-screen bg-ink">
         <PageHero eyebrow={eyebrow} title={title} />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {loading ? (
             <p className="text-center text-muted">Loading…</p>
           ) : !user ? (

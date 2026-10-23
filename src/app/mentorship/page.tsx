@@ -68,7 +68,7 @@ export default function MentorshipPage() {
           title={<>Mentorship <span className="text-gold-gradient">Program</span></>}
           subtitle="Stuck on studies, admissions or your first job? A BCBHS senior has walked that road, reach out, they are happy to help."
         />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {!user ? (
             <Reveal className="mx-auto max-w-2xl rounded-3xl border border-gold/30 bg-ink-2 p-10 text-center">
               <p className="font-display text-2xl font-bold text-ivory">Members only</p>

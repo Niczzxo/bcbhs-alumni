@@ -99,7 +99,7 @@ export default function NoticeBoard() {
 
   return (
     <section id="notices" className="relative py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+      <div className="mx-auto w-full px-5 sm:px-10 lg:px-[3vw]">
         <Reveal className="mb-12 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gold">
             Announcements

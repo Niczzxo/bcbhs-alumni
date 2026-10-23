@@ -29,7 +29,7 @@ export default function Committee() {
   return (
     <section id="committee" className="grain relative overflow-hidden border-y border-gold/20 bg-ink-2 py-24">
       <div className="sunburst pointer-events-none absolute -left-40 top-0 h-[500px] w-[500px]" />
-      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
+      <div className="relative mx-auto w-full px-5 sm:px-10 lg:px-[3vw]">
         <Reveal className="mb-14 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gold">
             Leadership

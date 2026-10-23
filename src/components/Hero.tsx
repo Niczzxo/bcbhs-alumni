@@ -47,7 +47,7 @@ export default function Hero() {
 
       <motion.div
         style={{ y: contentY, opacity: contentOpacity }}
-        className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-24 pt-36 text-center will-change-transform sm:px-8 lg:text-left"
+        className="relative z-10 mx-auto w-full px-5 pb-24 pt-36 text-center will-change-transform sm:px-10 lg:px-[3vw] lg:text-left"
       >
         {/* Seal emblem */}
         <motion.div

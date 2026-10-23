@@ -52,7 +52,7 @@ export default function AboutPage() {
         </section>
 
         {/* Values */}
-        <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+        <section className="mx-auto w-full px-5 py-14 sm:px-10 lg:px-[3vw]">
           <div className="grid gap-6 sm:grid-cols-3">
             {c.aboutValues.map((v, i) => (
               <Reveal key={v.title} delay={i * 0.08}>

@@ -46,7 +46,7 @@ export default function StatsBand() {
   return (
     <section className="grain relative overflow-hidden border-y border-gold/20 bg-ink-2 py-16">
       <div className="sunburst pointer-events-none absolute left-1/2 top-0 h-full w-[900px] -translate-x-1/2 opacity-60" />
-      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
+      <div className="relative mx-auto w-full px-5 sm:px-10 lg:px-[3vw]">
         <Reveal className="mb-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gold">
             Our community in numbers
