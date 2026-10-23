@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useScroll } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { PUBLIC_NAV_LINKS, MEMBER_NAV_LINKS, MEMBER_MORE_LINKS, MEMBER_PROFILE_LINK } from "@/lib/site";
+import { PUBLIC_NAV_LINKS, MEMBER_NAV_LINKS, MEMBER_MORE_LINKS } from "@/lib/site";
 import { ROLE_META } from "@/lib/types";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
@@ -407,9 +407,16 @@ export default function Navbar() {
               {/* signed-in identity card: same layout as the desktop
                   dropdown header (owner's exact spec, 2026-10-23):
                   64px avatar left; beside it name, Batch, gold member
-                  ID, then the highlighted gold role pill. */}
+                  ID, then the highlighted gold role pill. The whole
+                  card is the profile link (owner, 2026-10-23): tapping
+                  it opens /member/{memberId}; the separate Profile row
+                  that used to sit under it is removed. */}
               {user && (
-                <div className="flex items-center gap-3.5 border-b border-ivory/10 px-5 py-4">
+                <Link
+                  href={`/member/${user.memberId ?? user.id}`}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3.5 border-b border-ivory/10 px-5 py-4 transition-colors hover:bg-ivory/5"
+                >
                   <Avatar name={user.name} photoURL={user.photoURL} size="ml" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-[15px] font-semibold text-ivory">{user.name}</p>
@@ -421,7 +428,8 @@ export default function Navbar() {
                             {ROLE_META[user.role].label}
                           </span>
                         </div>
-                </div>
+                  <span className="shrink-0 text-lg text-muted/60">›</span>
+                </Link>
               )}
 
               {/* scrollable link list: the drawer scrolls, not the page */}
@@ -432,24 +440,6 @@ export default function Navbar() {
                   variants={{ show: { transition: { staggerChildren: 0.04, delayChildren: 0.08 } } }}
                   className="space-y-0.5"
                 >
-                  {/* Profile sits FIRST, right under the identity card
-                      (owner's order, 2026-10-23: it used to be last in
-                      the list); it opens the profile edit page. */}
-                  {user && (
-                    <motion.li
-                      variants={{ hidden: { opacity: 0, x: 26 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } }}
-                      className="pb-2"
-                    >
-                      <Link
-                        href={MEMBER_PROFILE_LINK.href}
-                        onClick={() => setMenuOpen(false)}
-                        className={drawerLinkCls(MEMBER_PROFILE_LINK.href)}
-                      >
-                        {MEMBER_PROFILE_LINK.label}
-                        <span className="text-muted/60">›</span>
-                      </Link>
-                    </motion.li>
-                  )}
                   {/* No Home row in the drawer (owner's call,
                       2026-10-23): the logo already goes home. Desktop
                       keeps its Home link. */}
