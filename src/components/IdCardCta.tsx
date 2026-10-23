@@ -129,7 +129,7 @@ export default function IdCardCta() {
                   Edit Profile
                 </Link>
               </div>
-              <ul className="mt-8 flex flex-col items-center space-y-3 text-sm text-muted lg:items-start">
+              <ul className="mx-auto mt-8 flex w-fit flex-col items-start space-y-3 text-left text-sm text-muted lg:mx-0">
                 <Tick>Member ID, {user.memberId ?? "-"}</Tick>
                 <Tick>Batch {user.batch} · {user.department ?? "Alumni"}</Tick>
                 <Tick>QR verification works even when printed</Tick>
@@ -148,7 +148,7 @@ export default function IdCardCta() {
                   View My Application
                 </Link>
               </div>
-              <ul className="mt-8 flex flex-col items-center space-y-3 text-sm text-muted lg:items-start">
+              <ul className="mx-auto mt-8 flex w-fit flex-col items-start space-y-3 text-left text-sm text-muted lg:mx-0">
                 <Tick>Registration received, Batch {user.batch}</Tick>
                 <Tick>Admin verification in progress</Tick>
                 <Tick>Your card activates automatically on approval</Tick>
@@ -167,7 +167,7 @@ export default function IdCardCta() {
                   Register Now
                 </button>
               </div>
-              <ul className="mt-8 flex flex-col items-center space-y-3 text-sm text-muted lg:items-start">
+              <ul className="mx-auto mt-8 flex w-fit flex-col items-start space-y-3 text-left text-sm text-muted lg:mx-0">
                 <Tick>Free registration for all BCBHS graduates</Tick>
                 <Tick>Admin-verified, no fake members, ever</Tick>
                 <Tick>QR verification works even when printed</Tick>
