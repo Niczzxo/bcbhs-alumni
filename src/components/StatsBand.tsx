@@ -43,15 +43,20 @@ export default function StatsBand() {
      January with no code change and no redeploy. */
   const [year, setYear] = useState(2026);
   useEffect(() => setYear(new Date().getFullYear()), []);
+  /* Placement (owner's layout, 2026-10-23): on mobile Years of
+     Legacy sits in the MIDDLE, full-width, with two stats above
+     and two below; on desktop the five run in the original order
+     with Legacy last. Encoded per item via responsive order. */
   const items = [
-    { label: "Registered Members", value: stats.totalMembers, suffix: "+" },
-    { label: "Living Abroad", value: stats.membersAbroad, suffix: "+" },
-    { label: "Batches Connected", value: stats.batches, suffix: "" },
-    { label: "Events & Reunions", value: stats.eventsHeld, suffix: "" },
+    { label: "Registered Members", value: stats.totalMembers, suffix: "+", cls: "order-1" },
+    { label: "Living Abroad", value: stats.membersAbroad, suffix: "+", cls: "order-2" },
+    { label: "Batches Connected", value: stats.batches, suffix: "", cls: "order-4 lg:order-3" },
+    { label: "Events & Reunions", value: stats.eventsHeld, suffix: "", cls: "order-5 lg:order-4" },
     {
       label: "Years of Legacy",
       value: Math.max(0, year - SCHOOL_FOUNDED_YEAR),
       suffix: "",
+      cls: "order-3 col-span-2 lg:order-5 lg:col-span-1",
     },
   ];
   return (
@@ -69,7 +74,7 @@ export default function StatsBand() {
             <Reveal
               key={s.label}
               delay={i * 0.12}
-              className={`text-center ${i === items.length - 1 ? "col-span-2 lg:col-span-1" : ""}`}
+              className={`text-center ${s.cls}`}
             >
               <Counter to={s.value} suffix={s.suffix} />
               <p className="mt-3 text-sm font-medium uppercase tracking-[0.2em] text-muted">
