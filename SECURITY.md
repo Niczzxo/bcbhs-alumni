@@ -11,8 +11,10 @@ The implementation brief this work followed assumed Vite + React +
 PostgreSQL + custom API routes. **None of that is this project.** The
 real stack, verified by inspection on 2026-10-23:
 
-- **Next.js 16** (App Router) on **Vercel** — static/PPR pages, **zero
-  custom API routes** (`src/app/api` does not exist).
+- **Next.js 16** (App Router) on **Vercel** — static/PPR pages, plus
+  exactly **one** application-controlled API route,
+  `POST /api/security/log` (added 2026-10-23, §7). No other API routes
+  exist; nothing user-facing depends on a custom backend.
 - **Firebase Authentication** (Email/Password) — passwords are hashed
   and verified **by Google** (scrypt). The app never sees, stores or
   transmits a password anywhere except the Firebase Auth SDK call.
@@ -25,12 +27,12 @@ real stack, verified by inspection on 2026-10-23:
 
 Consequence: there is no login endpoint on our infrastructure to put
 a Redis rate limiter in front of. Sign-in traffic goes from the
-browser to `identitytoolkit.googleapis.com`. Controls were therefore
-implemented at the layers that exist: Firebase Auth's built-in
-throttling, Firestore rules, a client-side progressive cooldown, and
-an append-only audit log. Adding Upstash in front of nothing would
-have been security theatre, so it is **not** wired up; exact steps to
-add it if real API routes appear are in §7.
+browser to `identitytoolkit.googleapis.com` — **no code in this repo
+can rate-limit it**, and §3 is explicit about that boundary.
+Controls live at the layers that exist: Firebase Auth's built-in
+throttling, Firestore rules, a client-side progressive cooldown, an
+append-only audit log, and — for the one endpoint we do control —
+a distributed Upstash rate limiter (§7).
 
 ## 2. Vulnerabilities found in the audit
 
@@ -116,29 +118,64 @@ normalized identifier) work even if IP identification is unavailable.
 - Security headers (HSTS, X-Frame-Options DENY, nosniff,
   Referrer-Policy, Permissions-Policy) are set in `next.config.ts`.
 
-## 7. If server API routes are added later (Upstash runbook)
+## 7. Server-side rate limiting (Upstash) — implemented, pending activation
 
-1. Create an Upstash Redis database (same region as the deployment).
-2. Set **server-only** env vars in Vercel (never `NEXT_PUBLIC_`):
-   `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`,
-   `RATE_LIMIT_SECRET` (HMAC key for pseudonymous identifiers).
-   Names are pre-documented in `.env.example`.
-3. Build limiters with `@upstash/ratelimit` (sliding window),
-   instances created once at module scope; keys namespaced
-   (`login:account:`, `login:ip:`, `reset:`, `otp:`, `register:`,
-   `admin:`) using `HMAC(RATE_LIMIT_SECRET, normalizedIdentifier)`,
-   never raw emails.
-4. Initial policy from the brief: login 5 failures/account/15min +
-   20 attempts/IP/15min; reset 3/account/15min + IP limit;
-   OTP 5/challenge/10min; registration 5/IP/hour; sensitive admin
-   actions 10/admin/min; everything else route-specific.
-5. **Failure policy: fail closed.** If Redis errors or times out on
-   an auth-sensitive route, return **503** with a generic message —
-   never silently skip the check. Log the outage as a security event.
-6. Vercel Firewall can then add a coarse per-IP layer on the `/api`
-   paths (Dashboard → Firewall), starting in log-only mode. Note the
-   firewall can **never** throttle Firebase Auth traffic — those
-   calls do not pass through Vercel.
+**Implemented in code (2026-10-23):** `src/server/ratelimit.ts`
+(@upstash/redis + @upstash/ratelimit, sliding windows, lazy
+singletons), `src/server/verify-token.ts` (Firebase ID-token
+verification against Google's JWKs), and the route
+`src/app/api/security/log/route.ts`. The client logger posts there
+first and falls back to the direct rules-governed Firestore write on
+any failure, so the audit trail survives an inactive limiter.
+
+The endpoint pipeline: body validation (allowlisted event types,
+4 KB cap, meta sanitization) → **rate-limit gate before any expensive
+work** → token verification (actor comes from the verified token,
+never the body) → Firestore write via REST with the caller's token
+forwarded, so security rules still authorize the write.
+
+Policies (`LIMIT_POLICIES`, each overridable via
+`RL_<NAME>_LIMIT` / `RL_<NAME>_WINDOW` env vars):
+
+| Policy | Limit | Applies to |
+|---|---|---|
+| ingestIp | 30 / 60 s | POST /api/security/log, per trusted IP |
+| ingestIdentifier | 20 / 15 min | POST /api/security/log, per hashed identifier |
+| loginAccount | 5 / 15 min | reserved for future app-controlled endpoints |
+| loginIp | 20 / 15 min | reserved |
+| resetAccount | 3 / 15 min | reserved |
+| registerIp | 5 / 1 h | reserved |
+| adminAction | 10 / 1 min | reserved |
+
+Identities are `HMAC-SHA256(RATE_LIMIT_SECRET, namespace:id)` — raw
+emails/IPs are never Redis keys. Trusted IP = `x-vercel-forwarded-for`
+(the value Vercel's edge records), then `x-forwarded-for` locally;
+when no IP is available the IP check is skipped (never a shared
+placeholder key) and identifier limits still apply.
+
+**Failure policy: fail closed.** Unconfigured or erroring Redis →
+the endpoint answers **503 `{error:"security_service_unavailable"}`**
+(verified by smoke test, §9). Rate-limited → **429** with
+`Retry-After`. The client logger's documented fallback keeps audit
+writes alive during an outage; it does not weaken the endpoint's own
+policy.
+
+**Activation (owner, ~5 minutes):**
+1. Create an Upstash Redis database (region close to the deployment).
+2. In Vercel → Project → Settings → Environment Variables (Production),
+   set the **server-only** variables `UPSTASH_REDIS_REST_URL`,
+   `UPSTASH_REDIS_REST_TOKEN`, and `RATE_LIMIT_SECRET` (any long
+   random string). Never prefix them with `NEXT_PUBLIC_`.
+3. Redeploy. The endpoint switches from fail-closed 503 to active
+   limiting automatically; verify with the smoke commands in §9.
+
+**Not covered, by design:** Firebase Authentication requests
+(sign-in / register / reset / OTP) never pass through this or any
+endpoint here, so Upstash cannot throttle them; Firebase's own
+limits apply (§3). A Vercel Firewall rule on `/api/*` can add a
+coarse IP layer for the ingest endpoint (Dashboard → Firewall,
+start log-only), but the firewall likewise cannot see Firebase
+Auth traffic, which does not transit Vercel.
 
 ## 8. Pending owner actions (cannot be done from code)
 
@@ -156,11 +193,22 @@ normalized identifier) work even if IP identification is unavailable.
 
 ## 9. Tests
 
-- `npm run test:security` — 9 node:test cases over the throttle and
-  normalization logic (shared counters for equivalent identifiers,
-  counter independence, success clearing only its own account,
-  schedule + cap, 15-minute expiry, burst behaviour, countdown).
-  **All 9 pass** (2026-10-23).
+- `npm run test:security` — **21 node:test cases, all passing**
+  (2026-10-23). 9 cover the client throttle and normalization
+  (shared counters for equivalent identifiers, counter independence,
+  success clearing only its own account, schedule + cap, 15-minute
+  expiry, burst behaviour, countdown). 12 cover the server
+  rate-limit layer with **mocked limiters**: trusted-IP precedence
+  (a forged `X-Forwarded-For` cannot beat the platform header),
+  HMAC identity properties, 429 + Retry-After derivation, counter
+  independence, fail-closed 503 on limiter errors, identifier
+  throttling across rotating IPs, and the brief's policy defaults.
+- Endpoint smoke test against the production build (no Upstash
+  configured): invalid body → **400**, unknown event type → **400**,
+  oversized body → **413**, valid event → **503** (fail closed, as
+  specified). The 429/202 path activates once the owner configures
+  Upstash (§7) and was verified at the gate-logic level by the
+  mocked-limiter tests, not against a live Redis.
 - Firestore rules behaviour is covered by the manual rules audit in
   §2–§4 and the demo-mode route sweep (27 routes, 0 errors). A
   Firebase-emulator rules test suite is the recommended next step if
@@ -184,3 +232,12 @@ normalized identifier) work even if IP identification is unavailable.
 - No alerting pipeline yet: repeated `login_failed` /
   `login_throttled` spikes are visible in `security_logs` but do not
   yet notify anyone. A scheduled check can be added if wanted.
+- The audit ingest endpoint's rate limiting is **implemented and
+  unit-verified but not yet live**: it needs the owner's Upstash
+  database + env vars (§7). Until then the endpoint fails closed
+  (503) and the client uses its direct rules-governed write, which
+  is NOT rate-limited — a modified client can still write audit
+  entries directly within what the rules allow (create-only,
+  field-allowlisted, actor-bound). Cross-instance behaviour of the
+  real limiters is guaranteed by Upstash's shared store design and
+  was not re-verified against a live Redis in this pass.

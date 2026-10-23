@@ -81,9 +81,13 @@ export async function logSecurityEvent(
   details: SecurityEventDetails = {},
 ): Promise<void> {
   try {
+    /* Pre-auth events are about an unauthenticated attempt, so they
+       carry no actor even if a stale session object exists. */
+    const isPreAuth =
+      type === "login_failed" || type === "login_throttled" || type === "password_reset_requested";
     const entry: Record<string, unknown> = {
       type,
-      actorUid: currentActorUid(),
+      actorUid: isPreAuth ? null : currentActorUid(),
     };
     if (details.targetUid) entry.targetUid = details.targetUid;
     if (details.identifier) entry.identifierHash = await hashIdentifier(details.identifier);
@@ -100,8 +104,38 @@ export async function logSecurityEvent(
       }
       return;
     }
-    const { addDoc, collection, serverTimestamp } = await import("firebase/firestore");
-    await addDoc(collection(db, "security_logs"), { ...entry, createdAt: serverTimestamp() });
+    /* Preferred path: the rate-limited ingest endpoint
+       (POST /api/security/log), which verifies the actor from the ID
+       token and writes server-side. On ANY failure (endpoint down,
+       rate limiter unconfigured, offline) fall back to the direct
+       rules-governed write so the audit trail never silently dies;
+       the fallback is documented in SECURITY.md. */
+    let sent = false;
+    try {
+      const payload: Record<string, unknown> = { type };
+      if (details.targetUid) payload.targetUid = details.targetUid;
+      if (entry.identifierHash) payload.identifierHash = entry.identifierHash;
+      if (details.meta) payload.meta = details.meta;
+      const token =
+        !isPreAuth && auth?.currentUser
+          ? await auth.currentUser.getIdToken().catch(() => null)
+          : null;
+      const res = await fetch("/api/security/log", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+      sent = res.ok;
+    } catch {
+      sent = false;
+    }
+    if (!sent) {
+      const { addDoc, collection, serverTimestamp } = await import("firebase/firestore");
+      await addDoc(collection(db, "security_logs"), { ...entry, createdAt: serverTimestamp() });
+    }
   } catch {
     /* auditing is best-effort; the action itself already happened */
   }
