@@ -222,11 +222,11 @@ export default function Navbar() {
               <>
                 {/* Bar order (owner's swap, 2026-10-23): the staff
                     dashboard button comes FIRST, the profile chip
-                    LAST. Both share one height so the bar reads as a
-                    single aligned row. The chip (owner's pick): photo
-                    + name + batch; on phones only the photo shows and
-                    it opens the drawer; on desktop it opens a dropdown
-                    with Profile, ID Card, About and Logout last. */}
+                    LAST (desktop). Both share one height so the bar
+                    reads as a single aligned row. No avatar on phones
+                    (owner's call, 2026-10-23): it duplicated the
+                    hamburger, both opened the drawer, whose identity
+                    card already carries the photo and name. */}
                 {isAdmin && (
                   <Link
                     href={dashboardHref}
@@ -235,14 +235,6 @@ export default function Navbar() {
                     {dashboardLabel}
                   </Link>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen(true)}
-                  aria-label="Open menu"
-                  className="shrink-0 rounded-full ring-gold/40 transition-shadow hover:ring-2 lg:hidden"
-                >
-                  <Avatar name={user.name} photoURL={user.photoURL} size="sm" />
-                </button>
                 <div className="relative hidden lg:block" ref={profileRef}>
                   <button
                     type="button"
