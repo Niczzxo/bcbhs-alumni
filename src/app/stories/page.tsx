@@ -11,7 +11,10 @@ import { useContent } from "@/lib/content-context";
 export default function StoriesPage() {
   const { stories, loading: allLoading, ready } = useContent();
   const loading = allLoading && !ready.has("stories");
-  const sorted = [...stories].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  // Null-safe: a story doc without createdAt must never crash the
+  // page (owner hit exactly that, 2026-10-24: seeded demo stories
+  // lacked the field and the comparator threw on undefined).
+  const sorted = [...stories].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
 
   return (
     <>
