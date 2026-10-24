@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "./auth-context";
 import { useContent } from "./content-context";
 import { isFirebaseConfigured, db } from "./firebase";
-import type { UserProfile } from "./types";
+import { POSITIONS, type UserProfile } from "./types";
 
 export interface SiteStats {
   totalMembers: number;
@@ -108,14 +108,15 @@ export function useMember(lookup: string | undefined): UserProfile | null | unde
            or Firestore denies it outright ("rules are not filters")
            an unconstrained memberId lookup fails for everyone except
            admins and the profile page reports "not found". Guests are
-           additionally limited to position holders (approved + a
-           non-empty position), the same rule the public directory
-           and committee pages use. */
+           additionally limited to position holders, constrained as an
+           `in` list of official positions — a `!= ""` constraint is
+           NOT provable against the read rule (the value could be a
+           number), so it is denied outright; see directory/page.tsx. */
         const constraints = [
           where("memberId", "==", lookup),
           where("status", "==", "approved"),
         ];
-        if (!user) constraints.push(where("position", "!=", ""));
+        if (!user) constraints.push(where("position", "in", POSITIONS));
         const q = query(collection(db, "users"), ...constraints, limit(1));
         const snap = await getDocs(q);
         if (!cancelled) {

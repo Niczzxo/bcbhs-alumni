@@ -30,8 +30,11 @@ export default function DirectoryPage() {
 
   /* Guests: fetch approved position holders directly. The query must
      constrain every field the read rule checks ("rules are not
-     filters"): approved + a non-empty position. Demo mode has no
-     Firestore, so it falls back to the context list below. */
+     filters"): approved + an official position. NOTE: this must be an
+     `in` list, NOT `!= ""` — the rules engine cannot prove a `!=`
+     result is a non-empty string (it could be a number), so a `!=`
+     query is denied outright even though every real position is a
+     string. Every value in POSITIONS is provably a non-empty string. */
   useEffect(() => {
     /* Signed-in visitors never read this state (the members memo below
        only uses it for guests), so there is nothing to reset here. */
@@ -44,7 +47,7 @@ export default function DirectoryPage() {
           query(
             collection(db, "users"),
             where("status", "==", "approved"),
-            where("position", "!=", ""),
+            where("position", "in", POSITIONS),
           )
         );
         const list = snap.docs

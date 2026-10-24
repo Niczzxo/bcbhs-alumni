@@ -87,11 +87,13 @@ export function useLeadership(): LeaderSeat[] {
     (async () => {
       try {
         const { collection, query, where, limit, getDocs } = await import("firebase/firestore");
+        /* `in` (not `!= ""`): only the official-positions list is
+           provable against the read rule, see directory/page.tsx. */
         const snap = await getDocs(
           query(
             collection(db, "users"),
             where("status", "==", "approved"),
-            where("position", "!=", ""),
+            where("position", "in", POSITIONS),
             limit(50),
           ),
         );
