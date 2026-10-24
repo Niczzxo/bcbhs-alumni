@@ -112,7 +112,7 @@ function VisitsChart({ days, avg }: { days: DayPoint[]; avg: number }) {
   const [active, setActive] = useState<number | null>(null);
   const W = 520;
   const H = 300;
-  const L = 36;
+  const L = 44;
   const R = 20;
   const T = 36;
   const B = 32;
@@ -621,7 +621,7 @@ export default function OverviewPanel({
             <button
               type="button"
               onClick={() => onJump(s.jump)}
-              className={`card-lift relative w-full overflow-hidden rounded-3xl border p-5 text-left sm:p-6 ${
+              className={`card-lift relative w-full overflow-hidden rounded-3xl border p-5 pb-9 text-left sm:p-6 sm:pb-8 ${
                 s.accent
                   ? "border-gold/50 bg-gold/[0.07] shadow-[0_0_28px_rgba(212,169,78,0.15)]"
                   : "border-ivory/10 bg-ink-2"
@@ -648,7 +648,7 @@ export default function OverviewPanel({
               <span className={`mt-1 block text-[11px] ${s.accent ? "font-semibold text-gold-2" : "text-muted/80"}`}>
                 {s.sub}
               </span>
-              <svg viewBox="0 0 96 28" aria-hidden="true" className="pointer-events-none absolute bottom-1 right-3 h-7 w-24 opacity-40" fill="none" stroke="#e9c766" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg viewBox="0 0 96 28" aria-hidden="true" className="pointer-events-none absolute bottom-1 right-3 h-6 w-20 opacity-40 sm:h-7 sm:w-24" fill="none" stroke="#e9c766" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="2,20 16,13 30,16 46,7 62,11 78,5 94,9" />
               </svg>
             </button>
@@ -685,7 +685,7 @@ export default function OverviewPanel({
                 <span className="shrink-0 text-gold-2">{m.icon}</span>
                 <span className="min-w-0">
                   <span className="font-display block text-[26px] font-extrabold leading-none text-ivory">{m.value}</span>
-                  <span className="mt-1.5 block truncate text-[9px] font-bold uppercase tracking-[0.18em] text-muted">{m.label}</span>
+                  <span className="mt-1.5 block text-[9px] font-bold uppercase leading-relaxed tracking-[0.18em] text-muted">{m.label}</span>
                 </span>
               </div>
             ))}
@@ -693,7 +693,7 @@ export default function OverviewPanel({
 
           <div className="mt-5 grid gap-5 lg:grid-cols-[1.55fr_1fr]">
             {/* chart panel */}
-            <div className="rounded-2xl border border-ivory/[0.07] bg-ink p-5">
+            <div className="rounded-2xl border border-ivory/[0.07] bg-ink p-4 sm:p-5">
               <div className="flex items-center justify-between gap-3">
                 <p className="flex items-center gap-2.5">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-gold-2">
