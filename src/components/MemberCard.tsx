@@ -93,6 +93,19 @@ export default function MemberCard({ member, delay = 0 }: { member: UserProfile;
               <span className="invisible">placeholder</span>
             )}
           </p>
+          {/* education row, same reserve-height pattern: juniors
+              scanning search results see the university at a glance */}
+          <p className="truncate" aria-hidden={!member.institution}>
+            {member.institution ? (
+              <>
+                🎓 {member.institution}
+                {member.eduDepartment ? ` · ${member.eduDepartment}` : ""}
+                {member.eduRunning ? " · Running" : ""}
+              </>
+            ) : (
+              <span className="invisible">placeholder</span>
+            )}
+          </p>
           {/* always reserve the donor-pill row so every card is the same height */}
           <p
             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${

@@ -48,7 +48,11 @@ export interface UserProfile {
   isAbroad: boolean;
   profession?: string;
   company?: string;
-  department?: string; // Science | Arts | Commerce, shown on the ID card
+  department?: string; // Science | Arts | Commerce (SCHOOL department), shown on the ID card
+  institution?: string; // current college/university, member-editable, searchable on /members
+  eduSession?: string; // session at that institution, e.g. "2022-23"
+  eduDepartment?: string; // department AT that institution (NOT the school department above)
+  eduRunning?: boolean; // true = currently studying there; false = completed/past
   position?: string; // e.g. "President", set ONLY by admins after manual verification
   dob?: string; // Date of birth, ISO YYYY-MM-DD, shown on the ID card
   status: MemberStatus;

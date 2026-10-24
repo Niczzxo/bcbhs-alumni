@@ -30,20 +30,22 @@ export default function MembersPage() {
   const [district, setDistrict] = useState("");
   const [profession, setProfession] = useState("");
   const [blood, setBlood] = useState("");
+  const [runningOnly, setRunningOnly] = useState(false);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return approvedMembers.filter((m) => {
-      if (needle && !`${m.name} ${m.company ?? ""}`.toLowerCase().includes(needle)) return false;
+      if (needle && !`${m.name} ${m.company ?? ""} ${m.institution ?? ""}`.toLowerCase().includes(needle)) return false;
       if (batch && m.batch !== batch) return false;
       if (district && (district === "Abroad" ? !m.isAbroad : m.district !== district)) return false;
       if (profession && !(m.profession ?? "").toLowerCase().includes(profession.toLowerCase())) return false;
       if (blood && m.bloodGroup !== blood) return false;
+      if (runningOnly && !m.eduRunning) return false;
       return true;
     });
-  }, [approvedMembers, q, batch, district, profession, blood]);
+  }, [approvedMembers, q, batch, district, profession, blood, runningOnly]);
 
-  const clear = () => { setQ(""); setBatch(""); setDistrict(""); setProfession(""); setBlood(""); };
+  const clear = () => { setQ(""); setBatch(""); setDistrict(""); setProfession(""); setBlood(""); setRunningOnly(false); };
 
   return (
     <>
@@ -52,7 +54,7 @@ export default function MembersPage() {
         <PageHero
           eyebrow="Our community"
           title={<>All <span className="text-gold-gradient">Members</span></>}
-          subtitle="Every verified alumnus registered on the portal, searchable by name, batch, district, profession or blood group."
+          subtitle="Every verified alumnus registered on the portal, searchable by name, batch, district, profession, blood group or university."
         />
         <div className="mx-auto w-full px-5 py-12 sm:px-10 lg:px-[3vw]">
           {loading ? (
@@ -78,7 +80,7 @@ export default function MembersPage() {
             <>
               <Reveal className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                  <input className={`${inputCls} xl:col-span-2`} placeholder="Search name or company…" value={q} onChange={(e) => setQ(e.target.value)} />
+                  <input className={`${inputCls} xl:col-span-2`} placeholder="Search name, company or university…" value={q} onChange={(e) => setQ(e.target.value)} />
                   <select className={inputCls} value={batch} onChange={(e) => setBatch(e.target.value)}>
                     <option value="">All batches</option>
                     {BATCH_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
@@ -94,11 +96,17 @@ export default function MembersPage() {
                     {BLOOD_GROUPS.map((b) => <option key={b} value={b}>{b}</option>)}
                   </select>
                 </div>
-                {(q || batch || district || profession || blood) && (
-                  <button onClick={clear} className="mt-4 text-xs font-bold uppercase tracking-widest text-gold-2 hover:underline">
-                    Clear filters ×
-                  </button>
-                )}
+                <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+                  <label className="flex cursor-pointer items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted hover:text-gold-2">
+                    <input type="checkbox" checked={runningOnly} onChange={(e) => setRunningOnly(e.target.checked)} className="h-4 w-4 accent-[#d4a94e]" />
+                    Only currently studying (Running)
+                  </label>
+                  {(q || batch || district || profession || blood || runningOnly) && (
+                    <button onClick={clear} className="text-xs font-bold uppercase tracking-widest text-gold-2 hover:underline">
+                      Clear filters ×
+                    </button>
+                  )}
+                </div>
               </Reveal>
 
               <p className="mt-8 text-sm text-muted">

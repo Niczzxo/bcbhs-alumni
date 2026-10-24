@@ -87,6 +87,10 @@ export interface ProfileUpdateInput {
   dob: string;
   profession: string;
   company: string;
+  institution: string;
+  eduSession: string;
+  eduDepartment: string;
+  eduRunning: boolean;
   phone: string;
   whatsapp: string;
   bloodGroup: string;
@@ -783,6 +787,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         dob: input.dob || undefined,
         profession: input.profession.trim() || undefined,
         company: input.company.trim() || undefined,
+        institution: input.institution.trim() || undefined,
+        eduSession: input.eduSession.trim() || undefined,
+        eduDepartment: input.eduDepartment.trim() || undefined,
+        eduRunning: input.eduRunning,
         whatsapp: input.whatsapp.trim() || undefined,
         bloodGroup: input.bloodGroup || undefined,
         isDonor: input.isDonor,

@@ -100,6 +100,34 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                     ))}
                   </dl>
                 </div>
+                {/* Education (member-editable, 2026-10-25): current
+                    college / university, session, department and
+                    whether still studying there — shown only when
+                    the member filled it in. */}
+                {member.institution && (
+                  <div className="mt-8 overflow-hidden rounded-2xl border border-ivory/10">
+                    <div className="bg-ink px-5 py-5 text-center">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold">Education</p>
+                      <p className="mt-2 text-lg font-bold text-ivory">{member.institution}</p>
+                      <p className="mt-1.5 text-sm text-muted">
+                        {[
+                          member.eduDepartment,
+                          member.eduSession ? `Session ${member.eduSession}` : "",
+                          member.eduRunning ? "Running" : "Completed",
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                      {member.eduRunning && (
+                        <p className="mt-3">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">
+                            ● Currently studying
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
                 {/* Actions as one aligned button grid (owner's fix,
                     2026-10-23): phones stack Chat and Back full-width
                     with Edit/Verify sharing a row; desktop gets a tidy

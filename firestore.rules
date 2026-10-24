@@ -63,7 +63,8 @@ service cloud.firestore {
 
     function profileEditableFields() {
       return ['name', 'batch', 'roll', 'district', 'country', 'isAbroad',
-              'department', 'dob', 'profession', 'company', 'photoURL', 'bloodGroup', 'isDonor', 'whatsapp'];
+              'department', 'dob', 'profession', 'company', 'photoURL', 'bloodGroup', 'isDonor', 'whatsapp',
+              'institution', 'eduSession', 'eduDepartment', 'eduRunning'];
     }
 
     function onlyPositionChanged() {
