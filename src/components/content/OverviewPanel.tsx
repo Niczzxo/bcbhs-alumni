@@ -557,7 +557,7 @@ export default function OverviewPanel({
       icon: <ShieldIcon />,
       value: batchReps,
       label: "Batch Reps",
-      sub: "Including super admins",
+      sub: "Assigned by super admin",
       jump: "roles",
       accent: false,
     },

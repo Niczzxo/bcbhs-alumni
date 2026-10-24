@@ -52,7 +52,10 @@ export default function SuperAdminPage() {
     () => members.filter((m) => (m.status === "approved" || m.status === "banned") && m.role !== "member"),
     [members],
   );
-  const admins = useMemo(() => members.filter((m) => m.role === "admin" || m.role === "super_admin"), [members]);
+  /* Batch Reps = approved members actually holding the Batch Rep role
+     (owner's rule, 2026-10-25): super admins are NOT counted here, even
+     though they can do everything a Batch Rep can. */
+  const batchReps = useMemo(() => members.filter((m) => m.status === "approved" && m.role === "admin"), [members]);
   const editors = useMemo(() => members.filter((m) => m.role === "editor"), [members]);
 
   /* The permissions a person holds are exactly their toggled list,
@@ -238,7 +241,7 @@ export default function SuperAdminPage() {
           approved={approved.length}
           pending={pending.length}
           banned={banned.length}
-          batchReps={admins.length}
+          batchReps={batchReps.length}
           editors={editors.length}
           members={members}
           onJump={setDashKey}
@@ -445,7 +448,7 @@ export default function SuperAdminPage() {
     })),
     { key: "about", label: "About Page", content: <AboutEditor /> },
     { key: "settings", label: "Settings", content: <SettingsManager /> },
-  ], [approved, pending, banned, staff, admins, editors, members, loading, approveMember, rejectMember, unbanMember, renderCard, shownMembers, memberBatches, memberQuery, memberBatch]);
+  ], [approved, pending, banned, staff, batchReps, editors, members, loading, approveMember, rejectMember, unbanMember, renderCard, shownMembers, memberBatches, memberQuery, memberBatch]);
 
   return (
     <RequireRole role="super_admin" eyebrow="Full access" title={<>Super Admin <span className="text-gold-gradient">Dashboard</span></>}>
