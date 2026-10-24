@@ -25,7 +25,7 @@ function MemberPhone({ userId }: { userId: string }) {
  * community features each open their own work area on click.
  */
 export default function AdminPage() {
-  const { user, members, loading, approveMember, rejectMember, banMember, unbanMember, setPosition, setGuestVisible, hasPermission } = useAuth();
+  const { user, members, loading, approveMember, rejectMember, banMember, unbanMember, setPosition, hasPermission } = useAuth();
   const canApprove = hasPermission("approve_members");
   /* Ban rides on the approval permission (owner's rule, 2026-10-23):
      whoever may approve members may also ban and unban them. */
@@ -162,16 +162,6 @@ export default function AdminPage() {
                         ★ {m.position}
                       </span>
                     )}
-                    <label className="ml-auto flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted hover:text-gold-2">
-                      <input
-                        type="checkbox"
-                        checked={!!m.guestVisible}
-                        onChange={(e) => setGuestVisible(m.id, e.target.checked)}
-                        aria-label={`Show ${m.name} in the public guest directory`}
-                        className="h-4 w-4 accent-[#d4a94e]"
-                      />
-                      Guest view
-                    </label>
                     </>
                     )}
                     {canBan && m.role !== "super_admin" && m.id !== user?.id && (
@@ -248,7 +238,7 @@ export default function AdminPage() {
         </div>
       ),
     })),
-  ], [pending, approved, banned, loading, canApprove, canBan, canSeeData, user, approveMember, rejectMember, banMember, unbanMember, setPosition, setGuestVisible, contentSectionsMemo, hasPermission]);
+  ], [pending, approved, banned, loading, canApprove, canBan, canSeeData, user, approveMember, rejectMember, banMember, unbanMember, setPosition, contentSectionsMemo, hasPermission]);
 
   return (
     <RequireRole role="admin" eyebrow="Batch Representatives" title={<>Batch Rep <span className="text-gold-gradient">Panel</span></>}>

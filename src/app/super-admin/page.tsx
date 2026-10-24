@@ -23,7 +23,7 @@ import type { MemberRole, UserProfile } from "@/lib/types";
  * Banned holds the suspended members until they are unbanned.
  */
 export default function SuperAdminPage() {
-  const { user, members, loading, setPermissions, setRole, setPosition, setGuestVisible, approveMember, rejectMember, banMember, unbanMember } = useAuth();
+  const { user, members, loading, setPermissions, setRole, setPosition, approveMember, rejectMember, banMember, unbanMember } = useAuth();
 
   const approved = useMemo(() => members.filter((m) => m.status === "approved"), [members]);
   /* All Members search (owner's request, 2026-10-23): a name field
@@ -147,23 +147,13 @@ export default function SuperAdminPage() {
             </option>
           ))}
         </select>
-        <div className="mt-3 flex flex-wrap items-center gap-2.5">
-          {m.position && (
+        {m.position && (
+          <div className="mt-3 flex flex-wrap items-center gap-2.5">
             <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
               ★ {m.position}
             </span>
-          )}
-          <label className="flex cursor-pointer items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted hover:text-gold-2">
-            <input
-              type="checkbox"
-              checked={!!m.guestVisible}
-              onChange={(e) => setGuestVisible(m.id, e.target.checked)}
-              aria-label={`Show ${m.name} in the public guest directory`}
-              className="h-4 w-4 accent-[#d4a94e]"
-            />
-            Guest view
-          </label>
-        </div>
+          </div>
+        )}
         <p className="mt-2.5 text-[11px] text-muted/70">
           Official positions are manually verified, allow up to 7 days.
         </p>
@@ -224,7 +214,7 @@ export default function SuperAdminPage() {
         </div>
       )}
     </Reveal>
-  ), [user, effectivePerms, changeRole, togglePerm, setPosition, setGuestVisible, banMember, unbanMember]);
+  ), [user, effectivePerms, changeRole, togglePerm, setPosition, banMember, unbanMember]);
 
   /* Memoized on the data the sections actually read (owner's
      complaint, 2026-10-24: section switches felt unresponsive).
