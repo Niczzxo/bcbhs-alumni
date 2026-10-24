@@ -96,9 +96,9 @@ function CardFront({ member }: { member: UserProfile }) {
             Official ID · Est. 2023
           </p>
 
-          {/* member photo, small, gold framed */}
-          <div className="foil-frame mt-[3cqw] rounded-xl p-[1.5cqw] shadow-[0_12px_36px_rgba(0,0,0,0.55)]">
-            <div className="relative h-[30cqw] w-[25cqw] overflow-hidden rounded-[8px] border-2 border-[#0a0f24] bg-[#0a0f24]">
+          {/* member photo, slightly larger, slim gold rim like the QR plate */}
+          <div className="foil-frame mt-[2.4cqw] rounded-xl p-[0.7cqw] shadow-[0_12px_36px_rgba(0,0,0,0.55)]">
+            <div className="relative h-[34cqw] w-[28cqw] overflow-hidden rounded-[8px] border-2 border-[#0a0f24] bg-[#0a0f24]">
               {member.photoURL ? (
                 <Image src={member.photoURL} alt={member.name} fill className="object-cover" />
               ) : (
