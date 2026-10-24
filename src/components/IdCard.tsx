@@ -51,6 +51,18 @@ function CardBackground() {
   );
 }
 
+/** Card display ID: "BCBHS-2023-0001" -> "Alumni-0001".
+ * The stored memberId is unchanged (QR + verify links still use it);
+ * only the printed value on the card drops the repeated year, since the
+ * card top already carries EST. 2023. The numeric suffix is globally
+ * unique (assigned from the total member count), so Alumni-NNNN stays
+ * a unique ID on its own. */
+function displayMemberId(memberId?: string): string {
+  if (!memberId) return "-";
+  const suffix = memberId.match(/(\d{4})\s*$/)?.[1];
+  return suffix ? `Alumni-${suffix}` : memberId;
+}
+
 /** "1998-05-12" -> "12 May 1998" for the ID card. */
 function formatDob(iso?: string): string {
   if (!iso) return "-";
@@ -117,7 +129,7 @@ function CardFront({ member }: { member: UserProfile }) {
               <div>
                 <p className="text-[1.8cqw] uppercase tracking-[0.24em] text-white/45">Member ID</p>
                 <p className="mt-[0.5cqw] font-mono text-[2.6cqw] font-bold tracking-wide text-white">
-                  {member.memberId ?? "-"}
+                  {displayMemberId(member.memberId)}
                 </p>
               </div>
               <div>
