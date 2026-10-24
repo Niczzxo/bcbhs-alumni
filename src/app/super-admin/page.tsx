@@ -86,9 +86,9 @@ export default function SuperAdminPage() {
     <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
       <div className="flex flex-wrap items-center gap-4">
         <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-ivory">
-            {m.name} <span className="text-xs text-muted">· Batch {m.batch} · {m.email}</span>
+        <div className="min-w-0 flex-1 basis-48">
+          <p className="font-semibold leading-snug text-ivory">
+            {m.name} <span className="break-all text-xs text-muted">· Batch {m.batch} · {m.email}</span>
           </p>
         </div>
         <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
@@ -254,10 +254,10 @@ export default function SuperAdminPage() {
           ) : (
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {pending.map((m) => (
-                <div key={m.id} className="flex items-center gap-4 rounded-2xl border border-ivory/10 bg-ink-2 p-5">
+                <div key={m.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-ivory/10 bg-ink-2 p-5">
                   <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-ivory">{m.name}</p>
+                  <div className="min-w-0 flex-1 basis-40">
+                    <p className="font-semibold leading-snug text-ivory">{m.name}</p>
                     <p className="text-xs text-muted">Batch {m.batch} · {m.district} · {m.email}</p>
                   </div>
                   <button onClick={() => approveMember(m.id)} className="rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-5 py-2 text-xs font-bold uppercase tracking-widest text-ink">
@@ -389,10 +389,12 @@ export default function SuperAdminPage() {
               banned.map((m) => (
                 <div key={m.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-red-400/20 bg-ink-2 px-4 py-3">
                   <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-ivory">{m.name}</p>
-                    <p className="text-xs text-muted">
-                      {m.memberId} · Batch {m.batch} · {m.email}
+                  <div className="min-w-0 flex-1 basis-48">
+                    <p className="text-sm font-semibold leading-snug text-ivory">{m.name}</p>
+                    <p className="text-xs leading-relaxed text-muted">
+                      <span className="whitespace-nowrap">{m.memberId}</span> ·{" "}
+                      <span className="whitespace-nowrap">Batch {m.batch}</span> ·{" "}
+                      <span className="break-all">{m.email}</span>
                     </p>
                   </div>
                   <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>

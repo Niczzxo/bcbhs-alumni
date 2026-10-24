@@ -581,7 +581,7 @@ export default function OverviewPanel({
   ];
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       {/* header */}
       <Reveal>
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -691,7 +691,7 @@ export default function OverviewPanel({
             ))}
           </div>
 
-          <div className="mt-5 grid gap-5 lg:grid-cols-[1.55fr_1fr]">
+          <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[1.55fr_1fr]">
             {/* chart panel */}
             <div className="rounded-2xl border border-ivory/[0.07] bg-ink p-4 sm:p-5">
               <div className="flex items-center justify-between gap-3">
@@ -725,7 +725,7 @@ export default function OverviewPanel({
             </div>
 
             {/* who visited panel */}
-            <div className="rounded-2xl border border-ivory/[0.07] bg-ink p-5">
+            <div className="min-w-0 rounded-2xl border border-ivory/[0.07] bg-ink p-5">
               <div className="flex items-center justify-between gap-3">
                 <p className="flex items-center gap-2.5">
                   <span className="text-gold-2">
@@ -741,7 +741,7 @@ export default function OverviewPanel({
                   View more →
                 </button>
               </div>
-              <div className="mt-3 grid gap-0.5">
+              <div className="mt-3 grid grid-cols-1 gap-0.5">
                 {!loaded ? (
                   <p className="py-4 text-sm text-muted">Loading visitors…</p>
                 ) : visits.length === 0 ? (
@@ -792,7 +792,7 @@ export default function OverviewPanel({
       )}
 
       {/* batches + latest + actions */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Reveal>
           <section className={`${cardCls} h-full`}>
             <div className="flex items-center justify-between gap-3">
@@ -810,7 +810,7 @@ export default function OverviewPanel({
                 View Details →
               </button>
             </div>
-            <div className="mt-5 grid gap-4">
+            <div className="mt-5 grid grid-cols-1 gap-4">
               {batches.map((b) => (
                 <div key={b.batch}>
                   <div className="flex items-baseline justify-between text-sm">
@@ -838,7 +838,7 @@ export default function OverviewPanel({
           </section>
         </Reveal>
 
-        <div className="grid gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <Reveal>
             <section className={cardCls}>
               <div className="flex items-center justify-between gap-3">
