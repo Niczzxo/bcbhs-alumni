@@ -84,18 +84,22 @@ export default function SuperAdminPage() {
      All Members (every approved member). */
   const renderCard = useCallback((m: UserProfile) => (
     <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
-      <div className="flex flex-wrap items-center gap-4">
+      {/* Identity: one left-aligned stack — name, then Batch, then email. */}
+      <div className="flex items-start gap-4">
         <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
-        <div className="min-w-0 flex-1 basis-48">
-          <p className="font-semibold leading-snug text-ivory">
-            {m.name} <span className="break-all text-xs text-muted">· Batch {m.batch} · {m.email}</span>
-          </p>
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold leading-snug text-ivory">{m.name}</p>
+          <p className="mt-0.5 text-xs text-muted">Batch {m.batch}</p>
+          <p className="break-all text-xs text-muted">{m.email}</p>
         </div>
+      </div>
+      {/* Role controls, left-aligned under the identity. */}
+      <div className="mt-4 flex flex-wrap items-center gap-2.5">
         <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
           {ROLE_META[m.role].label}
         </span>
         {m.id === user?.id ? (
-          <span className="rounded-full border border-ivory/10 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-muted">
+          <span className="rounded-full border border-ivory/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted">
             You
           </span>
         ) : (
@@ -103,7 +107,7 @@ export default function SuperAdminPage() {
             value={m.role}
             onChange={(e) => changeRole(m, e.target.value as MemberRole)}
             aria-label={`Change role for ${m.name}`}
-            className="cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
+            className="cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
           >
             {(Object.keys(ROLE_META) as MemberRole[]).map((r) => (
               <option key={r} value={r} className="bg-ink text-ivory">
@@ -113,8 +117,10 @@ export default function SuperAdminPage() {
           </select>
         )}
       </div>
-      <p className="mt-2 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
-      <div className="mt-3 flex flex-wrap items-center gap-3">
+      <p className="mt-3 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
+      {/* Position block: label, full-width select, then pill + guest view
+          on the same left-aligned row. */}
+      <div className="mt-4">
         <label className="text-[11px] font-bold uppercase tracking-widest text-muted">
           Position
         </label>
@@ -122,7 +128,7 @@ export default function SuperAdminPage() {
           value={m.position ?? ""}
           aria-label={`Official position for ${m.name}`}
           onChange={(e) => setPosition(m.id, e.target.value)}
-          className="w-56 cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
+          className="mt-2 w-full cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
         >
           <option value="" className="bg-ink text-ivory">
            , No position
@@ -138,24 +144,29 @@ export default function SuperAdminPage() {
             </option>
           ))}
         </select>
-        {m.position && (
-          <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
-            ★ {m.position}
-          </span>
-        )}
-        <label className="ml-auto flex cursor-pointer items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted hover:text-gold-2">
-          <input
-            type="checkbox"
-            checked={!!m.guestVisible}
-            onChange={(e) => setGuestVisible(m.id, e.target.checked)}
-            aria-label={`Show ${m.name} in the public guest directory`}
-            className="h-4 w-4 accent-[#d4a94e]"
-          />
-          Guest view
-        </label>
+        <div className="mt-3 flex flex-wrap items-center gap-2.5">
+          {m.position && (
+            <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
+              ★ {m.position}
+            </span>
+          )}
+          <label className="flex cursor-pointer items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted hover:text-gold-2">
+            <input
+              type="checkbox"
+              checked={!!m.guestVisible}
+              onChange={(e) => setGuestVisible(m.id, e.target.checked)}
+              aria-label={`Show ${m.name} in the public guest directory`}
+              className="h-4 w-4 accent-[#d4a94e]"
+            />
+            Guest view
+          </label>
+        </div>
+        <p className="mt-2.5 text-[11px] text-muted/70">
+          Official positions are manually verified, allow up to 7 days.
+        </p>
       </div>
       {m.role !== "super_admin" && m.id !== user?.id && (m.status === "approved" || m.status === "banned") && (
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-3">
           {m.status === "banned" ? (
             <>
               <span className="rounded-full bg-red-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-red-300">
@@ -180,9 +191,6 @@ export default function SuperAdminPage() {
           )}
         </div>
       )}
-      <p className="mt-1.5 text-[11px] text-muted/70">
-        Official positions are manually verified, allow up to 7 days.
-      </p>
       {(m.role === "admin" || m.role === "editor") && (
         <div className="mt-5">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
