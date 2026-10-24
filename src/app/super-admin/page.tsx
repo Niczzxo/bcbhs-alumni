@@ -123,17 +123,19 @@ export default function SuperAdminPage() {
       <p className="mt-3 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
       {/* Position row: compact select with the current position pill
           beside it (owner's call, 2026-10-25: the full-width select
-          looked too big on both PC and phone). Wraps left-aligned
-          on narrow phones. */}
+          looked too big on both PC and phone). Phone-only tweak
+          (owner's call, 2026-10-25): on phones the label sits on its
+          own line with the select + pill on one row below it; PC
+          keeps label + select + pill on a single row, untouched. */}
       <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2.5">
-        <label className="text-[11px] font-bold uppercase tracking-widest text-muted">
+        <label className="text-[11px] font-bold uppercase tracking-widest text-muted max-sm:w-full">
           Position
         </label>
         <select
           value={m.position ?? ""}
           aria-label={`Official position for ${m.name}`}
           onChange={(e) => setPosition(m.id, e.target.value)}
-          className="w-56 cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
+          className="w-56 cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10 max-sm:min-w-0 max-sm:flex-1"
         >
           <option value="" className="bg-ink text-ivory">
            , No position
@@ -150,7 +152,7 @@ export default function SuperAdminPage() {
           ))}
         </select>
         {m.position && (
-          <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
+          <span className="shrink-0 rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
             ★ {m.position}
           </span>
         )}
