@@ -121,9 +121,11 @@ export default function SuperAdminPage() {
         )}
       </div>
       <p className="mt-3 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
-      {/* Position block: label, full-width select, then pill + guest view
-          on the same left-aligned row. */}
-      <div className="mt-4">
+      {/* Position row: compact select with the current position pill
+          beside it (owner's call, 2026-10-25: the full-width select
+          looked too big on both PC and phone). Wraps left-aligned
+          on narrow phones. */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2.5">
         <label className="text-[11px] font-bold uppercase tracking-widest text-muted">
           Position
         </label>
@@ -131,7 +133,7 @@ export default function SuperAdminPage() {
           value={m.position ?? ""}
           aria-label={`Official position for ${m.name}`}
           onChange={(e) => setPosition(m.id, e.target.value)}
-          className="mt-2 w-full cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
+          className="w-56 cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
         >
           <option value="" className="bg-ink text-ivory">
            , No position
@@ -148,16 +150,14 @@ export default function SuperAdminPage() {
           ))}
         </select>
         {m.position && (
-          <div className="mt-3 flex flex-wrap items-center gap-2.5">
-            <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
-              ★ {m.position}
-            </span>
-          </div>
+          <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold-2">
+            ★ {m.position}
+          </span>
         )}
-        <p className="mt-2.5 text-[11px] text-muted/70">
-          Official positions are manually verified, allow up to 7 days.
-        </p>
       </div>
+      <p className="mt-2.5 text-[11px] text-muted/70">
+        Official positions are manually verified, allow up to 7 days.
+      </p>
       {m.role !== "super_admin" && m.id !== user?.id && (m.status === "approved" || m.status === "banned") && (
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {m.status === "banned" ? (
