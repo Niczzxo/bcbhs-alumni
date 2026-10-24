@@ -38,7 +38,7 @@ export default function VerifyView({ params }: { params: Promise<{ memberId: str
                 {genuine ? "✓" : "✕"}
               </p>
               <h2 className={`font-display mt-6 text-3xl font-extrabold ${genuine ? "text-gold-gradient" : "text-red-300"}`}>
-                {genuine ? "Genuine Member" : "Not Verified"}
+                {genuine ? "Verified Member" : "Not Verified"}
               </h2>
               {genuine && member ? (
                 <>
