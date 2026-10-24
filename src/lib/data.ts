@@ -25,7 +25,7 @@ export interface SiteStats {
  *
  * Live mode: read the public `site/stats` document, Firestore rules
  * stop guests from counting the `users` collection directly (they may
- * only read guest-visible profiles), so the totals are published to
+ * only read position holders' profiles), so the totals are published to
  * this doc instead. StatsSync (mounted in Providers) recomputes it
  * from the real member list whenever the super admin is signed in.
  *
@@ -108,12 +108,14 @@ export function useMember(lookup: string | undefined): UserProfile | null | unde
            or Firestore denies it outright ("rules are not filters")
            an unconstrained memberId lookup fails for everyone except
            admins and the profile page reports "not found". Guests are
-           additionally limited to guestVisible profiles. */
+           additionally limited to position holders (approved + a
+           non-empty position), the same rule the public directory
+           and committee pages use. */
         const constraints = [
           where("memberId", "==", lookup),
           where("status", "==", "approved"),
         ];
-        if (!user) constraints.push(where("guestVisible", "==", true));
+        if (!user) constraints.push(where("position", "!=", ""));
         const q = query(collection(db, "users"), ...constraints, limit(1));
         const snap = await getDocs(q);
         if (!cancelled) {
@@ -143,7 +145,8 @@ export function useMember(lookup: string | undefined): UserProfile | null | unde
  * PUBLIC card verification, resolves a memberId against the public
  * `verify` registry (see lib/verify-sync.ts), NOT the `users`
  * collection: a guest scanning a card QR cannot be authorized to read
- * `users` at all, so genuine members used to show "Not Verified".
+ * every `users` doc (guests may only read position holders' profiles),
+ * so genuine plain members used to show "Not Verified".
  * Returns undefined while loading, null when no approved member
  * carries this ID.
  */

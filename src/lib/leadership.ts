@@ -30,7 +30,7 @@ const rank = (position?: string) => {
  * sorted TOGETHER by position rank, the more powerful position
  * first, name as tiebreak, so a President always leads the list
  * however their entry was sourced. Callers pass only the members
- * the viewer may see (guests get guest-visible profiles only).
+ * the viewer may see (guests get approved position holders only).
  */
 export function mergeLeadership(
   members: UserProfile[],
@@ -70,7 +70,7 @@ export function mergeLeadership(
  * The leadership list for the current viewer, with the right data
  * source per viewer: signed-in members read the role-aware member
  * list from the auth context, while GUESTS get their own fetch of
- * guest-visible approved profiles (the same rule-constrained query
+ * approved position holders (the same rule-constrained query
  * the Directory page runs). Without this, the live auth context
  * holds NO members at all for guests, and the Leadership strip
  * showed only the hand-added seats (owner report, 2026-10-23).
@@ -90,14 +90,14 @@ export function useLeadership(): LeaderSeat[] {
         const snap = await getDocs(
           query(
             collection(db, "users"),
-            where("guestVisible", "==", true),
             where("status", "==", "approved"),
+            where("position", "!=", ""),
             limit(50),
           ),
         );
         const list = snap.docs
           .map((d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) }) as UserProfile)
-          .filter((m) => m.status === "approved" && m.guestVisible);
+          .filter((m) => m.status === "approved" && !!m.position?.trim());
         if (!cancelled) setGuestMembers(list);
       } catch {
         if (!cancelled) setGuestMembers([]);
@@ -108,10 +108,6 @@ export function useLeadership(): LeaderSeat[] {
     };
   }, [isGuest]);
 
-  const base = isGuest
-    ? isFirebaseConfigured
-      ? (guestMembers ?? [])
-      : members.filter((m) => m.guestVisible)
-    : members;
+  const base = isGuest && isFirebaseConfigured ? (guestMembers ?? []) : members;
   return mergeLeadership(base, committee);
 }

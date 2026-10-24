@@ -64,8 +64,6 @@ interface AuthContextValue {
   setRole: (id: string, role: UserProfile["role"]) => Promise<void>;
   /** Assign / clear a member's official position (admin only, manually verified). */
   setPosition: (id: string, position: string) => Promise<void>;
-  /** Toggle whether a member shows in the public (logged-out) directory (staff only). */
-  setGuestVisible: (id: string, visible: boolean) => Promise<void>;
   updateProfile: (input: ProfileUpdateInput) => Promise<{ ok: boolean; error?: string }>;
   /** Account settings: the member's own WhatsApp number (users_private). */
   updatePhone: (phone: string) => Promise<{ ok: boolean; error?: string }>;
@@ -652,15 +650,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [members]);
 
-  const setGuestVisible = useCallback(async (id: string, visible: boolean) => {
-    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, guestVisible: visible } : m)));
-    setUser((u) => (u && u.id === id ? { ...u, guestVisible: visible } : u));
-      void logSecurityEvent("guest_visibility_changed", { targetUid: id, meta: { visible } });
-    if (!isFirebaseConfigured || !db) return;
-    const { doc, updateDoc } = await import("firebase/firestore");
-    await updateDoc(doc(db, "users", id), { guestVisible: visible }).catch(() => undefined);
-  }, []);
-
   /* Account settings (owner, 2026-10-24): the member's own phone,
      email and password, edited from the /settings page. Email and
      password changes re-authenticate with the current password
@@ -849,7 +838,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPermissions,
       setRole,
       setPosition,
-      setGuestVisible,
       updateProfile,
       updatePhone,
       changeEmail,
@@ -858,7 +846,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, setGuestVisible, updateProfile, updatePhone, changeEmail, changePassword, hasPermission],
+    [user, members, loading, login, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, updateProfile, updatePhone, changeEmail, changePassword, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

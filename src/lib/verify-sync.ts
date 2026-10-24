@@ -3,9 +3,8 @@
 /*                                                                     */
 /*  The /verify page is public, anyone scanning a card QR lands      */
 /*  there, usually signed out. Firestore rules only let guests read   */
-/*  `users` docs that are BOTH approved and guestVisible, and a       */
-/*  memberId lookup cannot prove either condition, so the query is    */
-/*  denied outright and genuine members showed "Not Verified".       */
+/*  position holders' `users` docs, so a plain member's card would    */
+/*  show "Not Verified" without a public record of its own.           */
 /*                                                                     */
 /*  This registry holds only the facts printed on the card itself     */
 /*  (name, batch, photo, position) and is publicly readable. A doc    */
