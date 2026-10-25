@@ -424,7 +424,11 @@ export default function OverviewPanel({
   batchReps: number;
   editors: number;
   members: UserProfile[];
-  onJump: (key: string) => void;
+  /* Batch Reps / Editors cards jump into Roles & Access WITH a role
+     filter (owner's complaint, 2026-10-25: tapping Batch Reps showed
+     every role holder instead of the Batch Reps). Other jumps carry
+     no filter. */
+  onJump: (key: string, roleFilter?: "admin" | "editor") => void;
 }) {
   const { visits, loaded } = useVisits();
   const content = useContent();
@@ -536,7 +540,15 @@ export default function OverviewPanel({
     [members],
   );
 
-  const stats = [
+  const stats: {
+    icon: ReactNode;
+    value: number;
+    label: string;
+    sub: string;
+    jump: string;
+    accent: boolean;
+    roleFilter?: "admin" | "editor";
+  }[] = [
     {
       icon: <UsersIcon />,
       value: approved,
@@ -560,6 +572,7 @@ export default function OverviewPanel({
       sub: "Assigned by super admin",
       jump: "roles",
       accent: false,
+      roleFilter: "admin",
     },
     {
       icon: <PenIcon />,
@@ -568,6 +581,7 @@ export default function OverviewPanel({
       sub: "Content team",
       jump: "roles",
       accent: false,
+      roleFilter: "editor",
     },
   ];
 
@@ -620,7 +634,7 @@ export default function OverviewPanel({
           <Reveal key={s.label} delay={i * 0.06}>
             <button
               type="button"
-              onClick={() => onJump(s.jump)}
+              onClick={() => onJump(s.jump, s.roleFilter)}
               className={`card-lift relative w-full overflow-hidden rounded-3xl border p-5 pb-9 text-left sm:p-6 sm:pb-8 ${
                 s.accent
                   ? "border-gold/50 bg-gold/[0.07] shadow-[0_0_28px_rgba(212,169,78,0.15)]"

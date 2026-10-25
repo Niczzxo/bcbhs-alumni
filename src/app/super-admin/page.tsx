@@ -30,6 +30,10 @@ export default function SuperAdminPage() {
      (quietly also matches email / member ID when pasted) plus a
      batch picker; both filters combine. */
   const [dashKey, setDashKey] = useState("overview");
+  /* Roles & Access filter, set ONLY by Overview jumps (Batch Reps /
+     Editors cards). A manual section tap always resets it, so Roles
+     & Access shows everyone by default. */
+  const [rolesFilter, setRolesFilter] = useState<"all" | "admin" | "editor">("all");
   const [memberQuery, setMemberQuery] = useState("");
   const [memberBatch, setMemberBatch] = useState("");
   const memberBatches = useMemo(
@@ -57,6 +61,28 @@ export default function SuperAdminPage() {
      though they can do everything a Batch Rep can. */
   const batchReps = useMemo(() => members.filter((m) => m.status === "approved" && m.role === "admin"), [members]);
   const editors = useMemo(() => members.filter((m) => m.role === "editor"), [members]);
+  /* Filtered Roles & Access list. Batch Reps follow the Overview card's
+     own rule (approved admins only — super admins excluded, banned
+     excluded), so the card's count and the list always agree; banned
+     Batch Reps stay reachable under Banned and are noted, not hidden
+     silently. Editors follow their card's rule (role === 'editor'). */
+  const shownStaff = useMemo(() => {
+    if (rolesFilter === "admin") return staff.filter((m) => m.role === "admin" && m.status === "approved");
+    if (rolesFilter === "editor") return staff.filter((m) => m.role === "editor");
+    return staff;
+  }, [staff, rolesFilter]);
+  const bannedAdmins = useMemo(() => staff.filter((m) => m.role === "admin" && m.status === "banned"), [staff]);
+  /* Overview jumps (plain setters only, so no stale closures): a jump
+     into Roles & Access carries its filter, any other jump leaves the
+     filter alone. Manual section taps reset it via handleActiveChange. */
+  const handleJump = (key: string, roleFilter?: "admin" | "editor") => {
+    if (key === "roles") setRolesFilter(roleFilter ?? "all");
+    setDashKey(key);
+  };
+  const handleActiveChange = (key: string) => {
+    setRolesFilter("all");
+    setDashKey(key);
+  };
 
   /* The permissions a person holds are exactly their toggled list,
      for Batch Reps and editors alike. Editors start EMPTY: the super
@@ -223,7 +249,9 @@ export default function SuperAdminPage() {
      dashKey is deliberately NOT a dependency: switching sections
      re-renders this page, and with stable section elements React
      skips re-rendering every already-mounted section - only the
-     shell's highlight and the hidden flags change. */
+     shell's highlight and the hidden flags change. rolesFilter IS
+     a dependency (like memberQuery/memberBatch): the roles section
+     reads it, so changing the filter must rebuild the sections. */
   const sections: DashSection[] = useMemo<DashSection[]>(() => [
     {
       key: "overview",
@@ -236,7 +264,7 @@ export default function SuperAdminPage() {
           batchReps={batchReps.length}
           editors={editors.length}
           members={members}
-          onJump={setDashKey}
+          onJump={handleJump}
         />
       ),
     },
@@ -290,12 +318,46 @@ export default function SuperAdminPage() {
           </p>
           <div className="gold-rule mt-4 w-32" />
           <div className="mt-8 space-y-5">
-            {staff.length === 0 ? (
-              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
-                No one holds a role yet. Open All Members and give someone a role.
-              </p>
+            {rolesFilter !== "all" && (
+              <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3">
+                <p className="text-sm font-semibold text-gold-2">
+                  Showing {rolesFilter === "admin" ? "Batch Reps" : "Editors"} only
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setRolesFilter("all")}
+                  className="rounded-full border border-gold/50 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/20"
+                >
+                  Show all roles ×
+                </button>
+              </div>
+            )}
+            {shownStaff.length === 0 ? (
+              <div className="rounded-2xl border border-ivory/10 bg-ink-2 p-6">
+                <p className="text-sm text-muted">
+                  {rolesFilter === "admin"
+                    ? "No Batch Reps assigned yet. Open All Members and give someone the Batch Rep role."
+                    : rolesFilter === "editor"
+                      ? "No editors yet. Open All Members and give someone the editor role."
+                      : "No one holds a role yet. Open All Members and give someone a role."}
+                </p>
+                {rolesFilter !== "all" && (
+                  <button
+                    type="button"
+                    onClick={() => { setRolesFilter("all"); setDashKey("all-members"); }}
+                    className="mt-4 rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-5 py-2 text-xs font-bold uppercase tracking-widest text-ink"
+                  >
+                    Go to All Members
+                  </button>
+                )}
+              </div>
             ) : (
-              staff.map(renderCard)
+              shownStaff.map(renderCard)
+            )}
+            {rolesFilter === "admin" && bannedAdmins.length > 0 && (
+              <p className="text-xs text-muted">
+                Note: {bannedAdmins.length} banned Batch Rep{bannedAdmins.length === 1 ? "" : "s"} {bannedAdmins.length === 1 ? "is" : "are"} listed under Banned.
+              </p>
             )}
           </div>
         </section>
@@ -440,11 +502,11 @@ export default function SuperAdminPage() {
     })),
     { key: "about", label: "About Page", content: <AboutEditor /> },
     { key: "settings", label: "Settings", content: <SettingsManager /> },
-  ], [approved, pending, banned, staff, batchReps, editors, members, loading, approveMember, rejectMember, unbanMember, renderCard, shownMembers, memberBatches, memberQuery, memberBatch]);
+  ], [approved, pending, banned, staff, batchReps, editors, members, loading, approveMember, rejectMember, unbanMember, renderCard, shownMembers, memberBatches, memberQuery, memberBatch, rolesFilter, shownStaff, bannedAdmins]);
 
   return (
     <RequireRole role="super_admin" eyebrow="Full access" title={<>Super Admin <span className="text-gold-gradient">Dashboard</span></>}>
-      <DashboardShell sections={sections} activeKey={dashKey} onActiveChange={setDashKey} />
+      <DashboardShell sections={sections} activeKey={dashKey} onActiveChange={handleActiveChange} />
     </RequireRole>
   );
 }
