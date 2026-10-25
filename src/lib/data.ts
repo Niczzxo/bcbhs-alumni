@@ -109,7 +109,7 @@ export function useMember(lookup: string | undefined): UserProfile | null | unde
            an unconstrained memberId lookup fails for everyone except
            admins and the profile page reports "not found". Guests are
            additionally limited to position holders, constrained as an
-           `in` list of official positions — a `!= ""` constraint is
+           `in` list of official positions - a `!= ""` constraint is
            NOT provable against the read rule (the value could be a
            number), so it is denied outright; see directory/page.tsx. */
         const constraints = [

@@ -55,7 +55,7 @@ export const MEMBER_NAV_LINKS = [
 
 /** The drawer's Profile link: same destination as the desktop chip
  * dropdown's Profile (/profile, which lands on the member's own
- * profile page) — owner's rule, 2026-10-23, mobile and desktop agree. */
+ * profile page) - owner's rule, 2026-10-23, mobile and desktop agree. */
 export const MEMBER_PROFILE_LINK = { label: "Profile", href: "/profile" };
 
 /** Items inside the members navbar "More" dropdown. */

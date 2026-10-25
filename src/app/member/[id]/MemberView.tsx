@@ -102,7 +102,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                 </div>
                 {/* Education (member-editable, 2026-10-25): current
                     college / university, session, department and
-                    whether still studying there — shown only when
+                    whether still studying there - shown only when
                     the member filled it in. */}
                 {member.institution && (
                   <div className="mt-8 overflow-hidden rounded-2xl border border-ivory/10">

@@ -1,5 +1,5 @@
 /**
- * POST /api/security/log — the site's application-controlled audit
+ * POST /api/security/log - the site's application-controlled audit
  * ingest endpoint, protected by distributed (Upstash Redis) rate
  * limiting.
  *

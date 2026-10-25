@@ -107,7 +107,7 @@ export default function DashboardShell({
       | undefined;
     const cic = window.cancelIdleCallback as ((id: number) => void) | undefined;
     /* Warm-mount ONLY in idle slices and never right after a tap
-       (owner's complaint, 2026-10-24: switching felt unresponsive —
+       (owner's complaint, 2026-10-24: switching felt unresponsive -
        the old fixed 450ms stampede mounted heavy sections back to
        back and every tap queued behind a mount). Mounts also run as
        transitions so the UI stays responsive throughout. */

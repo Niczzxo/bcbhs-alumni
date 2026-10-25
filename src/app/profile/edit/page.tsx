@@ -192,14 +192,14 @@ export default function EditProfilePage() {
 
               <div className="sm:col-span-2 rounded-2xl border border-gold/25 bg-ink p-5">
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-gold">Education</p>
-                <p className="mt-1.5 text-[11px] text-muted/70">Your current college / university — juniors search by university to find running seniors, so keep this updated.</p>
+                <p className="mt-1.5 text-[11px] text-muted/70">Your current college / university - juniors search by university to find running seniors, so keep this updated.</p>
                 <div className="mt-4 grid gap-5 sm:grid-cols-2">
                   <div className="sm:col-span-2"><label className={labelCls}>College / University</label><input className={inputCls} value={f.institution} onChange={set("institution")} placeholder="e.g. BUET, University of Dhaka" /></div>
                   <div><label className={labelCls}>Session</label><input className={inputCls} value={f.eduSession} onChange={set("eduSession")} placeholder="e.g. 2022-23" /></div>
                   <div><label className={labelCls}>Department (at this institution)</label><input className={inputCls} value={f.eduDepartment} onChange={set("eduDepartment")} placeholder="e.g. CSE, EEE, Mathematics" /></div>
                   <label className="flex cursor-pointer items-center gap-3 self-end pb-3 sm:col-span-2">
                     <input type="checkbox" checked={f.eduRunning} onChange={() => { setF((p) => ({ ...p, eduRunning: !p.eduRunning })); setSaved(false); }} className="h-4 w-4 accent-[#d4a94e]" />
-                    <span className="text-sm text-ivory/90">Currently studying here (Running) — leave unticked if you have completed it</span>
+                    <span className="text-sm text-ivory/90">Currently studying here (Running) - leave unticked if you have completed it</span>
                   </label>
                 </div>
               </div>

@@ -87,7 +87,7 @@ export default function SuperAdminPage() {
      All Members (every approved member). */
   const renderCard = useCallback((m: UserProfile) => (
     <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
-      {/* Identity: one left-aligned stack — name, then Batch, then email. */}
+      {/* Identity: one left-aligned stack - name, then Batch, then email. */}
       <div className="flex items-start gap-4">
         <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
         <div className="min-w-0 flex-1">
@@ -222,7 +222,7 @@ export default function SuperAdminPage() {
      complaint, 2026-10-24: section switches felt unresponsive).
      dashKey is deliberately NOT a dependency: switching sections
      re-renders this page, and with stable section elements React
-     skips re-rendering every already-mounted section — only the
+     skips re-rendering every already-mounted section - only the
      shell's highlight and the hidden flags change. */
   const sections: DashSection[] = useMemo<DashSection[]>(() => [
     {

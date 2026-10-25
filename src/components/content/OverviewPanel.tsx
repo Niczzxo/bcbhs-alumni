@@ -105,7 +105,7 @@ function niceCeil(v: number): number {
 /**
  * Professional 7-day traffic chart (owner, 2026-10-24): axes,
  * gridlines, a smooth gold curve over a gradient area, a dashed
- * daily-average line, and a hover/tap tooltip per day. Pure SVG —
+ * daily-average line, and a hover/tap tooltip per day. Pure SVG -
  * no chart library, drawn from the real visit counts.
  */
 function VisitsChart({ days, avg }: { days: DayPoint[]; avg: number }) {
@@ -244,7 +244,7 @@ function fmtWhen(ts: number): string {
 
 /**
  * Guest trails fold identical (page, device) visits into one row
- * with a count — a wall of '/' rows helps nobody (owner, 2026-10-24).
+ * with a count - a wall of '/' rows helps nobody (owner, 2026-10-24).
  */
 function aggregateGuestTrail(visits: Visit[]): (Visit & { times: number })[] {
   const map = new Map<string, Visit & { times: number }>();
@@ -271,7 +271,7 @@ interface VisitorGroup {
 
 /**
  * Every recorded visit, grouped by person (owner, 2026-10-24):
- * who came, when, and which pages they opened — the detail view
+ * who came, when, and which pages they opened - the detail view
  * behind the Who Visited wall's "View all visitors" button.
  */
 function VisitorsModal({
@@ -334,7 +334,7 @@ function VisitorsModal({
           <div>
             <h3 className="font-display text-2xl font-bold text-ivory">All visitors</h3>
             <p className="mt-1 text-xs text-muted">
-              The last {visits.length} recorded visits — who came, when, and which pages they opened.
+              The last {visits.length} recorded visits - who came, when, and which pages they opened.
             </p>
           </div>
           <button
@@ -480,7 +480,7 @@ export default function OverviewPanel({
   }, [visits]);
 
   /* Who visited, grouped by person (owner, 2026-10-24): the wall
-     shows people, not page trails — each member once with their
+     shows people, not page trails - each member once with their
      latest visit + how often they came; guests fold into a single
      anonymous tile. Profile photos come from the members list. */
   const people = useMemo(() => {

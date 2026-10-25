@@ -12,7 +12,7 @@
  *
  * Retry policy: exactly one retry, and only after a NETWORK failure
  * (no response received, where delivery is genuinely uncertain).
- * HTTP responses — including 429 and 503 — are final. Every attempt
+ * HTTP responses - including 429 and 503 - are final. Every attempt
  * carries the same `eventId`, and the endpoint writes under that id,
  * so a retry after an uncertain network failure is idempotent and
  * cannot create a duplicate record.

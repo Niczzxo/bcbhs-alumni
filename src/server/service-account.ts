@@ -4,7 +4,7 @@
  *
  * Why a service account: Firestore rules cannot distinguish "the
  * browser wrote directly" from "our endpoint wrote with the user's
- * token" — both carry the same identity. Trusted audit records
+ * token" - both carry the same identity. Trusted audit records
  * therefore bypass client writes entirely: the rules deny ALL client
  * creates on `security_logs`, and the only writer is this module,
  * using a Google service account (which bypasses rules the way the
