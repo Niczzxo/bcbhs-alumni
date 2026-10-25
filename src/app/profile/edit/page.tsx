@@ -8,6 +8,7 @@ import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { useAuth, type ProfileUpdateInput } from "@/lib/auth-context";
 import { compressImageToDataURL } from "@/lib/image";
+import PhotoCropper from "@/components/PhotoCropper";
 import { inputCls, labelCls } from "@/components/auth/ui";
 import { BATCH_YEARS, BD_DISTRICTS, BLOOD_GROUPS, DEPARTMENTS } from "@/lib/types";
 
@@ -18,6 +19,8 @@ export default function EditProfilePage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [photoBusy, setPhotoBusy] = useState(false);
+  // Object URL of the photo being cropped (null = cropper closed).
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [today, setToday] = useState("");
@@ -81,18 +84,41 @@ export default function EditProfilePage() {
     setSaved(false);
   };
 
-  async function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+  // Picking a photo now opens the cropper instead of using the whole
+  // image: the member selects the exact square area to keep, and only
+  // that area goes through the usual compression into the preview.
+  // (Owner's call, 2026-10-25: "ami ei tuku area select korbo, sei tukui hbe".)
+  function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    // Reset so picking the same file again still fires onChange.
+    e.target.value = "";
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       setError("Please choose an image file.");
       return;
     }
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(URL.createObjectURL(file));
+    setError("");
+  }
+
+  function closeCropper() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
+  }
+
+  function onCropNewFile(file: File) {
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(URL.createObjectURL(file));
+  }
+
+  async function onCropDone(file: File) {
+    closeCropper();
     setPhotoBusy(true);
     try {
-      setF((p) => ({ ...p, photoURL: "" }));
       const url = await compressImageToDataURL(file, 256, 0.72);
       setF((p) => ({ ...p, photoURL: url }));
+      setSaved(false);
       setError("");
     } catch {
       setError("Could not process that image.");
@@ -254,6 +280,14 @@ export default function EditProfilePage() {
         </div>
       </main>
       <Footer />
+      {cropSrc && (
+        <PhotoCropper
+          src={cropSrc}
+          onCrop={onCropDone}
+          onCancel={closeCropper}
+          onNewFile={onCropNewFile}
+        />
+      )}
     </>
   );
 }
