@@ -30,10 +30,12 @@ export default function SuperAdminPage() {
      (quietly also matches email / member ID when pasted) plus a
      batch picker; both filters combine. */
   const [dashKey, setDashKey] = useState("overview");
-  /* Roles & Access filter, set ONLY by Overview jumps (Batch Reps /
-     Editors cards). A manual section tap always resets it, so Roles
-     & Access shows everyone by default. */
-  const [rolesFilter, setRolesFilter] = useState<"all" | "admin" | "editor">("all");
+  /* Roles & Access filter. Set by Overview jumps (Batch Reps /
+     Editors cards) OR by the filter chips inside the section itself
+     (owner's follow-up, 2026-10-27: filtering must work WITHOUT going
+     through Overview). A manual section tap always resets it, so
+     Roles & Access shows everyone by default. */
+  const [rolesFilter, setRolesFilter] = useState<"all" | "admin" | "editor" | "super_admin">("all");
   const [memberQuery, setMemberQuery] = useState("");
   const [memberBatch, setMemberBatch] = useState("");
   const memberBatches = useMemo(
@@ -69,6 +71,7 @@ export default function SuperAdminPage() {
   const shownStaff = useMemo(() => {
     if (rolesFilter === "admin") return staff.filter((m) => m.role === "admin" && m.status === "approved");
     if (rolesFilter === "editor") return staff.filter((m) => m.role === "editor");
+    if (rolesFilter === "super_admin") return staff.filter((m) => m.role === "super_admin");
     return staff;
   }, [staff, rolesFilter]);
   const bannedAdmins = useMemo(() => staff.filter((m) => m.role === "admin" && m.status === "banned"), [staff]);
@@ -317,21 +320,30 @@ export default function SuperAdminPage() {
             with no access at all until you switch sections on for them. Super admin always has full access.
           </p>
           <div className="gold-rule mt-4 w-32" />
+          {/* Role filter chips: filter right here, no Overview detour. */}
+          <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filter by role">
+            {([
+              { key: "all", label: "All roles" },
+              { key: "admin", label: "Batch Reps" },
+              { key: "editor", label: "Editors" },
+              { key: "super_admin", label: "Super Admins" },
+            ] as const).map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setRolesFilter(f.key)}
+                aria-pressed={rolesFilter === f.key}
+                className={`rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                  rolesFilter === f.key
+                    ? "border-gold bg-gold text-ink"
+                    : "border-ivory/20 text-muted hover:border-gold/50 hover:text-gold-2"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
           <div className="mt-8 space-y-5">
-            {rolesFilter !== "all" && (
-              <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3">
-                <p className="text-sm font-semibold text-gold-2">
-                  Showing {rolesFilter === "admin" ? "Batch Reps" : "Editors"} only
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setRolesFilter("all")}
-                  className="rounded-full border border-gold/50 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/20"
-                >
-                  Show all roles ×
-                </button>
-              </div>
-            )}
             {shownStaff.length === 0 ? (
               <div className="rounded-2xl border border-ivory/10 bg-ink-2 p-6">
                 <p className="text-sm text-muted">
@@ -339,7 +351,9 @@ export default function SuperAdminPage() {
                     ? "No Batch Reps assigned yet. Open All Members and give someone the Batch Rep role."
                     : rolesFilter === "editor"
                       ? "No editors yet. Open All Members and give someone the editor role."
-                      : "No one holds a role yet. Open All Members and give someone a role."}
+                      : rolesFilter === "super_admin"
+                        ? "No super admins."
+                        : "No one holds a role yet. Open All Members and give someone a role."}
                 </p>
                 {rolesFilter !== "all" && (
                   <button
