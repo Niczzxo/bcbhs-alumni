@@ -734,7 +734,7 @@ export default function OverviewPanel({
               <p className="text-[11px] leading-relaxed text-muted/70">
                 One visit is counted per person per page in a browsing session. Portal content so far:{" "}
                 {content.events.length} events · {content.announcements.length} announcements ·{" "}
-                {content.stories.length} stories · {content.businesses.length} businesses.
+                {content.businesses.length} businesses.
               </p>
             </div>
 

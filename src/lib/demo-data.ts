@@ -13,7 +13,6 @@ import type {
   AnnouncementItem,
   JobPost,
   BloodRequest,
-  SuccessStory,
   Business,
   MentorProfile,
   FundDonor,
@@ -468,18 +467,6 @@ export const DEMO_BLOOD_REQUESTS: BloodRequest[] = [
 ];
 
 
-
-export const DEMO_STORIES: SuccessStory[] = [
-  {
-    id: "s-1",
-    name: "Tanvir Ahmed",
-    batch: "2015",
-    title: "Software Engineer · Brain Station 23",
-    story:
-      "From the back benches of BCBHS to building fintech used by millions, Tanvir credits the discipline of cantonment school life for his work ethic, and now mentors junior alumni entering tech.",
-    createdAt: "2026-10-10T00:00:00.000Z",
-  },
-];
 
 export const DEMO_BUSINESSES: Business[] = [
   {

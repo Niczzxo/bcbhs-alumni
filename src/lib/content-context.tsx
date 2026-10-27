@@ -25,7 +25,6 @@ import {
   DEMO_ANNOUNCEMENTS,
   DEMO_JOBS,
   DEMO_BLOOD_REQUESTS,
-  DEMO_STORIES,
   DEMO_BUSINESSES,
   DEMO_MENTORS,
   DEMO_FUND_DONORS,
@@ -45,7 +44,6 @@ import type {
   MentorProfile,
   PortalEvent,
   SiteContent,
-  SuccessStory,
 } from "./types";
 
 const CONTENT_STORAGE_KEY = "bcbhs-demo-content-v1";
@@ -57,7 +55,6 @@ interface DemoContent {
   announcements: AnnouncementItem[];
   jobs: JobPost[];
   bloodRequests: BloodRequest[];
-  stories: SuccessStory[];
   businesses: Business[];
   mentors: MentorProfile[];
   fundDonors: FundDonor[];
@@ -74,7 +71,6 @@ function seedContent(): DemoContent {
     announcements: DEMO_ANNOUNCEMENTS,
     jobs: DEMO_JOBS,
     bloodRequests: DEMO_BLOOD_REQUESTS,
-    stories: DEMO_STORIES,
     businesses: DEMO_BUSINESSES,
     mentors: DEMO_MENTORS,
     fundDonors: DEMO_FUND_DONORS,
@@ -114,9 +110,6 @@ interface ContentContextValue {
   addBloodRequest: (r: Omit<BloodRequest, "id" | "createdAt">) => Promise<void>;
   updateBloodRequest: (id: string, r: Partial<BloodRequest>) => Promise<void>;
   removeBloodRequest: (id: string) => Promise<void>;
-  stories: SuccessStory[];
-  addStory: (s: Omit<SuccessStory, "id" | "createdAt">) => Promise<void>;
-  removeStory: (id: string) => Promise<void>;
   businesses: Business[];
   addBusiness: (b: Omit<Business, "id" | "createdAt">) => Promise<void>;
   removeBusiness: (id: string) => Promise<void>;
@@ -151,7 +144,6 @@ function emptyContent(): DemoContent {
     announcements: [],
     jobs: [],
     bloodRequests: [],
-    stories: [],
     businesses: [],
     mentors: [],
     fundDonors: [],
@@ -163,7 +155,7 @@ function emptyContent(): DemoContent {
 
 const CONTENT_KEYS = [
   "events", "gallery", "committee", "announcements", "jobs", "bloodRequests",
-  "stories", "businesses", "mentors",
+  "businesses", "mentors",
   "fundDonors", "batchLinks", "fundInfo", "siteContent",
 ] as const;
 
@@ -289,17 +281,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
               })),
             }));
           }),
-          onSnapshot(collection(db, "stories"), (snap) => {
-            markArrived("stories");
-            if (cancelled) return;
-            setContent((p) => ({
-              ...p,
-              stories: snap.docs.map((d) => ({
-                id: d.id,
-                ...(d.data() as Omit<SuccessStory, "id">),
-              })),
-            }));
-          }),
           onSnapshot(collection(db, "businesses"), (snap) => {
             markArrived("businesses");
             if (cancelled) return;
@@ -381,7 +362,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         | "announcements"
         | "jobs"
         | "requests"
-        | "stories"
         | "businesses"
         | "mentors"
         | "fundDonors",
@@ -470,13 +450,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         } as Record<string, unknown>),
       updateBloodRequest: (id, r) => mutate("requests", "update", id, r as Record<string, unknown>),
       removeBloodRequest: (id) => mutate("requests", "remove", id),
-      stories: content.stories,
-      addStory: (s) =>
-        mutate("stories", "add", null, {
-          ...s,
-          createdAt: new Date().toISOString(),
-        } as Record<string, unknown>),
-      removeStory: (id) => mutate("stories", "remove", id),
       businesses: content.businesses,
       addBusiness: (b) =>
         mutate("businesses", "add", null, {

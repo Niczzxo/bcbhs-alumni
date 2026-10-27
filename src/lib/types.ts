@@ -241,17 +241,6 @@ export interface BloodRequest {
   resolved?: boolean;
 }
 
-/** A Hall of Fame entry, a notable alumnus and their story. */
-export interface SuccessStory {
-  id: string;
-  name: string;
-  batch: string;
-  title: string; // achievement / role, e.g. "BCS Cadre · Administration"
-  story: string;
-  photoURL?: string;
-  createdAt: string; // ISO
-}
-
 /** An alumnus-owned business in the Business Directory. */
 export interface Business {
   id: string;

@@ -199,12 +199,6 @@ service cloud.firestore {
         && (resource.data.uid == request.auth.uid || isSuperAdmin());
     }
 
-    match /stories/{storyId} {
-      // Hall of Fame: public to read; content staff manage.
-      allow read: if true;
-      allow write: if can('post_announcements');
-    }
-
     match /businesses/{businessId} {
       // Business Directory: public to read; members list their OWN
       // business; the owner or staff may edit / remove it.

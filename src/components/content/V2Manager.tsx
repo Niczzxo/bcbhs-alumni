@@ -2,17 +2,15 @@
 
 /* ------------------------------------------------------------------ */
 /*  v2.0 community-feature management for the staff dashboards:        */
-/*  blood requests, hall of fame, businesses,      */
+/*  blood requests, businesses,      */
 /*  mentors, scholarship fund, batch WhatsApp links. Each section      */
 /*  gates itself on the signed-in staff member's role/permissions.     */
 /* ------------------------------------------------------------------ */
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useContent } from "@/lib/content-context";
 import { useAuth } from "@/lib/auth-context";
-import { compressImageToDataURL } from "@/lib/image";
 import { inputCls, labelCls } from "@/components/auth/ui";
-import { BATCH_YEARS } from "@/lib/types";
 
 const card = "rounded-3xl border border-ivory/10 bg-ink-2 p-6";
 const btnDanger =
@@ -31,42 +29,12 @@ function SectionTitle({ children, blurb }: { children: React.ReactNode; blurb: s
   );
 }
 
-function ImagePick({ onPick, label }: { onPick: (dataUrl: string) => void; label: string }) {
-  const ref = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  return (
-    <>
-      <input
-        ref={ref}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={async (e) => {
-          const f = e.target.files?.[0];
-          if (!f) return;
-          setBusy(true);
-          try {
-            onPick(await compressImageToDataURL(f, 1000, 0.72));
-          } catch {
-            /* ignore bad files */
-          }
-          setBusy(false);
-        }}
-      />
-      <button type="button" disabled={busy} onClick={() => ref.current?.click()} className={btnGhost}>
-        {busy ? "Processing…" : label}
-      </button>
-    </>
-  );
-}
-
 /** The community work areas, one per dashboard sidebar entry
  *  (owner, 2026-10-24: no single "Community" page anymore, each
  *  area is its own sidebar section in every dashboard). */
-export type V2SectionKey = "blood" | "stories" | "listings" | "fund" | "batches";
+export type V2SectionKey = "blood" | "listings" | "fund" | "batches";
 export const V2_SECTIONS: { key: V2SectionKey; label: string; blurb: string; needsContentPerm?: boolean }[] = [
   { key: "blood", label: "Blood Requests", blurb: "Urgent requests posted by members. Mark resolved once the blood is managed." },
-  { key: "stories", label: "Hall of Fame", blurb: "Celebrate notable alumni on the Success Stories page.", needsContentPerm: true },
   { key: "listings", label: "Businesses & Mentors", blurb: "Moderate member-submitted listings." },
   { key: "fund", label: "Scholarship Fund", blurb: "Scholarship & Donation Fund, totals, bKash number and the honour roll.", needsContentPerm: true },
   { key: "batches", label: "Batch Groups", blurb: "WhatsApp group invite link per batch, shown on the Batch Groups page." },
@@ -76,7 +44,6 @@ export default function V2Manager({ section }: { section: V2SectionKey }) {
   const { user, members, hasPermission, isSuperAdmin } = useAuth();
   const {
     bloodRequests, updateBloodRequest, removeBloodRequest,
-    stories, addStory, removeStory,
     businesses, removeBusiness,
     mentors, removeMentor,
     fundInfo, saveFundInfo, fundDonors, addFundDonor, removeFundDonor,
@@ -84,7 +51,6 @@ export default function V2Manager({ section }: { section: V2SectionKey }) {
   } = useContent();
 
   const canContent = hasPermission("post_announcements");
-  const [storyForm, setStoryForm] = useState({ name: "", batch: "2015", title: "", story: "", photoURL: "" });
   const [fundForm, setFundForm] = useState<null | typeof fundInfo>(null);
   const [donorForm, setDonorForm] = useState({ name: "", batch: "", amount: "", note: "" });
   const [linkDrafts, setLinkDrafts] = useState<Record<string, string>>({});
@@ -135,54 +101,6 @@ export default function V2Manager({ section }: { section: V2SectionKey }) {
           ))}
         </div>
       </div>
-
-        </>
-      )}
-{section === "stories" && (
-        <>
-      {/* --------------------------- hall of fame --------------------------- */}
-      {canContent && (
-        <div className={card}>
-          <SectionTitle blurb="Celebrate notable alumni on the Success Stories page.">
-            Hall of Fame
-          </SectionTitle>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <input className={inputCls} placeholder="Name" value={storyForm.name} onChange={(e) => setStoryForm({ ...storyForm, name: e.target.value })} />
-            <input className={inputCls} placeholder="Achievement, e.g. BCS Cadre · Dhaka University" value={storyForm.title} onChange={(e) => setStoryForm({ ...storyForm, title: e.target.value })} />
-            <select className={inputCls} value={storyForm.batch} onChange={(e) => setStoryForm({ ...storyForm, batch: e.target.value })}>
-              {BATCH_YEARS.map((y) => <option key={y} value={y}>Batch {y}</option>)}
-            </select>
-            <div className="flex items-center gap-2">
-              <ImagePick label={storyForm.photoURL ? "✓ Photo chosen, change" : "📷 Photo (optional)"} onPick={(url) => setStoryForm({ ...storyForm, photoURL: url })} />
-            </div>
-            <textarea className={`${inputCls} sm:col-span-2`} rows={3} placeholder="Their story…" value={storyForm.story} onChange={(e) => setStoryForm({ ...storyForm, story: e.target.value })} />
-            <button
-              className={`${btnPrimary} sm:col-span-2`}
-              disabled={!storyForm.name.trim() || !storyForm.title.trim() || !storyForm.story.trim()}
-              onClick={async () => {
-                await addStory({
-                  name: storyForm.name.trim(),
-                  batch: storyForm.batch,
-                  title: storyForm.title.trim(),
-                  story: storyForm.story.trim(),
-                  photoURL: storyForm.photoURL || undefined,
-                });
-                setStoryForm({ name: "", batch: "2015", title: "", story: "", photoURL: "" });
-              }}
-            >
-              Add to Hall of Fame
-            </button>
-          </div>
-          <div className="mt-5 space-y-2">
-            {stories.map((s) => (
-              <div key={s.id} className="flex items-center justify-between gap-3 rounded-2xl border border-ivory/10 bg-ink px-4 py-3">
-                <p className="text-sm text-ivory">{s.name} <span className="text-xs text-muted">· Batch {s.batch} · {s.title}</span></p>
-                <button className={btnDanger} onClick={() => removeStory(s.id)}>Remove</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
         </>
       )}

@@ -76,7 +76,7 @@ const DEMO_PEOPLE: { name: string | null; role: string | null }[] = [
   { name: null, role: null },
   { name: null, role: null },
 ];
-const DEMO_PATHS = ["/", "/", "/", "/events", "/directory", "/memories", "/gallery", "/blood-donors", "/fund", "/stories"];
+const DEMO_PATHS = ["/", "/", "/", "/events", "/directory", "/memories", "/gallery", "/blood-donors", "/fund"];
 
 function demoVisits(): Visit[] {
   const out: Visit[] = [];
