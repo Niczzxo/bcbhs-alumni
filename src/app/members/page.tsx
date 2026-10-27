@@ -47,6 +47,24 @@ export default function MembersPage() {
 
   const clear = () => { setQ(""); setBatch(""); setDistrict(""); setProfession(""); setBlood(""); setRunningOnly(false); };
 
+  /* Invite a batchmate (owner, 2026-10-28): one tap shares the
+     registration link. Native share sheet when the device has one,
+     otherwise WhatsApp with a pre-written message. Members-only page,
+     so no invite link ever reaches guests. */
+  function invite() {
+    const url = `${window.location.origin}/register`;
+    const text = `Assalamu Alaikum! BCBHS Alumni portal-এ join করো - verified alumni directory, digital ID card, events, blood donor আর mentorship সব এক জায়গায়। Register: ${url}`;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({ title: "BCBHS Alumni", text }).catch((err) => {
+        if ((err as Error)?.name !== "AbortError") {
+          window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+        }
+      });
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+    }
+  }
+
   return (
     <>
       <Navbar />
@@ -112,6 +130,16 @@ export default function MembersPage() {
               <p className="mt-8 text-sm text-muted">
                 Showing <span className="font-semibold text-gold-2">{filtered.length}</span> of {approvedMembers.length} members
               </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={invite}
+                  className="rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-ink"
+                >
+                  Invite a batchmate
+                </button>
+                <span className="text-xs text-muted">WhatsApp-এ registration link share হবে।</span>
+              </div>
               {filtered.length === 0 ? (
                 <div className="mt-8 rounded-3xl border border-ivory/10 bg-ink-2 p-14 text-center">
                   <p className="font-display text-xl font-bold text-ivory">No members match your filters</p>

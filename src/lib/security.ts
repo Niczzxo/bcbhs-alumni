@@ -37,6 +37,8 @@ export type SecurityEventType =
   | "position_changed"
   | "password_changed"
   | "email_change_requested"
+  | "mfa_enrolled"
+  | "mfa_disabled"
   | "guest_visibility_changed";
 
 export interface SecurityEventDetails {

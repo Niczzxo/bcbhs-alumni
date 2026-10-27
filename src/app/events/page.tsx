@@ -6,6 +6,9 @@ import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import { useContent } from "@/lib/content-context";
+import { useAuth } from "@/lib/auth-context";
+import { useAuthModal } from "@/components/AuthModal";
+import { isFirebaseConfigured, db } from "@/lib/firebase";
 import type { PortalEvent } from "@/lib/types";
 
 /**
@@ -64,6 +67,125 @@ function EventCard({ e, i, onSelect }: { e: PortalEvent; i: number; onSelect: (e
         )}
       </article>
     </Reveal>
+  );
+}
+
+interface Attendee {
+  id: string;
+  name: string;
+  batch: string;
+}
+
+/** Event RSVP ("আমি আসছি", owner, 2026-10-28): who is coming, and a
+ *  one-tap toggle for approved members. Attendees live in the
+ *  events/{id}/attendees subcollection (doc id == member uid), so the
+ *  event doc itself never grows. Past events show no RSVP. In demo
+ *  mode (no Firebase) the toggle works on a local-only list. */
+function RsvpSection({ eventId, upcoming }: { eventId: string; upcoming: boolean }) {
+  const { user, isAdmin, isSuperAdmin } = useAuth();
+  const { openAuthModal } = useAuthModal();
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState("");
+  const canRsvp = !!user && (user.status === "approved" || isAdmin || isSuperAdmin);
+  const mine = !!user && attendees.some((a) => a.id === user.id);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured || !db) return;
+    const firestore = db;
+    let unsub: (() => void) | undefined;
+    let cancelled = false;
+    void import("firebase/firestore").then(({ collection, onSnapshot }) => {
+      if (cancelled) return;
+      unsub = onSnapshot(collection(firestore, "events", eventId, "attendees"), (snap) => {
+        setAttendees(
+          snap.docs.map((d) => ({ id: d.id, ...(d.data() as { name: string; batch: string }) })),
+        );
+      });
+    });
+    return () => {
+      cancelled = true;
+      unsub?.();
+    };
+  }, [eventId]);
+
+  async function toggle() {
+    if (!user) {
+      openAuthModal("login");
+      return;
+    }
+    if (!canRsvp) {
+      setNote("RSVP opens once an admin approves your account.");
+      return;
+    }
+    setBusy(true);
+    setNote("");
+    try {
+      if (!isFirebaseConfigured || !db) {
+        setAttendees((p) =>
+          mine
+            ? p.filter((a) => a.id !== user.id)
+            : [...p, { id: user.id, name: user.name, batch: user.batch }],
+        );
+      } else {
+        const { doc, setDoc, deleteDoc } = await import("firebase/firestore");
+        if (mine) {
+          await deleteDoc(doc(db, "events", eventId, "attendees", user.id));
+        } else {
+          await setDoc(doc(db, "events", eventId, "attendees", user.id), {
+            name: user.name,
+            batch: user.batch,
+            createdAt: new Date().toISOString(),
+          });
+        }
+      }
+    } catch {
+      setNote("Could not save your RSVP. Please try again.");
+    }
+    setBusy(false);
+  }
+
+  if (!upcoming) return null;
+  return (
+    <div className="mt-8 border-t border-ivory/10 pt-6">
+      <p className="text-sm font-bold text-ivory">
+        {attendees.length} জন আসছে
+      </p>
+      {attendees.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {attendees.map((a) => (
+            <span key={a.id} className="rounded-full border border-ivory/15 px-3 py-1 text-xs text-ivory/90">
+              {a.name} <span className="text-muted">· Batch {a.batch}</span>
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-xs text-muted">No one has RSVPed yet. Be the first.</p>
+      )}
+      <div className="mt-4">
+        {!user ? (
+          <button
+            type="button"
+            onClick={() => openAuthModal("login")}
+            className="rounded-full border border-gold/40 px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-gold-2 hover:bg-gold/10"
+          >
+            Log in to RSVP
+          </button>
+        ) : !canRsvp ? (
+          <p className="text-xs text-muted">RSVP opens once an admin approves your account.</p>
+        ) : (
+          <button
+            type="button"
+            onClick={toggle}
+            disabled={busy}
+            className="rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-ink disabled:opacity-60"
+          >
+            {busy ? "Saving…" : mine ? "আসছি না" : "আমি আসছি"}
+          </button>
+        )}
+      </div>
+      {note && <p className="mt-3 text-xs text-red-300">{note}</p>}
+    </div>
   );
 }
 
@@ -130,6 +252,7 @@ function EventDetailModal({ e, onClose }: { e: PortalEvent; onClose: () => void 
           {e.description && (
             <p className="mt-5 whitespace-pre-line text-sm leading-relaxed text-muted">{e.description}</p>
           )}
+          <RsvpSection eventId={e.id} upcoming={e.upcoming} />
         </div>
       </div>
     </div>

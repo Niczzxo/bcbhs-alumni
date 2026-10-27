@@ -21,6 +21,7 @@ import {
   type ReactNode,
 } from "react";
 import { isFirebaseConfigured, auth, db } from "./firebase";
+import type { MultiFactorError, MultiFactorResolver, TotpSecret } from "firebase/auth";
 import { logSecurityEvent, loginThrottle, authErrorInfo, type AuthErrorField } from "@/lib/security";
 import { DEMO_USERS } from "./demo-data";
 import type { UserProfile } from "./types";
@@ -52,7 +53,26 @@ interface AuthContextValue {
   login: (
     email: string,
     password: string,
-  ) => Promise<{ ok: boolean; error?: string; field?: AuthErrorField }>;
+  ) => Promise<{ ok: boolean; error?: string; field?: AuthErrorField; mfaResolver?: MultiFactorResolver }>;
+  /** Second login step for TOTP-enrolled accounts. */
+  completeMfaLogin: (
+    resolver: MultiFactorResolver,
+    code: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  /** TOTP two-factor (super admins, opt-in): is it enrolled on this account? */
+  getTotpEnrolled: () => Promise<boolean>;
+  /** Start TOTP enrollment: secret + QR URL for the authenticator app. */
+  beginTotpEnrollment: () => Promise<{
+    ok: boolean;
+    secret?: TotpSecret;
+    secretKey?: string;
+    qrUrl?: string;
+    error?: string;
+  }>;
+  /** Finish TOTP enrollment with the 6-digit code from the authenticator app. */
+  confirmTotpEnrollment: (secret: TotpSecret, code: string) => Promise<{ ok: boolean; error?: string }>;
+  /** Remove the TOTP factor from this account. */
+  disableTotp: () => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
   register: (input: RegisterInput) => Promise<{ ok: boolean; error?: string }>;
@@ -357,7 +377,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (
       email: string,
       _password: string,
-    ): Promise<{ ok: boolean; error?: string; field?: AuthErrorField }> => {
+    ): Promise<{ ok: boolean; error?: string; field?: AuthErrorField; mfaResolver?: MultiFactorResolver }> => {
       const clean = email.trim().toLowerCase();
       if (!isFirebaseConfigured || !auth || !db) {
         /* Demo mode: match by email; any password is accepted. */
@@ -399,6 +419,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         cred = await signInWithEmailAndPassword(auth, clean, _password);
       } catch (e) {
+        /* TOTP second step (2026-10-28): the password was right, only
+           the authenticator code is missing. This is NOT a failed
+           login, so it must not count toward throttling or log a
+           failure. The form shows the code step instead. */
+        if ((e as { code?: string })?.code === "auth/multi-factor-auth-required") {
+          const { getMultiFactorResolver } = await import("firebase/auth");
+          return { ok: false, mfaResolver: getMultiFactorResolver(auth, e as MultiFactorError) };
+        }
         loginThrottle.recordFailure(clean);
         void logSecurityEvent("login_failed", { identifier: clean });
         /* Mapped messages only, never the raw provider text. When
@@ -426,6 +454,107 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [members],
   );
+
+  /* Second login step for TOTP-enrolled accounts (2026-10-28): the
+     resolver comes from the login attempt itself, so the code step
+     must run in the same browser session, right after login. */
+  const completeMfaLogin = useCallback(
+    async (resolver: MultiFactorResolver, code: string) => {
+      if (!isFirebaseConfigured || !auth || !db)
+        return { ok: false, error: "Two-factor needs a live account." };
+      try {
+        const { TotpMultiFactorGenerator } = await import("firebase/auth");
+        const { doc, getDoc } = await import("firebase/firestore");
+        const assertion = TotpMultiFactorGenerator.assertionForSignIn(
+          resolver.hints[0].uid,
+          code.trim(),
+        );
+        const cred = await resolver.resolveSignIn(assertion);
+        const snap = await getDoc(doc(db, "users", cred.user.uid));
+        if (!snap.exists()) return { ok: false, error: "Profile not found." };
+        const profile = { id: snap.id, ...(snap.data() as Omit<UserProfile, "id">) };
+        if (profile.status === "rejected")
+          return { ok: false, error: "This registration was rejected. Please contact the admin." };
+        setUser(profile);
+        void logSecurityEvent("login_success", {});
+        return { ok: true };
+      } catch (e) {
+        const c = (e as { code?: string })?.code ?? "";
+        if (c === "auth/invalid-verification-code")
+          return { ok: false, error: "Wrong code. Check your authenticator app and try again." };
+        return { ok: false, error: "Verification failed. Please try again." };
+      }
+    },
+    [],
+  );
+
+  /* TOTP two-factor for super admins, opt-in (2026-10-28). Nobody is
+     forced: a super admin enrolls from their own settings, and can
+     disable it any time while signed in. */
+  const getTotpEnrolled = useCallback(async () => {
+    if (!isFirebaseConfigured || !auth?.currentUser) return false;
+    try {
+      const { multiFactor } = await import("firebase/auth");
+      await auth.currentUser.reload();
+      const factors = multiFactor(auth.currentUser).enrolledFactors ?? [];
+      return factors.some((f) => f.factorId === "totp");
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const beginTotpEnrollment = useCallback(async () => {
+    if (!isFirebaseConfigured || !auth?.currentUser)
+      return { ok: false, error: "Two-factor needs a live account." };
+    try {
+      const { multiFactor, TotpMultiFactorGenerator } = await import("firebase/auth");
+      const session = await multiFactor(auth.currentUser).getSession();
+      const secret = await TotpMultiFactorGenerator.generateSecret(session);
+      return {
+        ok: true,
+        secret,
+        secretKey: secret.secretKey,
+        qrUrl: secret.generateQrCodeUrl(auth.currentUser.email ?? "BCBHS Alumni", "BCBHS Alumni"),
+      };
+    } catch {
+      return { ok: false, error: "Could not start two-factor setup. Please try again." };
+    }
+  }, []);
+
+  const confirmTotpEnrollment = useCallback(async (secret: TotpSecret, code: string) => {
+    if (!isFirebaseConfigured || !auth?.currentUser)
+      return { ok: false, error: "Two-factor needs a live account." };
+    try {
+      const { multiFactor, TotpMultiFactorGenerator } = await import("firebase/auth");
+      const assertion = TotpMultiFactorGenerator.assertionForEnrollment(secret, code.trim());
+      await multiFactor(auth.currentUser).enroll(assertion, "Authenticator app");
+      void logSecurityEvent("mfa_enrolled", {});
+      return { ok: true };
+    } catch (e) {
+      const c = (e as { code?: string })?.code ?? "";
+      if (c === "auth/invalid-verification-code")
+        return { ok: false, error: "Wrong code. Check your authenticator app and try again." };
+      if (c === "auth/requires-recent-login")
+        return { ok: false, error: "Please log out and log in again, then try once more." };
+      return { ok: false, error: "Could not enable two-factor. Please try again." };
+    }
+  }, []);
+
+  const disableTotp = useCallback(async () => {
+    if (!isFirebaseConfigured || !auth?.currentUser)
+      return { ok: false, error: "Two-factor needs a live account." };
+    try {
+      const { multiFactor } = await import("firebase/auth");
+      const factors = multiFactor(auth.currentUser).enrolledFactors ?? [];
+      const totp = factors.find((f) => f.factorId === "totp");
+      if (!totp) return { ok: true };
+      await multiFactor(auth.currentUser).unenroll(totp.uid);
+      void logSecurityEvent("mfa_disabled", {});
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Could not disable two-factor. Please try again." };
+    }
+  }, []);
 
   /* Password recovery (owner's request, 2026-10-23): Firebase emails
      a reset link; following it lets the member set a new password.
@@ -836,6 +965,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       isDemo: !isFirebaseConfigured,
       login,
+      completeMfaLogin,
+      getTotpEnrolled,
+      beginTotpEnrollment,
+      confirmTotpEnrollment,
+      disableTotp,
       logout,
       resetPassword,
       register,
@@ -854,7 +988,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, updateProfile, updatePhone, changeEmail, changePassword, hasPermission],
+    [user, members, loading, login, completeMfaLogin, getTotpEnrolled, beginTotpEnrollment, confirmTotpEnrollment, disableTotp, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, updateProfile, updatePhone, changeEmail, changePassword, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -159,6 +159,17 @@ service cloud.firestore {
       allow write: if can('manage_events');
     }
 
+    match /events/{eventId}/attendees/{attendeeId} {
+      // Event RSVP ("আমি আসছি", 2026-10-28): anyone may see who is
+      // coming; only an approved member may add or remove THEMSELVES
+      // (doc id == uid). Staff moderation is not needed: a member can
+      // only ever touch their own RSVP.
+      allow read: if true;
+      allow create, delete: if signedIn()
+        && request.auth.uid == attendeeId
+        && me().status == 'approved';
+    }
+
     match /gallery/{photoId} {
       allow read: if true;
       allow write: if can('manage_gallery');

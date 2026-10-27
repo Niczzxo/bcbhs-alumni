@@ -10,6 +10,8 @@ import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
 import { inputCls, labelCls } from "@/components/auth/ui";
 import { db, isFirebaseConfigured } from "@/lib/firebase";
+import DottedQr from "@/components/DottedQr";
+import type { TotpSecret } from "firebase/auth";
 
 const cardCls = "rounded-3xl border border-ivory/10 bg-ink-2 p-6 sm:p-8";
 const saveBtnCls =
@@ -250,6 +252,151 @@ function PasswordCard() {
  * manage the credentials they registered with, WhatsApp number,
  * email and password, from the profile menu's Settings entry.
  */
+/* ---------------- Two-factor authentication (super admins, opt-in) ---------------- */
+
+function SecurityCard() {
+  const { isSuperAdmin, isDemo, getTotpEnrolled, beginTotpEnrollment, confirmTotpEnrollment, disableTotp } = useAuth();
+  const [enrolled, setEnrolled] = useState<boolean | null>(null);
+  const [settingUp, setSettingUp] = useState(false);
+  const [secret, setSecret] = useState<TotpSecret | null>(null);
+  const [qrUrl, setQrUrl] = useState("");
+  const [secretKey, setSecretKey] = useState("");
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState("");
+
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    void getTotpEnrolled().then(setEnrolled);
+  }, [isSuperAdmin, getTotpEnrolled]);
+
+  if (!isSuperAdmin) return null;
+
+  async function startSetup() {
+    setError("");
+    setDone("");
+    setBusy(true);
+    const res = await beginTotpEnrollment();
+    setBusy(false);
+    if (res.ok && res.secret && res.qrUrl && res.secretKey) {
+      setSecret(res.secret);
+      setQrUrl(res.qrUrl);
+      setSecretKey(res.secretKey);
+      setCode("");
+      setSettingUp(true);
+    } else {
+      setError(res.error ?? "Could not start two-factor setup.");
+    }
+  }
+
+  async function confirm() {
+    if (!secret) return;
+    setError("");
+    setDone("");
+    setBusy(true);
+    const res = await confirmTotpEnrollment(secret, code);
+    setBusy(false);
+    if (res.ok) {
+      setEnrolled(true);
+      setSettingUp(false);
+      setSecret(null);
+      setCode("");
+      setDone("Two-factor is on for your account.");
+    } else {
+      setError(res.error ?? "Could not enable two-factor.");
+    }
+  }
+
+  async function disable() {
+    setError("");
+    setDone("");
+    setBusy(true);
+    const res = await disableTotp();
+    setBusy(false);
+    if (res.ok) {
+      setEnrolled(false);
+      setDone("Two-factor is off.");
+    } else {
+      setError(res.error ?? "Could not disable two-factor.");
+    }
+  }
+
+  return (
+    <section className={cardCls}>
+      <h2 className="font-display text-xl font-bold text-ivory">Two-factor authentication</h2>
+      <p className="mt-1 text-xs leading-relaxed text-muted">
+        An extra lock for super admins, opt-in only: after your password, login asks for a
+        6-digit code from your authenticator app. Disable it any time while signed in.
+      </p>
+      {isDemo ? (
+        <p className="mt-5 text-sm text-muted">Demo mode: two-factor needs a live account.</p>
+      ) : enrolled === null ? (
+        <p className="mt-5 text-sm text-muted">Checking…</p>
+      ) : enrolled ? (
+        <div className="mt-5">
+          <p className="text-sm font-medium text-emerald-300">✓ Two-factor is ON for your account.</p>
+          <button type="button" onClick={disable} disabled={busy} className={`${saveBtnCls} mt-4`}>
+            {busy ? "Working…" : "Disable two-factor"}
+          </button>
+        </div>
+      ) : settingUp && secret ? (
+        <div className="mt-5 space-y-4">
+          <p className="text-sm leading-relaxed text-muted">
+            Scan this QR in your authenticator app (Google Authenticator, Authy, …), or enter
+            the key below manually. Then type the 6-digit code to finish.
+          </p>
+          <div className="w-56 [&_canvas]:h-auto [&_canvas]:w-full">
+            <DottedQr url={qrUrl} />
+          </div>
+          <p className="break-all text-xs text-muted">
+            Key: <span className="font-mono text-ivory">{secretKey}</span>
+          </p>
+          <div>
+            <label className={labelCls}>Authenticator code</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              className={inputCls}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="123456"
+            />
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button type="button" onClick={confirm} disabled={busy || code.length !== 6} className={saveBtnCls}>
+              {busy ? "Verifying…" : "Verify & enable"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSettingUp(false);
+                setSecret(null);
+                setCode("");
+              }}
+              className="rounded-full border border-ivory/15 px-7 py-2.5 text-xs font-extrabold uppercase tracking-[0.18em] text-muted hover:text-ivory"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" onClick={startSetup} disabled={busy} className={`${saveBtnCls} mt-5`}>
+          {busy ? "Working…" : "Enable two-factor"}
+        </button>
+      )}
+      <div className="mt-4">
+        <Feedback error={error} done={done} />
+      </div>
+      <p className="mt-3 text-xs leading-relaxed text-muted/70">
+        Keep your authenticator app safe. If you lose it, your login will stop here — save
+        the key above somewhere safe when you enroll.
+      </p>
+    </section>
+  );
+}
+
 export default function SettingsPage() {
   const { user, loading } = useAuth();
   const { openAuthModal } = useAuthModal();
@@ -290,6 +437,7 @@ export default function SettingsPage() {
               <PhoneCard />
               <EmailCard />
               <PasswordCard />
+              <SecurityCard />
               <section className={cardCls}>
                 <h2 className="font-display text-xl font-bold text-ivory">Public profile</h2>
                 <p className="mt-1 text-xs leading-relaxed text-muted">

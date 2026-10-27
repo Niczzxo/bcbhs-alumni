@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
+import type { MultiFactorResolver } from "firebase/auth";
 import type { AuthErrorField } from "@/lib/security";
 import { inputCls, labelCls } from "./ui";
 
@@ -19,7 +20,7 @@ export default function LoginForm({
   onSuccess?: () => void;
   onSwitchToRegister?: () => void;
 }) {
-  const { login, resetPassword, isDemo } = useAuth();
+  const { login, completeMfaLogin, resetPassword, isDemo } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,6 +29,10 @@ export default function LoginForm({
   const [errorField, setErrorField] = useState<AuthErrorField | null>(null);
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  /* TOTP second step (2026-10-28): set when login answers with an MFA
+     challenge instead of success or a password error. */
+  const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   /** Editing the marked field clears its error. */
   function clearFieldError(field: AuthErrorField) {
@@ -46,10 +51,23 @@ export default function LoginForm({
     const res = await login(em, pw);
     setBusy(false);
     if (res.ok) onSuccess?.();
-    else {
+    else if (res.mfaResolver) {
+      setMfaResolver(res.mfaResolver);
+      setMfaCode("");
+    } else {
       setError(res.error ?? "Login failed.");
       setErrorField(res.field ?? null);
     }
+  }
+
+  async function doMfa() {
+    if (!mfaResolver) return;
+    setError("");
+    setBusy(true);
+    const res = await completeMfaLogin(mfaResolver, mfaCode);
+    setBusy(false);
+    if (res.ok) onSuccess?.();
+    else setError(res.error ?? "Verification failed.");
   }
 
   /* Forgot password: Firebase emails a link that sets a new one. */
@@ -79,6 +97,51 @@ export default function LoginForm({
 
   return (
     <div>
+      {mfaResolver ? (
+        <div>
+          <p className="text-sm leading-relaxed text-muted">
+            Two-factor is on for this account. Open your authenticator app and type the 6-digit code.
+          </p>
+          <div className="mt-5">
+            <label className={labelCls}>Authenticator code</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              className={inputCls}
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="123456"
+            />
+          </div>
+          {error && (
+            <p className="mt-5 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {error}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={doMfa}
+            disabled={busy || mfaCode.length !== 6}
+            className="btn-shimmer mt-7 w-full rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep py-3.5 text-sm font-bold uppercase tracking-widest text-ink disabled:opacity-60"
+          >
+            {busy ? "Verifying…" : "Verify"}
+          </button>
+          <p className="mt-5 text-center text-xs text-muted">
+            <button
+              type="button"
+              onClick={() => {
+                setMfaResolver(null);
+                setMfaCode("");
+                setError("");
+              }}
+              className="text-gold-2 hover:underline"
+            >
+              Use a different account
+            </button>
+          </p>
+        </div>
+      ) : (
       <form onSubmit={(e) => doLogin(e, email, password)}>
         <div className="space-y-5">
           <div>
@@ -160,6 +223,7 @@ export default function LoginForm({
           )}
         </p>
       </form>
+      )}
 
       {isDemo && (
         <div className="mt-6 rounded-2xl border border-gold/25 bg-ink p-5">
