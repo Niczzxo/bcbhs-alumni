@@ -241,20 +241,6 @@ export interface BloodRequest {
   resolved?: boolean;
 }
 
-/** An alumnus-owned business in the Business Directory. */
-export interface Business {
-  id: string;
-  name: string;
-  ownerId: string; // uid
-  ownerName: string;
-  ownerBatch: string;
-  category: string;
-  district: string;
-  description: string;
-  whatsapp: string;
-  createdAt: string; // ISO
-}
-
 export interface MentorProfile {
   id: string;
   memberId: string; // uid

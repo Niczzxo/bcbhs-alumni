@@ -28,7 +28,6 @@ export const NAV_LINKS = [
   { label: "Gallery", href: "/gallery" },
   { label: "Committee", href: "/committee" },
   { label: "Blood Donors", href: "/blood-donors" },
-  { label: "Businesses", href: "/businesses" },
   { label: "Scholarship Fund", href: "/fund" },
 ];
 
@@ -63,7 +62,6 @@ export const MEMBER_MORE_LINKS = [
   { label: "Blood Donors", href: "/blood-donors" },
   { label: "Mentorship", href: "/mentorship" },
   { label: "Batch Groups", href: "/batches" },
-  { label: "Businesses", href: "/businesses" },
   { label: "Scholarship Fund", href: "/fund" },
   { label: "Committee", href: "/committee" },
 ];

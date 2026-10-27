@@ -27,7 +27,7 @@ const SECTION_ICONS: Record<string, React.ReactNode> = {
   gallery: (<svg {...ic}><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><circle cx="9" cy="10" r="1.8" /><path d="M4 18l5-5 3.5 3.5L16 13l4 4" /></svg>),
   committee: (<svg {...ic}><path d="M4 20h16M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6H3z" /></svg>),
   blood: (<svg {...ic}><path d="M12 20.5s-7.5-4.6-9.3-9C1.3 8 3.2 4.9 6.5 4.9c2 0 3.6 1.1 5.5 3.4 1.9-2.3 3.5-3.4 5.5-3.4 3.3 0 5.2 3.1 3.8 6.6-1.8 4.4-9.3 9-9.3 9z" /></svg>),
-  listings: (<svg {...ic}><rect x="3" y="7.5" width="18" height="12.5" rx="2.5" /><path d="M9 7.5V6a3 3 0 0 1 6 0v1.5M3 13h18" /></svg>),
+  mentors: (<svg {...ic}><rect x="3" y="7.5" width="18" height="12.5" rx="2.5" /><path d="M9 7.5V6a3 3 0 0 1 6 0v1.5M3 13h18" /></svg>),
   fund: (<svg {...ic}><circle cx="12" cy="12" r="8.5" /><path d="M12 7v10M15 9.2c-.6-1-1.7-1.5-3-1.5-1.8 0-3 .9-3 2.2 0 3 6 1.6 6 4.3 0 1.3-1.3 2.2-3 2.2-1.4 0-2.6-.6-3.2-1.6" /></svg>),
   batches: (<svg {...ic}><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H9l-5 4V6z" /></svg>),
   about: (<svg {...ic}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 7.8v.4" /></svg>),

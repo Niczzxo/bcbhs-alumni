@@ -13,7 +13,6 @@ import type {
   AnnouncementItem,
   JobPost,
   BloodRequest,
-  Business,
   MentorProfile,
   FundDonor,
   BatchLink,
@@ -466,23 +465,6 @@ export const DEMO_BLOOD_REQUESTS: BloodRequest[] = [
   },
 ];
 
-
-
-export const DEMO_BUSINESSES: Business[] = [
-  {
-    id: "b-1",
-    name: "Bogura Computer & IT Solution",
-    ownerId: "u-1",
-    ownerName: "Tanvir Ahmed",
-    ownerBatch: "2015",
-    category: "IT & Electronics",
-    district: "Bogura",
-    description:
-      "Sales and servicing of laptops, desktops and accessories. Special discount for BCBHS alumni, just show your alumni ID card.",
-    whatsapp: "01712345678",
-    createdAt: "2026-10-09T00:00:00.000Z",
-  },
-];
 
 
 export const DEMO_MENTORS: MentorProfile[] = [

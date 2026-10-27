@@ -2,7 +2,7 @@
 
 /* ------------------------------------------------------------------ */
 /*  v2.0 community-feature management for the staff dashboards:        */
-/*  blood requests, businesses,      */
+/*  blood requests,      */
 /*  mentors, scholarship fund, batch WhatsApp links. Each section      */
 /*  gates itself on the signed-in staff member's role/permissions.     */
 /* ------------------------------------------------------------------ */
@@ -32,10 +32,10 @@ function SectionTitle({ children, blurb }: { children: React.ReactNode; blurb: s
 /** The community work areas, one per dashboard sidebar entry
  *  (owner, 2026-10-24: no single "Community" page anymore, each
  *  area is its own sidebar section in every dashboard). */
-export type V2SectionKey = "blood" | "listings" | "fund" | "batches";
+export type V2SectionKey = "blood" | "mentors" | "fund" | "batches";
 export const V2_SECTIONS: { key: V2SectionKey; label: string; blurb: string; needsContentPerm?: boolean }[] = [
   { key: "blood", label: "Blood Requests", blurb: "Urgent requests posted by members. Mark resolved once the blood is managed." },
-  { key: "listings", label: "Businesses & Mentors", blurb: "Moderate member-submitted listings." },
+  { key: "mentors", label: "Mentors", blurb: "Moderate mentor listings." },
   { key: "fund", label: "Scholarship Fund", blurb: "Scholarship & Donation Fund, totals, bKash number and the honour roll.", needsContentPerm: true },
   { key: "batches", label: "Batch Groups", blurb: "WhatsApp group invite link per batch, shown on the Batch Groups page." },
 ];
@@ -44,7 +44,6 @@ export default function V2Manager({ section }: { section: V2SectionKey }) {
   const { user, members, hasPermission, isSuperAdmin } = useAuth();
   const {
     bloodRequests, updateBloodRequest, removeBloodRequest,
-    businesses, removeBusiness,
     mentors, removeMentor,
     fundInfo, saveFundInfo, fundDonors, addFundDonor, removeFundDonor,
     batchLinks, setBatchLink,
@@ -104,23 +103,17 @@ export default function V2Manager({ section }: { section: V2SectionKey }) {
 
         </>
       )}
-{section === "listings" && (
+{section === "mentors" && (
         <>
-      {/* ------------------------- businesses / mentors ------------------------- */}
+      {/* ------------------------- mentors ------------------------- */}
       <div className={card}>
-        <SectionTitle blurb="Moderate member-submitted listings.">
-          Businesses & Mentors
+        <SectionTitle blurb="Moderate mentor listings.">
+          Mentors
         </SectionTitle>
         <div className="mt-4 space-y-2">
-          {businesses.length === 0 && mentors.length === 0 && (
-            <p className="text-sm text-muted">No listings yet.</p>
+          {mentors.length === 0 && (
+            <p className="text-sm text-muted">No mentors yet.</p>
           )}
-          {businesses.map((b) => (
-            <div key={b.id} className="flex items-center justify-between gap-3 rounded-2xl border border-ivory/10 bg-ink px-4 py-3">
-              <p className="text-sm text-ivory">{b.name} <span className="text-xs text-muted">· {b.ownerName} ({b.ownerBatch})</span></p>
-              <button className={btnDanger} onClick={() => removeBusiness(b.id)}>Remove</button>
-            </div>
-          ))}
           {mentors.map((m) => (
             <div key={m.id} className="flex items-center justify-between gap-3 rounded-2xl border border-ivory/10 bg-ink px-4 py-3">
               <p className="text-sm text-ivory">{m.name} <span className="text-xs text-muted">· {m.expertise}</span></p>
