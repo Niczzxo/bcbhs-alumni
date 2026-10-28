@@ -85,6 +85,49 @@ export default function DashboardShell({
   const [sheetOpen, setSheetOpen] = useState(false);
   const current = sections.find((s) => s.key === active) ?? sections[0];
 
+  /* Reload persistence (owner, 2026-10-28): a reload used to drop
+     the user back to the first section. The active section now lives
+     in ?section= : on load it restores the section, on every switch
+     it rewrites the param (replace, so Back still leaves the
+     dashboard). The default section leaves no param, and an unknown
+     key falls back to the default. Works in both modes: controlled
+     pages get the key through onActiveChange, uncontrolled pages
+     through internal state. */
+  const defaultSectionKey = defaultKey ?? sections[0]?.key;
+  const syncStartedRef = useRef(false);
+  useEffect(() => {
+    try {
+      const key = new URLSearchParams(window.location.search).get("section");
+      if (key && sections.some((s) => s.key === key)) setActive(key);
+      else if (key) {
+        /* Unknown key: fall back to the default and drop the stale param. */
+        const url = new URL(window.location.href);
+        url.searchParams.delete("section");
+        window.history.replaceState(null, "", url.toString());
+      }
+    } catch {
+      /* Malformed URL: stay on the default section. */
+    }
+    /* Mount-only restore; the first render's sections carry the
+       full key list. */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    /* The first run belongs to the restore above, not to a tap. */
+    if (!syncStartedRef.current) {
+      syncStartedRef.current = true;
+      return;
+    }
+    try {
+      const url = new URL(window.location.href);
+      if (active && active !== defaultSectionKey) url.searchParams.set("section", active);
+      else url.searchParams.delete("section");
+      window.history.replaceState(null, "", url.toString());
+    } catch {
+      /* Ignore: persistence must never break section switching. */
+    }
+  }, [active, defaultSectionKey]);
+
   /* Warm-mount every section in the background (owner's complaint,
      2026-10-23: switching sections "took a load" first). Sections
      mount one by one on a short stagger shortly after the dashboard
