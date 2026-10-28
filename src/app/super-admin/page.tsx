@@ -125,12 +125,13 @@ export default function SuperAdminPage() {
      All Members (every approved member). Collapsed cards sit in a
      responsive grid (phone: 1 column, desktop: 2-3) so they read as
      cards instead of full-width strips (owner, 2026-10-28); an
-     expanded card spans the full row so its permission grid keeps
-     its room. */
+     expanded card stays in its own grid cell, card-sized (owner,
+     2026-10-28), and the permission grid caps at 2 columns so its
+     toggles don't crush inside a narrow card. */
   const renderCard = useCallback((m: UserProfile) => {
     const open = !!openCards[m.id];
     return (
-    <Reveal key={m.id} className={`rounded-3xl border border-ivory/10 bg-ink-2 p-6 ${open ? "md:col-span-2 xl:col-span-3" : ""}`}>
+    <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
       {/* Identity: one left-aligned stack - name, then Batch, then email -
           plus the collapse chevron (down = tap to expand downward,
           up = tap to collapse back up). */}
@@ -256,7 +257,7 @@ export default function SuperAdminPage() {
       )}
       {(m.role === "admin" || m.role === "editor") && (
         <div className="mt-5">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2">
             {PERMISSIONS.map((p) => {
               const on = effectivePerms(m).includes(p.key);
               return (
