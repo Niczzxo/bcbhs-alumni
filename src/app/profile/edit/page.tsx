@@ -10,7 +10,8 @@ import { useAuth, type ProfileUpdateInput } from "@/lib/auth-context";
 import { compressImageToDataURL } from "@/lib/image";
 import PhotoCropper from "@/components/PhotoCropper";
 import { inputCls, labelCls } from "@/components/auth/ui";
-import { BATCH_YEARS, BD_DISTRICTS, BLOOD_GROUPS, DEPARTMENTS } from "@/lib/types";
+import { BD_DISTRICTS, BLOOD_GROUPS, DEPARTMENTS } from "@/lib/types";
+import { useBatchYears } from "@/lib/useBatchYears";
 
 /** Members edit their own profile, safe fields only. */
 export default function EditProfilePage() {
@@ -28,6 +29,7 @@ export default function EditProfilePage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client-only date for the dob max attribute
     setToday(new Date().toISOString().slice(0, 10));
   }, []);
+  const batchYears = useBatchYears();
   const [f, setF] = useState<ProfileUpdateInput>({
     name: "",
     batch: "",
@@ -189,7 +191,7 @@ export default function EditProfilePage() {
                 <label className={labelCls}>Batch (SSC year) *</label>
                 <select className={inputCls} value={f.batch} onChange={set("batch")}>
                   <option value="">Select…</option>
-                  {BATCH_YEARS.map((b) => <option key={b} value={b}>{b}</option>)}
+                  {batchYears.map((b) => <option key={b} value={b}>{b}</option>)}
                 </select>
               </div>
               <div>

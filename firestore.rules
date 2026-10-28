@@ -109,12 +109,14 @@ service cloud.firestore {
         && whatsappValid()
         && request.resource.data.keys().hasAll(['name', 'batch', 'email', 'district', 'department', 'dob', 'status', 'role', 'permissions', 'createdAt',
           'bloodGroup', 'profession', 'company', 'photoURL', 'whatsapp', 'isDonor', 'isAbroad', 'country'])
-        // Every registration field is mandatory (owner's rule, 2026-10-23):
-        // the form collects them all, and a create that arrives with any
-        // of them empty is refused here too, not just in the UI.
+        // Every registration field is mandatory (owner's rule, 2026-10-23),
+        // except Company / Organization, which is optional (owner,
+        // 2026-10-28): the form sends it as null when left blank, and
+        // a create that arrives with any mandatory field empty is
+        // refused here too, not just in the UI.
         && request.resource.data.bloodGroup is string && request.resource.data.bloodGroup.size() > 0
         && request.resource.data.profession is string && request.resource.data.profession.size() > 0
-        && request.resource.data.company is string && request.resource.data.company.size() > 0
+        && (request.resource.data.company == null || request.resource.data.company is string)
         && request.resource.data.photoURL is string && request.resource.data.photoURL.size() > 0
         && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() > 0
         && (!request.resource.data.isAbroad

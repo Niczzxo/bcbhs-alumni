@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { compressImageToDataURL } from "@/lib/image";
-import { BLOOD_GROUPS, BD_DISTRICTS, BATCH_YEARS, DEPARTMENTS } from "@/lib/types";
+import { BLOOD_GROUPS, BD_DISTRICTS, DEPARTMENTS } from "@/lib/types";
+import { useBatchYears } from "@/lib/useBatchYears";
 import { inputCls, labelCls } from "./ui";
 
 /** Shared registration form, used by the /register page and the auth modal. */
@@ -27,6 +28,7 @@ export default function RegisterForm({
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client-only date for the dob max attribute
     setToday(new Date().toISOString().slice(0, 10));
   }, []);
+  const batchYears = useBatchYears();
   const [form, setForm] = useState({
     name: "",
     batch: "",
@@ -71,9 +73,11 @@ export default function RegisterForm({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    /* Every field in the form is mandatory (owner's rule, 2026-10-23):
-       a registration missing any of them is incomplete by definition,
-       so name exactly what is missing and refuse to submit. */
+    /* Every field in the form is mandatory (owner's rule, 2026-10-23)
+       EXCEPT Company / Organization, which is optional (owner,
+       2026-10-28): a registration missing any mandatory field is
+       incomplete by definition, so name exactly what is missing and
+       refuse to submit. */
     const missing: string[] = [];
     if (!form.name.trim()) missing.push("full name");
     if (!form.batch) missing.push("batch");
@@ -87,10 +91,9 @@ export default function RegisterForm({
     if (!form.district) missing.push("current district");
     if (form.district === "Abroad" && !form.country.trim()) missing.push("country");
     if (!form.profession.trim()) missing.push("profession");
-    if (!form.company.trim()) missing.push("company / organization");
     if (!photoURL) missing.push("photo");
     if (missing.length) {
-      setError(`Every field is required. Please fill in: ${missing.join(", ")}.`);
+      setError(`Please fill in: ${missing.join(", ")}.`);
       return;
     }
     setBusy(true);
@@ -116,7 +119,7 @@ export default function RegisterForm({
           <label className={labelCls}>Batch (SSC year) *</label>
           <select className={inputCls} value={form.batch} onChange={set("batch")}>
             <option value="">Select batch…</option>
-            {BATCH_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+            {batchYears.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
         <div>
@@ -172,7 +175,7 @@ export default function RegisterForm({
           <input className={inputCls} value={form.profession} onChange={set("profession")} placeholder="e.g. Software Engineer" />
         </div>
         <div>
-          <label className={labelCls}>Company / Organization *</label>
+          <label className={labelCls}>Company / Organization (optional)</label>
           <input className={inputCls} value={form.company} onChange={set("company")} placeholder="e.g. Brain Station 23" />
         </div>
         <div className="sm:col-span-2">

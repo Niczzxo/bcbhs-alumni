@@ -215,10 +215,20 @@ export const BD_DISTRICTS = [
   "Tangail", "Thakurgaon",
 ];
 
-/** Batch years offered on the registration form. */
-export const BATCH_YEARS: string[] = Array.from({ length: 31 }, (_, i) =>
-  String(2025 - i),
+/** Batch years offered on the registration form. Static fallback for
+    the first render (see useBatchYears); the live list always runs
+    up to the current calendar year. */
+export const BATCH_YEARS: string[] = Array.from({ length: 32 }, (_, i) =>
+  String(2026 - i),
 );
+
+/** Batch years from 1995 up to the given year, newest first. */
+export function batchYearsUpTo(year: number): string[] {
+  const top = Math.max(year, 1995);
+  return Array.from({ length: top - 1995 + 1 }, (_, i) =>
+    String(top - i),
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /*  v2.0 community features                                            */

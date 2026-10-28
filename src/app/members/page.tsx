@@ -9,7 +9,8 @@ import Reveal from "@/components/Reveal";
 import { useDirectory } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
-import { BLOOD_GROUPS, BD_DISTRICTS, BATCH_YEARS } from "@/lib/types";
+import { BLOOD_GROUPS, BD_DISTRICTS } from "@/lib/types";
+import { useBatchYears } from "@/lib/useBatchYears";
 
 const inputCls =
   "w-full rounded-xl border border-ivory/15 bg-ink px-4 py-2.5 text-sm text-ivory outline-none transition-colors focus:border-gold/60";
@@ -26,6 +27,7 @@ export default function MembersPage() {
   const approvedMembers = useDirectory();
   const canBrowse = !!user && (user.status === "approved" || isAdmin || isSuperAdmin);
   const [q, setQ] = useState("");
+  const batchYears = useBatchYears();
   const [batch, setBatch] = useState("");
   const [district, setDistrict] = useState("");
   const [profession, setProfession] = useState("");
@@ -101,7 +103,7 @@ export default function MembersPage() {
                   <input className={`${inputCls} xl:col-span-2`} placeholder="Search name, company or university…" value={q} onChange={(e) => setQ(e.target.value)} />
                   <select className={inputCls} value={batch} onChange={(e) => setBatch(e.target.value)}>
                     <option value="">All batches</option>
-                    {BATCH_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                    {batchYears.map((y) => <option key={y} value={y}>{y}</option>)}
                   </select>
                   <select className={inputCls} value={district} onChange={(e) => setDistrict(e.target.value)}>
                     <option value="">All districts</option>
