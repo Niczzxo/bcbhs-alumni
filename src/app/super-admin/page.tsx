@@ -122,11 +122,15 @@ export default function SuperAdminPage() {
 
   /* The one member card: role select, position, guest view, ban and
      the permission grid. Used by Roles & Access (staff only) and by
-     All Members (every approved member). */
+     All Members (every approved member). Collapsed cards sit in a
+     responsive grid (phone: 1 column, desktop: 2-3) so they read as
+     cards instead of full-width strips (owner, 2026-10-28); an
+     expanded card spans the full row so its permission grid keeps
+     its room. */
   const renderCard = useCallback((m: UserProfile) => {
     const open = !!openCards[m.id];
     return (
-    <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
+    <Reveal key={m.id} className={`rounded-3xl border border-ivory/10 bg-ink-2 p-6 ${open ? "md:col-span-2 xl:col-span-3" : ""}`}>
       {/* Identity: one left-aligned stack - name, then Batch, then email -
           plus the collapse chevron (down = tap to expand downward,
           up = tap to collapse back up). */}
@@ -381,9 +385,9 @@ export default function SuperAdminPage() {
               </button>
             ))}
           </div>
-          <div className="mt-8 space-y-5">
+          <div className="mt-8 grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
             {shownStaff.length === 0 ? (
-              <div className="rounded-2xl border border-ivory/10 bg-ink-2 p-6">
+              <div className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 md:col-span-2 xl:col-span-3">
                 <p className="text-sm text-muted">
                   {rolesFilter === "admin"
                     ? "No Batch Reps assigned yet. Open All Members and give someone the Batch Rep role."
@@ -407,7 +411,7 @@ export default function SuperAdminPage() {
               shownStaff.map(renderCard)
             )}
             {rolesFilter === "admin" && bannedAdmins.length > 0 && (
-              <p className="text-xs text-muted">
+              <p className="text-xs text-muted md:col-span-2 xl:col-span-3">
                 Note: {bannedAdmins.length} banned Batch Rep{bannedAdmins.length === 1 ? "" : "s"} {bannedAdmins.length === 1 ? "is" : "are"} listed under Banned.
               </p>
             )}
@@ -465,13 +469,13 @@ export default function SuperAdminPage() {
               Showing {shownMembers.length} of {approved.length} members
             </p>
           )}
-          <div className="mt-6 space-y-5">
+          <div className="mt-6 grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
             {approved.length === 0 ? (
-              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
+              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted md:col-span-2 xl:col-span-3">
                 {loading ? "Loading members…" : "No approved members yet."}
               </p>
             ) : shownMembers.length === 0 ? (
-              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
+              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted md:col-span-2 xl:col-span-3">
                 {memberQuery.trim()
                   ? `No member matches “${memberQuery.trim()}”${memberBatch ? ` in Batch ${memberBatch}` : ""}.`
                   : `No members in Batch ${memberBatch} yet.`}
