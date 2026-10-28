@@ -90,6 +90,33 @@ async function mintAccessToken(sa: ServiceAccount): Promise<string> {
   return data.access_token;
 }
 
+/** Mint a fresh OAuth token for an arbitrary scope (no cache: used
+    for rare admin operations, e.g. Auth user deletion, where the
+    datastore scope is not enough). */
+export async function mintScopedAccessToken(scope: string): Promise<string> {
+  const sa = getServiceAccount();
+  if (!sa) throw new Error("service_account_unconfigured");
+  const key = await importPKCS8(sa.private_key, "RS256");
+  const assertion = await new SignJWT({ scope })
+    .setProtectedHeader({ alg: "RS256", typ: "JWT" })
+    .setIssuer(sa.client_email)
+    .setAudience("https://oauth2.googleapis.com/token")
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(key);
+  const resp = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion,
+    }),
+  });
+  if (!resp.ok) throw new Error("token_exchange_failed");
+  const data = (await resp.json()) as { access_token: string };
+  return data.access_token;
+}
+
 /* --------------------------- writing ---------------------------- */
 
 export type WriteOutcome = "written" | "exists" | "error";

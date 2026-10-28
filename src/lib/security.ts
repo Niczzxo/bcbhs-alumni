@@ -32,6 +32,7 @@ export type SecurityEventType =
   | "member_rejected"
   | "member_banned"
   | "member_unbanned"
+  | "member_deleted"
   | "role_changed"
   | "permissions_changed"
   | "position_changed"

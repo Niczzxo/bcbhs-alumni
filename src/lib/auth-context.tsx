@@ -80,6 +80,9 @@ interface AuthContextValue {
   rejectMember: (id: string) => Promise<void>;
   banMember: (id: string) => Promise<void>;
   unbanMember: (id: string) => Promise<void>;
+  /** Permanently delete a banned member (profile + phone + login),
+      so they can register again anytime. Server-confirmed only. */
+  deleteMember: (id: string) => Promise<{ ok: boolean; error?: string }>;
   setPermissions: (id: string, permissions: string[]) => Promise<void>;
   setRole: (id: string, role: UserProfile["role"]) => Promise<void>;
   /** Assign / clear a member's official position (admin only, manually verified). */
@@ -735,6 +738,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [members]);
 
+  /* Delete (owner's feature, 2026-10-29): a BANNED member is removed
+     permanently - profile, phone, and login - through the server
+     endpoint, so the same email can register again anytime. Unlike
+     ban/unban, the local list changes ONLY after the server confirms:
+     a half-delete (docs gone, login alive) would trap the person
+     between "cannot sign in" and "cannot re-register". */
+  const deleteMember = useCallback(async (id: string): Promise<{ ok: boolean; error?: string }> => {
+    if (!isFirebaseConfigured || !db) {
+      setMembers((prev) => prev.filter((m) => m.id !== id));
+      return { ok: true };
+    }
+    const currentUser = auth?.currentUser;
+    if (!currentUser) return { ok: false, error: "Session expired. Please log in again." };
+    try {
+      const token = await currentUser.getIdToken();
+      const resp = await fetch("/api/admin/delete-member", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ targetUid: id }),
+      });
+      if (!resp.ok) {
+        const data = (await resp.json().catch(() => null)) as { error?: string } | null;
+        const code = data?.error;
+        if (code === "unauthorized") return { ok: false, error: "Session expired. Please log in again." };
+        if (code === "forbidden") return { ok: false, error: "Only the super admin can delete members." };
+        if (code === "not_banned") return { ok: false, error: "Only banned members can be deleted." };
+        if (code === "member_not_found") return { ok: false, error: "Member not found." };
+        if (code === "auth_delete_failed") return { ok: false, error: "Could not remove the login account. Nothing was deleted." };
+        if (code === "docs_delete_failed") return { ok: false, error: "Profile removal incomplete. Please try again." };
+        return { ok: false, error: "Delete failed. Please try again." };
+      }
+      setMembers((prev) => prev.filter((m) => m.id !== id));
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Delete failed. Please try again." };
+    }
+  }, []);
+
   const setPermissions = useCallback(async (id: string, permissions: string[]) => {
     /* Granting an EDITOR also flips permissionsCustom, marking that
        the super admin has configured this editor's grants. */
@@ -977,6 +1018,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       rejectMember,
       banMember,
       unbanMember,
+      deleteMember,
       setPermissions,
       setRole,
       setPosition,
@@ -988,7 +1030,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, completeMfaLogin, getTotpEnrolled, beginTotpEnrollment, confirmTotpEnrollment, disableTotp, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, setPermissions, setRole, setPosition, updateProfile, updatePhone, changeEmail, changePassword, hasPermission],
+    [user, members, loading, login, completeMfaLogin, getTotpEnrolled, beginTotpEnrollment, confirmTotpEnrollment, disableTotp, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, deleteMember, setPermissions, setRole, setPosition, updateProfile, updatePhone, changeEmail, changePassword, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

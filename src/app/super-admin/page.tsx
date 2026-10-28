@@ -23,7 +23,7 @@ import type { MemberRole, UserProfile } from "@/lib/types";
  * Banned holds the suspended members until they are unbanned.
  */
 export default function SuperAdminPage() {
-  const { user, members, loading, setPermissions, setRole, setPosition, approveMember, rejectMember, banMember, unbanMember } = useAuth();
+  const { user, members, loading, setPermissions, setRole, setPosition, approveMember, rejectMember, banMember, unbanMember, deleteMember } = useAuth();
 
   const approved = useMemo(() => members.filter((m) => m.status === "approved"), [members]);
   /* All Members search (owner's request, 2026-10-23): a name field
@@ -47,6 +47,11 @@ export default function SuperAdminPage() {
   const toggleCard = useCallback((id: string) => {
     setOpenCards((p) => ({ ...p, [id]: !p[id] }));
   }, []);
+  /* Delete (owner, 2026-10-29): one in-flight delete at a time, with
+     its error shown above the banned list (a silent failure here
+     would be worse than no button at all). */
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
   const memberBatches = useMemo(
     () => [...new Set(approved.map((m) => m.batch))].sort().reverse(),
     [approved],
@@ -499,10 +504,17 @@ export default function SuperAdminPage() {
           </h2>
           <p className="mt-2 text-sm text-muted">
             Suspended members wait here. They cannot use the portal while banned;
-            unban restores their full access, ID card included.
+            unban restores their full access, ID card included. Delete removes a
+            member permanently (profile, phone, and login); they can register
+            again anytime.
           </p>
           <div className="gold-rule mt-4 w-32" />
           <div className="mt-8 space-y-3">
+            {deleteError && (
+              <p className="rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+                {deleteError}
+              </p>
+            )}
             {banned.length === 0 ? (
               <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted">
                 No banned members. When you ban someone, they will appear here.
@@ -532,6 +544,21 @@ export default function SuperAdminPage() {
                   >
                     Unban
                   </button>
+                  <button
+                    type="button"
+                    disabled={deletingId === m.id}
+                    onClick={async () => {
+                      if (!window.confirm(`Delete ${m.name} permanently? Their profile, phone number, and login will be removed. They can register again anytime.`)) return;
+                      setDeleteError("");
+                      setDeletingId(m.id);
+                      const res = await deleteMember(m.id);
+                      setDeletingId(null);
+                      if (!res.ok) setDeleteError(res.error ?? "Delete failed.");
+                    }}
+                    className="rounded-full border border-red-400/40 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-60"
+                  >
+                    {deletingId === m.id ? "Deleting…" : "Delete"}
+                  </button>
                 </div>
               ))
             )}
@@ -559,7 +586,7 @@ export default function SuperAdminPage() {
     })),
     { key: "about", label: "About Page", content: <AboutEditor /> },
     { key: "settings", label: "Settings", content: <SettingsManager /> },
-  ], [approved, pending, banned, staff, batchReps, editors, members, loading, approveMember, rejectMember, unbanMember, renderCard, shownMembers, memberBatches, memberQuery, memberBatch, rolesFilter, shownStaff, bannedAdmins]);
+  ], [approved, pending, banned, staff, batchReps, editors, members, loading, approveMember, rejectMember, unbanMember, deleteMember, deletingId, deleteError, renderCard, shownMembers, memberBatches, memberQuery, memberBatch, rolesFilter, shownStaff, bannedAdmins]);
 
   return (
     <RequireRole role="super_admin" eyebrow="Full access" title={<>Super Admin <span className="text-gold-gradient">Dashboard</span></>}>
