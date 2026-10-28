@@ -38,6 +38,15 @@ export default function SuperAdminPage() {
   const [rolesFilter, setRolesFilter] = useState<"all" | "admin" | "editor" | "super_admin">("all");
   const [memberQuery, setMemberQuery] = useState("");
   const [memberBatch, setMemberBatch] = useState("");
+  /* Collapsible member cards (owner, 2026-10-28): the full card (role,
+     position, ban, permission grid) is tall, so All Members looked
+     huge and ugly. Cards start collapsed - identity + role pill +
+     chevron only; tapping the chevron expands the rest downward,
+     tapping again (chevron up) collapses it back up. */
+  const [openCards, setOpenCards] = useState<Record<string, boolean>>({});
+  const toggleCard = useCallback((id: string) => {
+    setOpenCards((p) => ({ ...p, [id]: !p[id] }));
+  }, []);
   const memberBatches = useMemo(
     () => [...new Set(approved.map((m) => m.batch))].sort().reverse(),
     [approved],
@@ -114,9 +123,13 @@ export default function SuperAdminPage() {
   /* The one member card: role select, position, guest view, ban and
      the permission grid. Used by Roles & Access (staff only) and by
      All Members (every approved member). */
-  const renderCard = useCallback((m: UserProfile) => (
+  const renderCard = useCallback((m: UserProfile) => {
+    const open = !!openCards[m.id];
+    return (
     <Reveal key={m.id} className="rounded-3xl border border-ivory/10 bg-ink-2 p-6">
-      {/* Identity: one left-aligned stack - name, then Batch, then email. */}
+      {/* Identity: one left-aligned stack - name, then Batch, then email -
+          plus the collapse chevron (down = tap to expand downward,
+          up = tap to collapse back up). */}
       <div className="flex items-start gap-4">
         <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
         <div className="min-w-0 flex-1">
@@ -124,31 +137,53 @@ export default function SuperAdminPage() {
           <p className="mt-0.5 text-xs text-muted">Batch {m.batch}</p>
           <p className="break-all text-xs text-muted">{m.email}</p>
         </div>
+        <button
+          type="button"
+          onClick={() => toggleCard(m.id)}
+          aria-expanded={open}
+          aria-label={`${open ? "Collapse" : "Expand"} details for ${m.name}`}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ivory/15 text-ivory/80 transition-colors hover:border-gold/50 hover:text-gold-2"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}>
+            <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </div>
-      {/* Role controls, left-aligned under the identity. */}
+      {/* Role pill stays visible when collapsed, so who holds access is
+          scannable without expanding every card. */}
       <div className="mt-4 flex flex-wrap items-center gap-2.5">
         <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${ROLE_META[m.role].badge}`}>
           {ROLE_META[m.role].label}
         </span>
-        {m.id === user?.id ? (
+        {m.id === user?.id && (
           <span className="rounded-full border border-ivory/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted">
             You
           </span>
-        ) : (
-          <select
-            value={m.role}
-            onChange={(e) => changeRole(m, e.target.value as MemberRole)}
-            aria-label={`Change role for ${m.name}`}
-            className="cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
-          >
-            {(Object.keys(ROLE_META) as MemberRole[]).map((r) => (
-              <option key={r} value={r} className="bg-ink text-ivory">
-                {ROLE_META[r].label}
-              </option>
-            ))}
-          </select>
         )}
       </div>
+      {open && (
+        <>
+          {/* Role change, position, ban and permissions live in the
+              expanded body, below the always-visible header. */}
+          {m.id !== user?.id && (
+            <div className="mt-4 flex flex-wrap items-center gap-2.5">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-muted">
+                Change role
+              </span>
+              <select
+                value={m.role}
+                onChange={(e) => changeRole(m, e.target.value as MemberRole)}
+                aria-label={`Change role for ${m.name}`}
+                className="cursor-pointer rounded-full border border-gold/40 bg-ink px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-gold-2 outline-none transition-colors hover:bg-gold/10"
+              >
+                {(Object.keys(ROLE_META) as MemberRole[]).map((r) => (
+                  <option key={r} value={r} className="bg-ink text-ivory">
+                    {ROLE_META[r].label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
       <p className="mt-3 text-xs text-muted">{ROLE_META[m.role].blurb}</p>
       {/* Position row: compact select with the current position pill
           beside it (owner's call, 2026-10-25: the full-width select
@@ -244,8 +279,11 @@ export default function SuperAdminPage() {
           )}
         </div>
       )}
+        </>
+      )}
     </Reveal>
-  ), [user, effectivePerms, changeRole, togglePerm, setPosition, banMember, unbanMember]);
+    );
+  }, [user, effectivePerms, changeRole, togglePerm, setPosition, banMember, unbanMember, openCards, toggleCard]);
 
   /* Memoized on the data the sections actually read (owner's
      complaint, 2026-10-24: section switches felt unresponsive).
