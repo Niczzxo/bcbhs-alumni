@@ -34,7 +34,19 @@ function EventCard({ e, i, onSelect }: { e: PortalEvent; i: number; onSelect: (e
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={shown} alt={e.title} className="h-52 w-full object-cover" />
-              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-5 pb-3 pt-10 text-left text-[11px] font-bold uppercase tracking-[0.2em] text-gold-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              {/* Title overlay, always visible (owner, 2026-10-30): on phones
+                  there is no hover, so the event name must read on the card
+                  itself, like the gallery's album titles. */}
+              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-5 pb-3 pt-12 text-left">
+                <span className="font-display block text-lg font-bold leading-snug text-ivory drop-shadow">
+                  {e.title}
+                </span>
+                <span className="mt-1 block text-[11px] font-bold uppercase tracking-[0.2em] text-gold-2">
+                  {e.date}
+                  {e.venue ? ` · ${e.venue}` : ""}
+                </span>
+              </span>
+              <span className="absolute right-4 top-4 rounded-full bg-black/55 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gold-2 opacity-0 backdrop-blur transition-opacity duration-300 group-hover:opacity-100">
                 Tap to view details
               </span>
             </button>
