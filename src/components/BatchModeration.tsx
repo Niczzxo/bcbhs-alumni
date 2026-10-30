@@ -6,26 +6,31 @@ import { useAuth } from "@/lib/auth-context";
 import type { UserProfile } from "@/lib/types";
 
 /**
- * Batch moderation (owner, 2026-10-30): batch reps and editors can
- * ban, unban and permanently delete members of their OWN batch only.
+ * Member moderation (owner, 2026-10-30): batch reps can ban, unban and
+ * permanently delete members of their OWN batch only; editors moderate
+ * EVERY member as the super admin's alternative.
  *
  * The server enforces the scope on every call; this UI additionally
- * lists only own-batch plain members - never the staffer themselves,
- * never privileged roles (admin / editor / super_admin).
+ * lists only plain members - never the staffer themselves, never
+ * privileged roles (admin / editor / super_admin).
  */
 export default function BatchModeration() {
   const { user, members, banMember, unbanMember, deleteMember } = useAuth();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState("");
+  const isEditor = user?.role === "editor";
 
-  const ownBatch = useMemo(() => {
-    if (!user?.batch) return [] as UserProfile[];
+  const moderatable = useMemo(() => {
+    if (!user) return [] as UserProfile[];
     return members.filter(
-      (m) => m.batch === user.batch && m.id !== user.id && m.role === "member",
+      (m) =>
+        m.id !== user.id &&
+        m.role === "member" &&
+        (isEditor || m.batch === user.batch),
     );
-  }, [members, user]);
-  const approved = useMemo(() => ownBatch.filter((m) => m.status === "approved"), [ownBatch]);
-  const banned = useMemo(() => ownBatch.filter((m) => m.status === "banned"), [ownBatch]);
+  }, [members, user, isEditor]);
+  const approved = useMemo(() => moderatable.filter((m) => m.status === "approved"), [moderatable]);
+  const banned = useMemo(() => moderatable.filter((m) => m.status === "banned"), [moderatable]);
 
   if (!user || (user.role !== "admin" && user.role !== "editor")) return null;
 
@@ -44,13 +49,17 @@ export default function BatchModeration() {
   return (
     <section>
       <h2 className="font-display text-xl font-bold text-ivory">
-        Batch moderation{" "}
-        <span className="text-gold-2">· Batch {user.batch}</span>
+        {isEditor ? "Member moderation" : "Batch moderation"}{" "}
+        <span className="text-gold-2">
+          · {isEditor ? "All batches" : `Batch ${user.batch}`}
+        </span>
       </h2>
       <div className="gold-rule mt-3 w-28" />
       <p className="mt-3 max-w-2xl text-xs leading-relaxed text-muted">
-        You can ban, unban and delete members of your own batch only. Banned
-        members lose their ID-card verification; deleting removes their login
+        {isEditor
+          ? "You moderate every member as the super admin's alternative: ban, unban and delete any member of any batch."
+          : "You can ban, unban and delete members of your own batch only."}{" "}
+        Banned members lose their ID-card verification; deleting removes their login
         and profile permanently, but they may register again anytime.
       </p>
       {deleteError && (

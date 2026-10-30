@@ -43,7 +43,7 @@ export default function EditorPage() {
             its own work area where you can add, edit or remove content, and everything updates
             on the public site right away. Member approvals, official positions and roles are
             handled from the Batch Rep and Super Admin panels. From the Moderation sector you
-            can ban, unban and delete members of your own batch.
+            can ban, unban and delete any member, as the super admin's alternative.
           </p>
           {kindsMemo.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2">

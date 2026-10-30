@@ -14,9 +14,11 @@
  *    never trusted.
  *  - Target must exist (404), be banned (403), and never be a
  *    super admin or the caller (403).
- *  - Batch-scoped staff (admin/editor, owner's rule 2026-10-30): the
- *    target must be a plain member (role == 'member') of the caller's
- *    own batch (403 otherwise). Super admins keep full power.
+ *  - Batch reps (admin, owner's rule 2026-10-30): the target must be
+ *    a plain member (role == 'member') of the caller's own batch
+ *    (403 otherwise). Editors moderate every member as the super
+ *    admin's alternative (owner, 2026-10-30): any batch, plain
+ *    members only. Super admins keep full power.
  *  - Auth deletion runs FIRST; on failure the profile docs stay
  *    untouched (502) so no member is left half-deleted.
  *
