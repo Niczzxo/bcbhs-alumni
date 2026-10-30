@@ -191,14 +191,14 @@ export const POSITIONS: string[] = [
 
 /** Granular admin permissions, toggled by the super admin. */
 export const PERMISSIONS: { key: string; label: string; hint: string }[] = [
-  { key: "approve_members", label: "Approve Members", hint: "Verify & approve new registrations, ban & unban members" },
+  { key: "approve_members", label: "Approve Members", hint: "Approve/reject registrations · also allows ban & unban" },
   { key: "manage_events", label: "Manage Events", hint: "Create, edit & delete events" },
   { key: "manage_gallery", label: "Manage Gallery", hint: "Upload & curate gallery photos" },
   { key: "post_announcements", label: "Post Announcements", hint: "Publish notices to all members" },
   { key: "view_member_data", label: "View Member Data", hint: "See private contact details" },
   { key: "manage_committee", label: "Manage Committee", hint: "Edit leadership seats" },
   { key: "moderate_content", label: "Moderate Content", hint: "Remove posts & comments" },
-  { key: "moderate_members", label: "Moderate Members", hint: "Ban, unban & delete members (any batch)" },
+  { key: "moderate_members", label: "Moderate Members", hint: "Ban, unban & DELETE any member · no registration approvals" },
 ];
 
 /** All 64 districts of Bangladesh. */
