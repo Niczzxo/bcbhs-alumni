@@ -25,6 +25,7 @@ import type { MultiFactorError, MultiFactorResolver, TotpSecret } from "firebase
 import { logSecurityEvent, loginThrottle, authErrorInfo, type AuthErrorField } from "@/lib/security";
 import { DEMO_USERS } from "./demo-data";
 import type { UserProfile } from "./types";
+import { withBatchRepDefaults } from "./types";
 
 export interface RegisterInput {
   name: string;
@@ -838,19 +839,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     /* A fresh editor starts with NO access at all: clear any old
        list whenever the editor role is (re)given, so the super admin
        grants each section explicitly (owner's rule, 2026-10-23). */
+    /* A new batch rep auto-gets the starter set (owner, 2026-10-30):
+       approve_members, view_member_data and moderate_members turn ON
+       at promotion; the super admin may switch any of them off later.
+       Merge-only: the member's existing grants are kept. */
+    const target = members.find((m) => m.id === id);
     const patch =
       role === "editor"
         ? { role, permissions: [] as string[], permissionsCustom: false }
         : role === "member"
           ? { role, permissions: [] as string[] }
-          : { role };
+          : role === "admin"
+            ? { role, permissions: withBatchRepDefaults(target?.permissions ?? []) }
+            : { role };
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
     setUser((u) => (u && u.id === id ? { ...u, ...patch } : u));
     void logSecurityEvent("role_changed", { targetUid: id, meta: { role } });
     if (!isFirebaseConfigured || !db) return;
     const { doc, updateDoc } = await import("firebase/firestore");
     await updateDoc(doc(db, "users", id), patch).catch(() => undefined);
-  }, []);
+  }, [members]);
 
   const setPosition = useCallback(async (id: string, position: string) => {
     const clean = position.trim() || undefined;

@@ -201,6 +201,19 @@ export const PERMISSIONS: { key: string; label: string; hint: string }[] = [
   { key: "moderate_members", label: "Moderate Members", hint: "Ban, unban & DELETE any member · no registration approvals" },
 ];
 
+/** Permissions auto-enabled when the super admin makes someone a batch
+ *  rep (owner, 2026-10-30). Merge-only: existing grants are kept, the
+ *  super admin may switch any of them off afterwards. */
+export const BATCH_REP_DEFAULT_PERMISSIONS = [
+  "approve_members",
+  "view_member_data",
+  "moderate_members",
+];
+
+export function withBatchRepDefaults(existing: string[]): string[] {
+  return [...new Set([...(existing ?? []), ...BATCH_REP_DEFAULT_PERMISSIONS])];
+}
+
 /** All 64 districts of Bangladesh. */
 export const BD_DISTRICTS = [
   "Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogura",

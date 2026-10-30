@@ -50,8 +50,15 @@ export function canModerateMember(
       target.role === "member" && (caller.permissions ?? []).includes("moderate_members")
     );
   if (caller.role !== "admin") return false;
-  /* Batch reps: own batch's plain members only. */
-  return target.role === "member" && !!caller.batch && target.batch === caller.batch;
+  /* Batch reps: own batch's plain members only, and only with the
+     'moderate_members' grant - auto-on at promotion (owner,
+     2026-10-30), the super admin may switch it off afterwards. */
+  return (
+    target.role === "member" &&
+    !!caller.batch &&
+    target.batch === caller.batch &&
+    (caller.permissions ?? []).includes("moderate_members")
+  );
 }
 
 function firestoreDocUrl(projectId: string, path: string): string {

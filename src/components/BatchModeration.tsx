@@ -19,10 +19,11 @@ export default function BatchModeration() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState("");
   const isEditor = user?.role === "editor";
-  /* Batch reps moderate by role; editors only with the super admin's
-     explicit 'moderate_members' grant (owner, 2026-10-30). */
+  /* Moderation is grant-gated for staff (owner, 2026-10-30): batch
+     reps get 'moderate_members' auto-on at promotion, editors only
+     by explicit grant - the super admin may switch it off after. */
   const canModerate =
-    user?.role === "admin" || (isEditor && hasPermission("moderate_members"));
+    (user?.role === "admin" || isEditor) && hasPermission("moderate_members");
 
   const moderatable = useMemo(() => {
     if (!user) return [] as UserProfile[];
@@ -37,7 +38,7 @@ export default function BatchModeration() {
   const banned = useMemo(() => moderatable.filter((m) => m.status === "banned"), [moderatable]);
 
   if (!user || !canModerate) {
-    if (isEditor) {
+    if (user?.role === "admin" || isEditor) {
       return (
         <section>
           <p className="rounded-2xl border border-dashed border-ivory/15 p-6 text-center text-sm text-muted">

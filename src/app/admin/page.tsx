@@ -221,11 +221,15 @@ export default function AdminPage() {
         </section>
       ),
     },
-    {
-      key: "moderation",
-      label: "Moderation",
-      content: <BatchModeration />,
-    },
+    ...(hasPermission("moderate_members")
+      ? [
+          {
+            key: "moderation",
+            label: "Moderation",
+            content: <BatchModeration />,
+          } as DashSection,
+        ]
+      : []),
     ...contentSectionsMemo.map((s) => ({
       key: s.kind,
       label: s.label,
