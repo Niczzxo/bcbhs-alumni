@@ -108,6 +108,16 @@ export async function POST(req: Request): Promise<NextResponse> {
     targetUid: { stringValue: targetUid },
     createdAt: { timestampValue: new Date().toISOString() },
   };
-  await writeSecurityLogDoc(projectId, `member_deleted_${Date.now()}_${targetUid}`, fields);
+  const auditOutcome = await writeSecurityLogDoc(
+    projectId,
+    `member_deleted_${Date.now()}_${targetUid}`,
+    fields,
+  );
+  if (auditOutcome === "error") {
+    // The member IS deleted; only the audit record failed. Surface it in
+    // the server log (Vercel Runtime Logs) so a missing audit trail is
+    // diagnosable instead of silent.
+    console.error("[delete-member] audit write failed", { targetUid, actorUid: callerUid });
+  }
   return json(200, { ok: true });
 }
