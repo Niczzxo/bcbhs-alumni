@@ -259,12 +259,20 @@ function EventDetailModal({ e, onClose }: { e: PortalEvent; onClose: () => void 
   );
 }
 
-/** Events & reunions, upcoming and past. */
+/** Events & reunions, upcoming and past.
+ *  Date-wise serial (owner, 2026-10-30): both sections sort by the
+ *  event date, oldest first - so the 24th's events always come
+ *  before the 25th's. Dates are YYYY-MM-DD, so plain string order
+ *  is chronological; events without a date sink to the end. */
+const eventDateKey = (e: PortalEvent) => e.date || "9999-12-31";
+const byDateAsc = (a: PortalEvent, b: PortalEvent) =>
+  eventDateKey(a).localeCompare(eventDateKey(b)) || a.title.localeCompare(b.title);
+
 export default function EventsPage() {
   const { events } = useContent();
   const [selected, setSelected] = useState<PortalEvent | null>(null);
-  const upcoming = events.filter((e) => e.upcoming);
-  const past = events.filter((e) => !e.upcoming);
+  const upcoming = events.filter((e) => e.upcoming).sort(byDateAsc);
+  const past = events.filter((e) => !e.upcoming).sort(byDateAsc);
 
   return (
     <>
