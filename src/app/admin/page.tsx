@@ -10,6 +10,7 @@ import { ROLE_META, POSITIONS } from "@/lib/types";
 import { usePrivatePhone } from "@/lib/data";
 import ContentManager from "@/components/content/ContentManager";
 import V2Manager, { V2_SECTIONS } from "@/components/content/V2Manager";
+import BatchModeration from "@/components/BatchModeration";
 import type { ContentKind } from "@/components/content/ContentManager";
 
 /** Phone suffix for a member row, fetched from the private store. */
@@ -219,6 +220,11 @@ export default function AdminPage() {
           )}
         </section>
       ),
+    },
+    {
+      key: "moderation",
+      label: "Moderation",
+      content: <BatchModeration />,
     },
     ...contentSectionsMemo.map((s) => ({
       key: s.kind,

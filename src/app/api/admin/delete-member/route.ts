@@ -9,10 +9,14 @@
  *
  * Guards, in order (any failure aborts before the next step):
  *  - Bearer ID token must verify (401).
- *  - Caller must be super_admin per a SERVER-side Firestore read
- *    (403) - the caller's claim in the request is never trusted.
+ *  - Caller must be super_admin, admin or editor per a SERVER-side
+ *    Firestore read (403) - the caller's claim in the request is
+ *    never trusted.
  *  - Target must exist (404), be banned (403), and never be a
  *    super admin or the caller (403).
+ *  - Batch-scoped staff (admin/editor, owner's rule 2026-10-30): the
+ *    target must be a plain member (role == 'member') of the caller's
+ *    own batch (403 otherwise). Super admins keep full power.
  *  - Auth deletion runs FIRST; on failure the profile docs stay
  *    untouched (502) so no member is left half-deleted.
  *
@@ -32,6 +36,7 @@ import {
   deleteFirestoreDoc,
   readFirestoreDoc,
 } from "@/server/member-delete";
+import { canModerateMember } from "@/server/moderation";
 
 function json(status: number, body: Record<string, unknown>): NextResponse {
   return NextResponse.json(body, { status });
@@ -72,7 +77,9 @@ export async function POST(req: Request): Promise<NextResponse> {
   } catch {
     return json(502, { error: "lookup_failed" });
   }
-  if (callerFields?.role?.stringValue !== "super_admin") {
+  if (callerFields?.role?.stringValue !== "super_admin"
+    && callerFields?.role?.stringValue !== "admin"
+    && callerFields?.role?.stringValue !== "editor") {
     return json(403, { error: "forbidden" });
   }
 
@@ -88,6 +95,24 @@ export async function POST(req: Request): Promise<NextResponse> {
   }
   if (targetFields.role?.stringValue === "super_admin") {
     return json(403, { error: "forbidden" });
+  }
+  /* Batch-scoped staff may delete only their own batch's plain
+     members (owner's rule, 2026-10-30); super admins keep full power. */
+  if (callerFields?.role?.stringValue !== "super_admin") {
+    const ok = canModerateMember(
+      {
+        uid: callerUid,
+        role: callerFields?.role?.stringValue,
+        batch: callerFields?.batch?.stringValue,
+      },
+      {
+        uid: targetUid,
+        role: targetFields.role?.stringValue,
+        batch: targetFields.batch?.stringValue,
+        status: targetFields.status?.stringValue,
+      },
+    );
+    if (!ok) return json(403, { error: "forbidden" });
   }
   const memberId = targetFields.memberId?.stringValue;
 

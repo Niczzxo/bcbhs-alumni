@@ -707,36 +707,80 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await removeVerifyDoc(db, target?.memberId);
   }, [members]);
 
+  /* Staff moderation (owner, 2026-10-30): batch reps and editors ban /
+     unban through the server endpoint, which enforces the own-batch
+     rule and syncs the verify doc; the super admin keeps the direct
+     flow. Returns false when the server refuses the action. */
+  const moderateMember = useCallback(
+    async (id: string, action: "ban" | "unban"): Promise<boolean> => {
+      if (!isFirebaseConfigured) return true; // demo: the caller already flipped local state
+      const currentUser = auth?.currentUser;
+      if (!currentUser) return false;
+      try {
+        const token = await currentUser.getIdToken();
+        const resp = await fetch("/api/admin/moderate-member", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ targetUid: id, action }),
+        });
+        return resp.ok;
+      } catch {
+        return false;
+      }
+    },
+    [],
+  );
+
   /* Ban: an approved member is suspended (owner's feature, 2026-10-23).
      Their profile stops counting as approved everywhere at once:
      listings filter on status, their ID card stops verifying, and
      the app shows them a suspension gate instead of member content. */
   const banMember = useCallback(async (id: string) => {
     const target = members.find((m) => m.id === id);
+    const prevStatus = target?.status;
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "banned" } : m)));
     setUser((u) => (u && u.id === id ? { ...u, status: "banned" } : u));
       void logSecurityEvent("member_banned", { targetUid: id });
     if (!isFirebaseConfigured || !db) return;
-    const { doc, updateDoc } = await import("firebase/firestore");
-    await updateDoc(doc(db, "users", id), { status: "banned" }).catch(() => undefined);
-    const { removeVerifyDoc } = await import("./verify-sync");
-    await removeVerifyDoc(db, target?.memberId);
-  }, [members]);
+    if (user?.role === "super_admin") {
+      const { doc, updateDoc } = await import("firebase/firestore");
+      await updateDoc(doc(db, "users", id), { status: "banned" }).catch(() => undefined);
+      const { removeVerifyDoc } = await import("./verify-sync");
+      await removeVerifyDoc(db, target?.memberId);
+      return;
+    }
+    const ok = await moderateMember(id, "ban");
+    if (!ok && prevStatus) {
+      /* Server refused: revert the optimistic flip. */
+      setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: prevStatus } : m)));
+      setUser((u) => (u && u.id === id ? { ...u, status: prevStatus } : u));
+    }
+  }, [members, user, moderateMember]);
 
   /* Unban restores full approved status, ID-card verification included. */
   const unbanMember = useCallback(async (id: string) => {
     const target = members.find((m) => m.id === id);
+    const prevStatus = target?.status;
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: "approved" } : m)));
     setUser((u) => (u && u.id === id ? { ...u, status: "approved" } : u));
       void logSecurityEvent("member_unbanned", { targetUid: id });
     if (!isFirebaseConfigured || !db) return;
-    const { doc, updateDoc } = await import("firebase/firestore");
-    await updateDoc(doc(db, "users", id), { status: "approved" }).catch(() => undefined);
-    if (target) {
-      const { syncVerifyDoc } = await import("./verify-sync");
-      await syncVerifyDoc(db, { ...target, status: "approved" });
+    if (user?.role === "super_admin") {
+      const { doc, updateDoc } = await import("firebase/firestore");
+      await updateDoc(doc(db, "users", id), { status: "approved" }).catch(() => undefined);
+      if (target) {
+        const { syncVerifyDoc } = await import("./verify-sync");
+        await syncVerifyDoc(db, { ...target, status: "approved" });
+      }
+      return;
     }
-  }, [members]);
+    const ok = await moderateMember(id, "unban");
+    if (!ok && prevStatus) {
+      /* Server refused: revert the optimistic flip. */
+      setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: prevStatus } : m)));
+      setUser((u) => (u && u.id === id ? { ...u, status: prevStatus } : u));
+    }
+  }, [members, user, moderateMember]);
 
   /* Delete (owner's feature, 2026-10-29): a BANNED member is removed
      permanently - profile, phone, and login - through the server
@@ -762,7 +806,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = (await resp.json().catch(() => null)) as { error?: string } | null;
         const code = data?.error;
         if (code === "unauthorized") return { ok: false, error: "Session expired. Please log in again." };
-        if (code === "forbidden") return { ok: false, error: "Only the super admin can delete members." };
+        if (code === "forbidden") return { ok: false, error: "You don't have permission to delete this member." };
         if (code === "not_banned") return { ok: false, error: "Only banned members can be deleted." };
         if (code === "member_not_found") return { ok: false, error: "Member not found." };
         if (code === "auth_delete_failed") return { ok: false, error: "Could not remove the login account. Nothing was deleted." };

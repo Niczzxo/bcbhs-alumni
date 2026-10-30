@@ -98,6 +98,15 @@ service cloud.firestore {
           isAdmin()
         ));
 
+      // Batch-scoped moderation (owner, 2026-10-30): batch reps and
+      // editors may read their own batch's profiles in any status, so
+      // the Moderation sector can list banned members to unban/delete.
+      // Ban/unban/delete themselves run through guarded server
+      // endpoints - no client write rule is added for them.
+      allow read: if signedIn()
+        && (me().role == 'admin' || me().role == 'editor')
+        && resource.data.batch == me().batch;
+
       // Registration: a signed-in user creates ONLY their own doc, always as
       // a pending plain member. Phone numbers may NEVER live here — they
       // belong in `users_private/{uid}`.

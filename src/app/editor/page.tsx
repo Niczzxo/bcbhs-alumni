@@ -7,6 +7,7 @@ import DashboardShell, { type DashSection } from "@/components/DashboardShell";
 import { useAuth } from "@/lib/auth-context";
 import ContentManager from "@/components/content/ContentManager";
 import V2Manager, { V2_SECTIONS } from "@/components/content/V2Manager";
+import BatchModeration from "@/components/BatchModeration";
 import type { ContentKind } from "@/components/content/ContentManager";
 
 /**
@@ -41,7 +42,8 @@ export default function EditorPage() {
             This is your own workspace. Use the sidebar to jump between sectors, each one opens
             its own work area where you can add, edit or remove content, and everything updates
             on the public site right away. Member approvals, official positions and roles are
-            handled from the Batch Rep and Super Admin panels, so they do not appear here.
+            handled from the Batch Rep and Super Admin panels. From the Moderation sector you
+            can ban, unban and delete members of your own batch.
           </p>
           {kindsMemo.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2">
@@ -58,6 +60,11 @@ export default function EditorPage() {
           )}
         </Reveal>
       ),
+    },
+    {
+      key: "moderation",
+      label: "Moderation",
+      content: <BatchModeration />,
     },
     ...kindsMemo.map((s) => ({
       key: s.kind,
