@@ -27,10 +27,10 @@ export default function GalleryPage() {
   const [albumName, setAlbumName] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
 
-  /* Date-wise serial (owner, 2026-10-30): albums order by their
-     batch's upload date, oldest first, and the photos inside each
-     album keep upload order too - so a batch uploaded on the 24th
-     always comes before one uploaded on the 25th. */
+  /* Date-wise (owner, 2026-10-30): albums order by their batch's
+     upload date, newest first - like Past highlights, the most
+     recently uploaded batch sits on top. Photos inside each album
+     keep upload order (first uploaded first). */
   const albums = useMemo<Album[]>(() => {
     const map = new Map<string, GalleryPhoto[]>();
     for (const p of gallery) {
@@ -45,7 +45,7 @@ export default function GalleryPage() {
         photos: [...photos].sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
       }))
       .sort((a, b) =>
-        (a.photos[0]?.createdAt ?? "").localeCompare(b.photos[0]?.createdAt ?? ""),
+        (b.photos[0]?.createdAt ?? "").localeCompare(a.photos[0]?.createdAt ?? ""),
       );
   }, [gallery]);
 
