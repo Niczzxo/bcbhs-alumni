@@ -42,8 +42,9 @@ export default function EditorPage() {
             This is your own workspace. Use the sidebar to jump between sectors, each one opens
             its own work area where you can add, edit or remove content, and everything updates
             on the public site right away. Member approvals, official positions and roles are
-            handled from the Batch Rep and Super Admin panels. From the Moderation sector you
-            can ban, unban and delete any member, as the super admin's alternative.
+            handled from the Batch Rep and Super Admin panels. If the super admin grants
+            you the Moderate Members permission, the Moderation sector lets you ban, unban
+            and delete any member, as the super admin's alternative.
           </p>
           {kindsMemo.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2">
@@ -61,11 +62,15 @@ export default function EditorPage() {
         </Reveal>
       ),
     },
-    {
-      key: "moderation",
-      label: "Moderation",
-      content: <BatchModeration />,
-    },
+    ...(hasPermission("moderate_members")
+      ? [
+          {
+            key: "moderation",
+            label: "Moderation",
+            content: <BatchModeration />,
+          } as DashSection,
+        ]
+      : []),
     ...kindsMemo.map((s) => ({
       key: s.kind,
       label: s.label,

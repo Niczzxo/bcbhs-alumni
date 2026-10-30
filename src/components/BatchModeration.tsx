@@ -15,10 +15,14 @@ import type { UserProfile } from "@/lib/types";
  * privileged roles (admin / editor / super_admin).
  */
 export default function BatchModeration() {
-  const { user, members, banMember, unbanMember, deleteMember } = useAuth();
+  const { user, members, banMember, unbanMember, deleteMember, hasPermission } = useAuth();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState("");
   const isEditor = user?.role === "editor";
+  /* Batch reps moderate by role; editors only with the super admin's
+     explicit 'moderate_members' grant (owner, 2026-10-30). */
+  const canModerate =
+    user?.role === "admin" || (isEditor && hasPermission("moderate_members"));
 
   const moderatable = useMemo(() => {
     if (!user) return [] as UserProfile[];
@@ -32,7 +36,19 @@ export default function BatchModeration() {
   const approved = useMemo(() => moderatable.filter((m) => m.status === "approved"), [moderatable]);
   const banned = useMemo(() => moderatable.filter((m) => m.status === "banned"), [moderatable]);
 
-  if (!user || (user.role !== "admin" && user.role !== "editor")) return null;
+  if (!user || !canModerate) {
+    if (isEditor) {
+      return (
+        <section>
+          <p className="rounded-2xl border border-dashed border-ivory/15 p-6 text-center text-sm text-muted">
+            The super admin has not granted you member moderation yet. Ask them
+            to enable the “Moderate Members” permission for your account.
+          </p>
+        </section>
+      );
+    }
+    return null;
+  }
 
   async function onDelete(m: UserProfile) {
     setDeleteError("");

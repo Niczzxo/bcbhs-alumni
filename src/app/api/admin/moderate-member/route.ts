@@ -15,7 +15,8 @@
  *  - Batch reps (admin, owner's rule 2026-10-30): the target must be
  *    a plain member (role == 'member') of the caller's own batch
  *    (403 otherwise). Editors moderate every member as the super
- *    admin's alternative (owner, 2026-10-30): any batch, plain
+ *    admin's alternative, but only with the explicit
+ *    'moderate_members' grant (owner, 2026-10-30): any batch, plain
  *    members only. Super admins keep full power.
  *  - ban needs status 'approved', unban needs status 'banned' (400).
  *
@@ -27,7 +28,7 @@ import { NextResponse } from "next/server";
 import { verifyFirebaseIdToken } from "@/server/verify-token";
 import { getServiceAccount, mintScopedAccessToken } from "@/server/service-account";
 import { readFirestoreDoc } from "@/server/member-delete";
-import { canModerateMember, updateFirestoreDoc } from "@/server/moderation";
+import { canModerateMember, stringArrayField, updateFirestoreDoc } from "@/server/moderation";
 
 function json(status: number, body: Record<string, unknown>): NextResponse {
   return NextResponse.json(body, { status });
@@ -85,6 +86,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       uid: callerUid,
       role: callerFields?.role?.stringValue,
       batch: callerFields?.batch?.stringValue,
+      permissions: stringArrayField(callerFields, "permissions"),
     },
     {
       uid: targetUid,

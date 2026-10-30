@@ -198,6 +198,7 @@ export const PERMISSIONS: { key: string; label: string; hint: string }[] = [
   { key: "view_member_data", label: "View Member Data", hint: "See private contact details" },
   { key: "manage_committee", label: "Manage Committee", hint: "Edit leadership seats" },
   { key: "moderate_content", label: "Moderate Content", hint: "Remove posts & comments" },
+  { key: "moderate_members", label: "Moderate Members", hint: "Ban, unban & delete members (any batch)" },
 ];
 
 /** All 64 districts of Bangladesh. */

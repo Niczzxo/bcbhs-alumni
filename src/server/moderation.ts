@@ -23,6 +23,8 @@ export interface ModerationActor {
   uid: string;
   role?: string;
   batch?: string;
+  /** Granted permission keys (editors need 'moderate_members'). */
+  permissions?: string[];
 }
 
 export interface ModerationTarget {
@@ -40,9 +42,13 @@ export function canModerateMember(
   if (target.role === "super_admin") return false;
   if (caller.role === "super_admin") return true;
   /* Editors moderate every member as the super admin's alternative
-     (owner, 2026-10-30): any batch, but plain members only - staff
-     roles stay protected from each other. */
-  if (caller.role === "editor") return target.role === "member";
+     (owner, 2026-10-30) - but only when the super admin granted them
+     the 'moderate_members' permission (owner, 2026-10-30): any batch,
+     plain members only - staff roles stay protected from each other. */
+  if (caller.role === "editor")
+    return (
+      target.role === "member" && (caller.permissions ?? []).includes("moderate_members")
+    );
   if (caller.role !== "admin") return false;
   /* Batch reps: own batch's plain members only. */
   return target.role === "member" && !!caller.batch && target.batch === caller.batch;
@@ -50,6 +56,19 @@ export function canModerateMember(
 
 function firestoreDocUrl(projectId: string, path: string): string {
   return `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${path}`;
+}
+
+/** Pull a string[] field (e.g. permissions) out of Firestore REST fields. */
+export function stringArrayField(fields: unknown, key: string): string[] {
+  const rec = fields as Record<string, { arrayValue?: unknown }> | null | undefined;
+  const v = rec?.[key]?.arrayValue as
+    | { values?: { stringValue?: unknown }[] }
+    | undefined;
+  const vals = v?.values;
+  if (!Array.isArray(vals)) return [];
+  return vals
+    .map((x) => x?.stringValue)
+    .filter((s): s is string => typeof s === "string");
 }
 
 /** PATCH a document's fields (creates it when missing); false on failure. */
