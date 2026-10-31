@@ -13,7 +13,7 @@
 [![Firebase](https://img.shields.io/badge/Firebase-Auth_%2B_Firestore-ffca28?logo=firebase&logoColor=black)](https://firebase.google.com)
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed_on-Vercel-black?logo=vercel)](https://vercel.com)
 
-🌐 **Live site:** [bcbhs-alumni-niczzxos-projects.vercel.app](https://bcbhsalumni.vercel.app)
+🌐 **Live site:** [bcbhs-alumni.vercel.app](https://bcbhsalumni.vercel.app)
 
 </div>
 
