@@ -1,21 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { UserProfile } from "@/lib/types";
 import { useAuth } from "@/lib/auth-context";
 import Reveal from "./Reveal";
 import WhatsAppButton from "./WhatsAppButton";
+import PhotoLightbox from "./PhotoLightbox";
 
-/** Photo avatar, falls back to initials when a member has no photo. */
+/** Photo avatar, falls back to initials when a member has no photo.
+ *  With `zoomable`, clicking the photo opens the fullscreen viewer
+ *  (owner, 2026-10-31) - used on profile headers, not in lists. */
 export function Avatar({
   name,
   size = "md",
   photoURL,
+  zoomable = false,
 }: {
   name: string;
   size?: "xs" | "sm" | "ml" | "md" | "lg";
   photoURL?: string | null;
+  zoomable?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
   const initials = name
     .split(" ")
     .map((p) => p[0])
@@ -24,7 +31,7 @@ export function Avatar({
     .toUpperCase();
   const dims = size === "lg" ? "h-28 w-28 text-3xl" : size === "sm" ? "h-10 w-10 text-sm" : size === "ml" ? "h-16 w-16 text-lg" : size === "xs" ? "h-7 w-7 text-[10px]" : "h-20 w-20 text-xl";
   if (photoURL) {
-    return (
+    const ring = (
       /* `block` is load-bearing: without it the span stays inline, the
        * h/w classes are ignored and the photo renders at natural size
        * (the mobile navbar avatar bug, 2026-10-23: fine inside flex
@@ -33,6 +40,26 @@ export function Avatar({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={photoURL} alt={name} className="h-full w-full object-cover" />
       </span>
+    );
+    return (
+      <>
+        {zoomable ? (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label={`View ${name}'s profile picture`}
+            title="View larger"
+            className="cursor-zoom-in rounded-full transition-transform hover:scale-105"
+          >
+            {ring}
+          </button>
+        ) : (
+          ring
+        )}
+        {open && (
+          <PhotoLightbox photoURL={photoURL} name={name} onClose={() => setOpen(false)} />
+        )}
+      </>
     );
   }
   return (

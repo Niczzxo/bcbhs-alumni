@@ -61,7 +61,7 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
                     gold, and the position/role as a highlighted gold
                     pill with a soft glow, all in one centered column. */}
                 <div className="flex flex-col items-center gap-5 text-center">
-                  <Avatar name={member.name} photoURL={member.photoURL} size="lg" />
+                  <Avatar name={member.name} photoURL={member.photoURL} size="lg" zoomable />
                   <div>
                     <h2 className="font-display text-3xl font-extrabold text-ivory">{member.name}</h2>
                     <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.22em] text-gold sm:text-xs sm:tracking-[0.25em]">
