@@ -24,7 +24,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type Props = {
   /** Object URL or data URL of the image the member just picked. */
   src: string;
-  /** Called with the cropped square JPEG (512px) — the caller runs it
+  /** Called with the cropped square JPEG (1024px) — the caller runs it
       through the usual compression pipeline before storing it. */
   onCrop: (file: File) => void;
   onCancel: () => void;
@@ -32,7 +32,7 @@ type Props = {
   onNewFile: (file: File) => void;
 };
 
-const OUTPUT_SIZE = 512;
+const OUTPUT_SIZE = 1024;
 const MAX_ZOOM = 4; // slider 100 = 4x the cover scale
 
 export default function PhotoCropper({ src, onCrop, onCancel, onNewFile }: Props) {

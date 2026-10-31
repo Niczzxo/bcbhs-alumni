@@ -1,8 +1,10 @@
 /* ------------------------------------------------------------------ */
 /*  Client-side image compression.                                     */
-/*  Profile photos are downscaled + JPEG-compressed in the browser so  */
-/*  they fit comfortably inside a Firestore document (< 1 MB) without  */
-/*  needing Cloud Storage (which requires the Blaze billing plan).     */
+/*  Profile photos are downscaled to 1024px + JPEG-compressed in the   */
+/*  browser so they fit comfortably inside a Firestore document        */
+/*  (< 1 MB) without needing Cloud Storage (which requires the Blaze   */
+/*  billing plan). A 1024px JPEG stays well under the limit while      */
+/*  looking sharp in the fullscreen photo lightbox.                    */
 /* ------------------------------------------------------------------ */
 
 /** Compress an image file to a small JPEG data URL suitable for Firestore. */

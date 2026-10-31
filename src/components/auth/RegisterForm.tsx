@@ -61,7 +61,7 @@ export default function RegisterForm({
     }
     setPhotoBusy(true);
     try {
-      const dataUrl = await compressImageToDataURL(file);
+      const dataUrl = await compressImageToDataURL(file, 1024, 0.85);
       setPhotoURL(dataUrl);
       setError("");
     } catch {

@@ -118,7 +118,7 @@ export default function EditProfilePage() {
     closeCropper();
     setPhotoBusy(true);
     try {
-      const url = await compressImageToDataURL(file, 256, 0.72);
+      const url = await compressImageToDataURL(file, 1024, 0.85);
       setF((p) => ({ ...p, photoURL: url }));
       setSaved(false);
       setError("");
