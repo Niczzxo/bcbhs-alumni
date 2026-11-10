@@ -11,6 +11,7 @@ import { usePrivatePhone } from "@/lib/data";
 import ContentManager from "@/components/content/ContentManager";
 import V2Manager, { V2_SECTIONS } from "@/components/content/V2Manager";
 import BatchModeration from "@/components/BatchModeration";
+import PendingApprovals from "@/components/PendingApprovals";
 import type { ContentKind } from "@/components/content/ContentManager";
 
 /** Phone suffix for a member row, fetched from the private store. */
@@ -56,52 +57,14 @@ export default function AdminPage() {
       label: "Approvals",
       badge: pending.length,
       content: (
-        <section>
-          <h2 className="font-display text-xl font-bold text-ivory">
-            Pending approvals <span className="text-gold-2">({pending.length})</span>
-          </h2>
-          <div className="gold-rule mt-3 w-28" />
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {pending.length === 0 && (
-              <p className="rounded-2xl border border-ivory/10 bg-ink-2 p-6 text-sm text-muted md:col-span-2">
-                {loading ? "Loading registrations…" : "All caught up, no pending registrations. 🎉"}
-              </p>
-            )}
-            {pending.map((m, i) => (
-              <Reveal key={m.id} delay={Math.min(i, 4) * 0.05} className="rounded-2xl border border-ivory/10 bg-ink-2 p-5">
-                <div className="flex items-center gap-4">
-                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold leading-snug text-ivory">{m.name}</p>
-                    <p className="break-all text-xs text-muted">
-                      Batch {m.batch} · {m.district} · {m.email}
-                      {canSeeData && <MemberPhone userId={m.id} />}
-                    </p>
-                    {m.profession && <p className="text-xs text-muted">{m.profession}{m.company ? ` @ ${m.company}` : ""}</p>}
-                  </div>
-                </div>
-                {canApprove ? (
-                  <div className="mt-4 flex gap-3">
-                    <button
-                      onClick={() => approveMember(m.id)}
-                      className="flex-1 rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-deep py-2.5 text-xs font-bold uppercase tracking-widest text-ink"
-                    >
-                      ✓ Approve
-                    </button>
-                    <button
-                      onClick={() => rejectMember(m.id)}
-                      className="flex-1 rounded-full border border-red-400/40 py-2.5 text-xs font-bold uppercase tracking-widest text-red-300 hover:bg-red-500/10"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                ) : (
-                  <p className="mt-4 text-xs text-muted">You don&apos;t have the <span className="text-gold-2">approve_members</span> permission.</p>
-                )}
-              </Reveal>
-            ))}
-          </div>
-        </section>
+        <PendingApprovals
+          pending={pending}
+          loading={loading}
+          canApprove={canApprove}
+          canSeeData={canSeeData}
+          onApprove={approveMember}
+          onReject={rejectMember}
+        />
       ),
     },
     {

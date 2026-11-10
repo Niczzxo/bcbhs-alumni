@@ -344,12 +344,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false);
             /* Role-aware list fetch. Firestore denies a query whose
              * results it cannot prove readable: the full collection is
-             * only readable by admins, while regular members may read
-             * approved profiles, so they get a status-constrained
-             * query (plus their own doc, whatever its status). The old
-             * unconstrained fetch silently failed for every non-admin
-             * and left the demo seed list on screen. */
-            const isStaff = own?.role === "admin" || own?.role === "super_admin";
+             * readable by admins and by editors holding the
+             * approve_members or moderate_members grant (the rules'
+             * moderation read covers any status for such editors),
+             * while regular members may read approved profiles, so
+             * they get a status-constrained query (plus their own doc,
+             * whatever its status). The old unconstrained fetch
+             * silently failed for every non-admin and left the demo
+             * seed list on screen. */
+            const isStaff =
+              own?.role === "admin" ||
+              own?.role === "super_admin" ||
+              (own?.role === "editor" &&
+                (own.permissions.includes("approve_members") ||
+                  own.permissions.includes("moderate_members")));
             const snapList = isStaff
               ? await getDocs(collection(liveDb, "users"))
               : await approvedPromise;

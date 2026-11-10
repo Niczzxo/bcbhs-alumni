@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import ContentManager from "@/components/content/ContentManager";
 import V2Manager, { V2_SECTIONS } from "@/components/content/V2Manager";
 import BatchModeration from "@/components/BatchModeration";
+import PendingApprovals from "@/components/PendingApprovals";
 import type { ContentKind } from "@/components/content/ContentManager";
 
 /**
@@ -17,7 +18,14 @@ import type { ContentKind } from "@/components/content/ContentManager";
  * content only; member approvals and roles live in the admin panels.
  */
 export default function EditorPage() {
-  const { user, hasPermission } = useAuth();
+  const { user, members, loading, approveMember, rejectMember, hasPermission } = useAuth();
+
+  /* Pending registrations for the Approvals sector (editors with the
+     approve_members grant see them — the auth context fetches the
+     full member list for grant-holding editors). */
+  const pending = useMemo(() => members.filter((m) => m.status === "pending"), [members]);
+  const canApprove = hasPermission("approve_members");
+  const canSeeData = hasPermission("view_member_data");
 
   const kinds: { kind: ContentKind; perm: string; label: string }[] = (
     [
@@ -41,10 +49,11 @@ export default function EditorPage() {
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
             This is your own workspace. Use the sidebar to jump between sectors, each one opens
             its own work area where you can add, edit or remove content, and everything updates
-            on the public site right away. Member approvals, official positions and roles are
-            handled from the Batch Rep and Super Admin panels. If the super admin grants
-            you the Moderate Members permission, the Moderation sector lets you ban, unban
-            and delete any member, as the super admin's alternative.
+            on the public site right away. Official positions and roles are handled from the
+            Batch Rep and Super Admin panels. If the super admin grants you the Approve Members
+            permission, the Approvals sector lets you approve or reject registrations; the
+            Moderate Members permission adds the Moderation sector to ban, unban and delete
+            any member, as the super admin&apos;s alternative.
           </p>
           {kindsMemo.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2">
@@ -62,6 +71,25 @@ export default function EditorPage() {
         </Reveal>
       ),
     },
+    ...(hasPermission("approve_members")
+      ? [
+          {
+            key: "approvals",
+            label: "Approvals",
+            badge: pending.length,
+            content: (
+              <PendingApprovals
+                pending={pending}
+                loading={loading}
+                canApprove={canApprove}
+                canSeeData={canSeeData}
+                onApprove={approveMember}
+                onReject={rejectMember}
+              />
+            ),
+          } as DashSection,
+        ]
+      : []),
     ...(hasPermission("moderate_members")
       ? [
           {
@@ -89,7 +117,7 @@ export default function EditorPage() {
         </div>
       ),
     })),
-  ], [user, kindsMemo, hasPermission]);
+  ], [user, kindsMemo, hasPermission, pending, loading, canApprove, canSeeData, approveMember, rejectMember]);
 
   return (
     <RequireRole role="editor" eyebrow="Content team" title={<>Editor <span className="text-gold-gradient">Dashboard</span></>}>
