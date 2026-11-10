@@ -12,12 +12,21 @@ export interface LeaderSeat {
   batch?: string;
   note?: string;
   photoURL?: string;
+  /** True for the super admin (internal: only used for ordering). */
+  isSuperAdmin?: boolean;
 }
 
 const rank = (position?: string) => {
   const i = POSITIONS.indexOf(position ?? "");
   return i === -1 ? POSITIONS.length : i;
 };
+
+/** Within one position rank, the super admin leads, then name A-Z
+ *  (owner's rule, 2026-11-11: Omar first among Executives). */
+const compareSeats = (a: LeaderSeat, b: LeaderSeat) =>
+  rank(a.role) - rank(b.role) ||
+  (a.isSuperAdmin ? -1 : b.isSuperAdmin ? 1 : 0) ||
+  a.name.localeCompare(b.name);
 
 /**
  * THE leadership list (owner's merge rule, 2026-10-23; ordering
@@ -40,7 +49,9 @@ export function mergeLeadership(
     .filter((m) => m.status === "approved" && m.position?.trim())
     .sort(
       (a, b) =>
-        rank(a.position) - rank(b.position) || a.name.localeCompare(b.name),
+        rank(a.position) - rank(b.position) ||
+        (a.role === "super_admin" ? -1 : b.role === "super_admin" ? 1 : 0) ||
+        a.name.localeCompare(b.name),
     )
     .map<LeaderSeat>((m) => ({
       id: `member-${m.id}`,
@@ -49,6 +60,7 @@ export function mergeLeadership(
       batch: m.batch,
       note: m.profession,
       photoURL: m.photoURL,
+      isSuperAdmin: m.role === "super_admin",
     }));
   const names = new Set(holders.map((h) => h.name.trim().toLowerCase()));
   const manual = seats
@@ -61,9 +73,7 @@ export function mergeLeadership(
       note: s.note,
       photoURL: s.photoURL,
     }));
-  return [...holders, ...manual].sort(
-    (a, b) => rank(a.role) - rank(b.role) || a.name.localeCompare(b.name),
-  );
+  return [...holders, ...manual].sort(compareSeats);
 }
 
 /**
