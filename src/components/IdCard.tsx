@@ -308,7 +308,7 @@ function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: st
           <div className="mt-[2.1cqw] w-full">
             <ContactRow icon={<PinIcon />} text="Bogura Cantonment, Bogura, Bangladesh" />
             <ContactRow icon={<MailIcon />} text={email} />
-            <ContactRow icon={<GlobeIcon />} text="bcbhsalumni.vercel.app" />
+            <ContactRow icon={<GlobeIcon />} text="bcbhsalumni.org" />
           </div>
 
           <div className="flex-1" />

@@ -72,6 +72,10 @@ export { DEMO_EVENTS as EVENTS, DEMO_COMMITTEE as COMMITTEE } from "./demo-data"
 
 /* ------------------------- official contact --------------------------- */
 
+/** Canonical public URL of the portal. Card QR codes and share links
+ *  always use this, so they never point at the old Vercel address
+ *  even when the site is opened from it. */
+export const SITE_URL = "https://bcbhsalumni.org";
 export const SITE_FACEBOOK = "https://www.facebook.com/share/1DYzEdVYQV/";
 export const SITE_INSTAGRAM = "https://instagram.com/bcbhsalumni";
 export const SITE_WHATSAPP = "https://chat.whatsapp.com/LOb86Kx4UL04AV3dQSnTCo?s=cl&p=a&mlu=4&ilr=4";

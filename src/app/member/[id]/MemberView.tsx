@@ -13,6 +13,7 @@ import { useAuthModal } from "@/components/AuthModal";
 import { useMember } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
 import { ROLE_META } from "@/lib/types";
+import { SITE_URL } from "@/lib/site";
 
 /** Public alumni profile, consumes the route-params promise via `use()`. */
 export default function MemberView({ params }: { params: Promise<{ id: string }> }) {
@@ -31,10 +32,9 @@ export default function MemberView({ params }: { params: Promise<{ id: string }>
      contact each other; it is NOT tied to card ownership. */
   const canContact = user?.status === "approved";
 
-  const verifyUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/verify/${member?.memberId ?? id}`
-      : `/verify/${id}`;
+  // Card QR always points at the canonical domain, even when the
+  // site is opened from the old Vercel address.
+  const verifyUrl = `${SITE_URL}/verify/${member?.memberId ?? id}`;
 
   return (
     <>

@@ -9,6 +9,7 @@ import Reveal from "@/components/Reveal";
 import IdCard, { CardDownloadButton } from "@/components/IdCard";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
+import { SITE_URL } from "@/lib/site";
 
 /** Official digital ID card for the logged-in approved member. */
 export default function IdCardPage() {
@@ -17,8 +18,10 @@ export default function IdCardPage() {
   const [verifyUrl, setVerifyUrl] = useState("");
 
   useEffect(() => {
+    // Card QR always points at the canonical domain, even when the
+    // site is opened from the old Vercel address.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time client hydration
-    setVerifyUrl(`${window.location.origin}/verify/${user?.memberId ?? ""}`);
+    setVerifyUrl(`${SITE_URL}/verify/${user?.memberId ?? ""}`);
   }, [user]);
 
   const approved = user?.status === "approved" && user.memberId;

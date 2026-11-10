@@ -201,7 +201,7 @@ export default function IdCardCta() {
           ) : (
             <IdCard
               member={TEASER_MEMBER}
-              verifyUrl="https://bcbhs-alumni-niczzxos-projects.vercel.app/verify/BCBHS-20XX-0000"
+              verifyUrl="https://bcbhsalumni.org/verify/BCBHS-20XX-0000"
               lockBack
             />
           )}

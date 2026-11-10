@@ -32,7 +32,7 @@ export default function PrivacyPage() {
             <p className="rounded-2xl border border-ivory/10 bg-ink-2 px-5 py-4 text-sm text-muted">
               Effective date: <span className="font-semibold text-ivory/90">October 15, 2026</span>.
               This Privacy Policy applies to the BCBHS Alumni Portal
-              (bcbhs-alumni-niczzxos-projects.vercel.app), operated by the BCBHS Alumni Association
+              (bcbhsalumni.org), operated by the BCBHS Alumni Association
               (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;), a voluntary alumni community based in
               Bogura, Bangladesh. It is prepared in accordance with the laws of Bangladesh, including the
               Information and Communication Technology Act, 2006 and the Cyber Security Act, 2023.
