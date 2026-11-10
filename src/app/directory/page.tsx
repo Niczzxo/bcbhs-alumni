@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 import { isFirebaseConfigured, db } from "@/lib/firebase";
 import type { UserProfile } from "@/lib/types";
 import { POSITIONS } from "@/lib/types";
+import { compareHolders } from "@/lib/leadership";
 
 /**
  * The Alumni Directory lists POSITION HOLDERS only (owner's rule,
@@ -71,17 +72,18 @@ export default function DirectoryPage() {
 
   /* Position holders only: an official position assigned by the super
      admin is what puts an alumnus in this directory. Holders are
-     ordered by position rank (owner's rule, 2026-10-23): President
-     first, then Vice President, General Secretary and so on down the
-     POSITIONS list; same-position holders are ordered by name. */
+     ordered by the shared leadership ordering (see lib/leadership):
+     position rank first, then the super admin leads their rank,
+     then one named person goes last, then name A-Z. */
   const holders = useMemo(() => {
-    const rank = (p?: string) => {
-      const i = POSITIONS.indexOf(p ?? "");
-      return i === -1 ? POSITIONS.length : i;
-    };
     return members
       .filter((m) => !!m.position && m.position.trim() !== "")
-      .sort((a, b) => rank(a.position) - rank(b.position) || a.name.localeCompare(b.name));
+      .sort((a, b) =>
+        compareHolders(
+          { ...a, isSuperAdmin: a.role === "super_admin" },
+          { ...b, isSuperAdmin: b.role === "super_admin" },
+        ),
+      );
   }, [members]);
 
   return (

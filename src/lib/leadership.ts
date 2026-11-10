@@ -21,12 +21,34 @@ const rank = (position?: string) => {
   return i === -1 ? POSITIONS.length : i;
 };
 
-/** Within one position rank, the super admin leads, then name A-Z
- *  (owner's rule, 2026-11-11: Omar first among Executives). */
-const compareSeats = (a: LeaderSeat, b: LeaderSeat) =>
-  rank(a.role) - rank(b.role) ||
-  (a.isSuperAdmin ? -1 : b.isSuperAdmin ? 1 : 0) ||
-  a.name.localeCompare(b.name);
+/** Owner's rule, 2026-11-11: this person goes last in every
+ *  leadership listing, whatever their position. */
+const LAST_NAME = "md mehedi hasan miad";
+const isLast = (name: string) =>
+  name.trim().toLowerCase() === LAST_NAME;
+
+/**
+ * Shared leadership ordering, used by the homepage strip, the
+ * Committee page and the Directory: position rank first, then the
+ * super admin leads their rank (owner's rule, 2026-11-11: Omar
+ * first among Executives), then the person named above goes last,
+ * then name A-Z. Accepts either a position holder
+ * ({ position, name, isSuperAdmin }) or a mapped seat
+ * ({ role = position, name, isSuperAdmin }).
+ */
+export function compareHolders(
+  a: { position?: string; role?: string; name: string; isSuperAdmin?: boolean },
+  b: { position?: string; role?: string; name: string; isSuperAdmin?: boolean },
+): number {
+  const posOf = (h: { position?: string; role?: string }) =>
+    h.position ?? h.role ?? "";
+  return (
+    rank(posOf(a)) - rank(posOf(b)) ||
+    (a.isSuperAdmin ? -1 : b.isSuperAdmin ? 1 : 0) ||
+    (isLast(a.name) ? 1 : isLast(b.name) ? -1 : 0) ||
+    a.name.localeCompare(b.name)
+  );
+}
 
 /**
  * THE leadership list (owner's merge rule, 2026-10-23; ordering
@@ -47,11 +69,11 @@ export function mergeLeadership(
 ): LeaderSeat[] {
   const holders = members
     .filter((m) => m.status === "approved" && m.position?.trim())
-    .sort(
-      (a, b) =>
-        rank(a.position) - rank(b.position) ||
-        (a.role === "super_admin" ? -1 : b.role === "super_admin" ? 1 : 0) ||
-        a.name.localeCompare(b.name),
+    .sort((a, b) =>
+      compareHolders(
+        { ...a, isSuperAdmin: a.role === "super_admin" },
+        { ...b, isSuperAdmin: b.role === "super_admin" },
+      ),
     )
     .map<LeaderSeat>((m) => ({
       id: `member-${m.id}`,
@@ -73,7 +95,7 @@ export function mergeLeadership(
       note: s.note,
       photoURL: s.photoURL,
     }));
-  return [...holders, ...manual].sort(compareSeats);
+  return [...holders, ...manual].sort(compareHolders);
 }
 
 /**
