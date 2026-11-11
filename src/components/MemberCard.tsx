@@ -92,11 +92,23 @@ export default function MemberCard({ member, delay = 0 }: { member: UserProfile;
   const href = `/member/${member.memberId ?? member.id}`;
   const showDonor = member.isDonor && member.bloodGroup;
   return (
-    <Reveal delay={delay} className="cv-auto h-full min-w-0">
+    <Reveal
+      delay={delay}
+      /* The hover lift lives on the Reveal wrapper, NOT on the card
+         Link: the wrapper carries .cv-auto (content-visibility: auto,
+         2026-11-11 phone-lag fix), whose paint containment clips
+         anything the card paints outside the wrapper box - a lift on
+         the Link pushed the card 6px above the wrapper and cut the
+         top border on hover. Lifting the whole wrapper moves the
+         clip box with it, so the border stays intact. transition
+         covers `translate` only, so it never fights framer-motion's
+         entrance transform on this same element. */
+      className="cv-auto card-lift-sm h-full min-w-0 transition-[translate] duration-300"
+    >
       <div className="relative h-full">
         <Link
           href={href}
-          className="card-lift-sm group flex h-full flex-col rounded-3xl border border-ivory/10 bg-ink-2 p-6 transition-all duration-300 hover:border-gold/40 hover:shadow-[0_18px_50px_rgba(212,169,78,0.12)]"
+          className="group flex h-full flex-col rounded-3xl border border-ivory/10 bg-ink-2 p-6 transition-all duration-300 hover:border-gold/40 hover:shadow-[0_18px_50px_rgba(212,169,78,0.12)]"
         >
         <div className="flex items-center gap-4">
           <Avatar name={member.name} photoURL={member.photoURL} zoomable />
