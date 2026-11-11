@@ -7,7 +7,7 @@ import DashboardShell, { type DashSection } from "@/components/DashboardShell";
 import { Avatar } from "@/components/MemberCard";
 import { useAuth } from "@/lib/auth-context";
 import { ROLE_META, POSITIONS } from "@/lib/types";
-import { usePrivatePhone } from "@/lib/data";
+import { usePrivatePhone, byMemberId } from "@/lib/data";
 import ContentManager from "@/components/content/ContentManager";
 import V2Manager, { V2_SECTIONS } from "@/components/content/V2Manager";
 import BatchModeration from "@/components/BatchModeration";
@@ -35,7 +35,8 @@ export default function AdminPage() {
   const canSeeData = hasPermission("view_member_data");
 
   const pending = useMemo(() => members.filter((m) => m.status === "pending"), [members]);
-  const approved = useMemo(() => members.filter((m) => m.status === "approved"), [members]);
+  /* Alumni ID serial order (owner, 2026-11-11): same as /members. */
+  const approved = useMemo(() => members.filter((m) => m.status === "approved").sort(byMemberId), [members]);
   const banned = useMemo(() => members.filter((m) => m.status === "banned"), [members]);
 
   const contentSections: { kind: ContentKind; perm: string; label: string }[] = (

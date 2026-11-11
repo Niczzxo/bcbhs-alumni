@@ -89,6 +89,24 @@ export function useDirectory(): UserProfile[] {
   return members.filter((m) => m.status === "approved");
 }
 
+/* Alumni ID serial order (owner, 2026-11-11): the card prints
+   "Alumni-NNNN" - the trailing number of the stored memberId, a
+   global running serial - so a list reads Alumni-0001, Alumni-0002,
+   ... in join order, regardless of batch. Ties (two members sharing
+   one number) fall back to the full ID, then name. Used by /members
+   and by the staff dashboards (Roles & Access, All Members). */
+export function byMemberId(a: { memberId?: string; name: string }, b: { memberId?: string; name: string }) {
+  const num = (id?: string) => {
+    const m = id?.match(/(\d+)\s*$/);
+    return m ? Number(m[1]) : Number.POSITIVE_INFINITY; // no ID goes last
+  };
+  const diff = num(a.memberId) - num(b.memberId);
+  if (diff !== 0) return diff;
+  const idDiff = (a.memberId ?? "").localeCompare(b.memberId ?? "");
+  if (idDiff !== 0) return idDiff;
+  return a.name.localeCompare(b.name);
+}
+
 /** Find one member by id or memberId. */
 export function useMember(lookup: string | undefined): UserProfile | null | undefined {
   const { members, user } = useAuth();

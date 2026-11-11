@@ -11,6 +11,7 @@ import AboutEditor from "@/components/content/AboutEditor";
 import SettingsManager from "@/components/content/SettingsManager";
 import OverviewPanel from "@/components/content/OverviewPanel";
 import { useAuth } from "@/lib/auth-context";
+import { byMemberId } from "@/lib/data";
 import { PERMISSIONS, ROLE_META, POSITIONS } from "@/lib/types";
 import type { MemberRole, UserProfile } from "@/lib/types";
 
@@ -25,7 +26,9 @@ import type { MemberRole, UserProfile } from "@/lib/types";
 export default function SuperAdminPage() {
   const { user, members, loading, setPermissions, setRole, setPosition, approveMember, rejectMember, banMember, unbanMember, deleteMember } = useAuth();
 
-  const approved = useMemo(() => members.filter((m) => m.status === "approved"), [members]);
+  /* Alumni ID serial order (owner, 2026-11-11): All Members and
+     Roles & Access both read Alumni-0001, 0002, ... like /members. */
+  const approved = useMemo(() => members.filter((m) => m.status === "approved").sort(byMemberId), [members]);
   /* All Members search (owner's request, 2026-10-23): a name field
      (quietly also matches email / member ID when pasted) plus a
      batch picker; both filters combine. */
@@ -69,7 +72,7 @@ export default function SuperAdminPage() {
   const pending = useMemo(() => members.filter((m) => m.status === "pending"), [members]);
   const banned = useMemo(() => members.filter((m) => m.status === "banned"), [members]);
   const staff = useMemo(
-    () => members.filter((m) => (m.status === "approved" || m.status === "banned") && m.role !== "member"),
+    () => members.filter((m) => (m.status === "approved" || m.status === "banned") && m.role !== "member").sort(byMemberId),
     [members],
   );
   /* Batch Reps = approved members actually holding the Batch Rep role
@@ -271,9 +274,13 @@ export default function SuperAdminPage() {
                   onClick={() => togglePerm(m, p.key)}
                   className={`rounded-2xl border p-4 text-left transition-all ${on ? "border-gold/60 bg-gold/10" : "border-ivory/10 bg-ink hover:border-gold/30"}`}
                 >
-                  <p className="flex items-center justify-between text-sm font-semibold text-ivory">
-                    {p.label}
-                    <span className={`ml-2 inline-block h-5 w-9 shrink-0 rounded-full p-0.5 transition-colors ${on ? "bg-gold" : "bg-ivory/20"}`}>
+                  <p className="flex items-center justify-between gap-2 text-sm font-semibold text-ivory">
+                    {/* min-w-0 is load-bearing: without it the label
+                        cannot shrink below its longest word, so a long
+                        label (Post Announcements) runs under the toggle
+                        in a narrow card instead of wrapping (2026-11-11). */}
+                    <span className="min-w-0">{p.label}</span>
+                    <span className={`inline-block h-5 w-9 shrink-0 rounded-full p-0.5 transition-colors ${on ? "bg-gold" : "bg-ivory/20"}`}>
                       <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${on ? "translate-x-4" : ""}`} />
                     </span>
                   </p>

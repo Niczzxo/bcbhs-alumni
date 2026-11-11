@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import MemberCard from "@/components/MemberCard";
 import Reveal from "@/components/Reveal";
-import { useDirectory } from "@/lib/data";
+import { useDirectory, byMemberId } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/components/AuthModal";
 import { BLOOD_GROUPS, BD_DISTRICTS } from "@/lib/types";
@@ -21,22 +21,6 @@ const inputCls =
  * accounts never see it, so member data cannot leak to outsiders.
  * The public /directory instead shows position holders only.
  */
-/* Members show in Alumni ID serial order (owner, 2026-11-11):
-   the card prints "Alumni-NNNN" - the trailing number of the stored
-   memberId, a global running serial - so the list reads Alumni-0001,
-   Alumni-0002, ... in join order, regardless of batch. Ties (two
-   members sharing one number) fall back to the full ID, then name. */
-function byMemberId(a: { memberId?: string; name: string }, b: { memberId?: string; name: string }) {
-  const num = (id?: string) => {
-    const m = id?.match(/(\d+)\s*$/);
-    return m ? Number(m[1]) : Number.POSITIVE_INFINITY; // no ID goes last
-  };
-  const diff = num(a.memberId) - num(b.memberId);
-  if (diff !== 0) return diff;
-  const idDiff = (a.memberId ?? "").localeCompare(b.memberId ?? "");
-  if (idDiff !== 0) return idDiff;
-  return a.name.localeCompare(b.name);
-}
 
 export default function MembersPage() {
   const { user, loading, isAdmin, isSuperAdmin } = useAuth();
