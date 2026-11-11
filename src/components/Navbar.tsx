@@ -466,12 +466,6 @@ export default function Navbar() {
                     ))}
                   {isVerifiedMember && (
                     <>
-                      <motion.li
-                        variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.3 } } }}
-                        className="px-4 pb-1 pt-5 text-[10px] font-bold uppercase tracking-[0.28em] text-muted"
-                      >
-                        More
-                      </motion.li>
                       {MEMBER_MORE_LINKS.map((link) => (
                         <motion.li
                           key={link.label}
