@@ -21,6 +21,24 @@ const inputCls =
  * accounts never see it, so member data cannot leak to outsiders.
  * The public /directory instead shows position holders only.
  */
+/* Members show in Member ID serial order (owner, 2026-11-11):
+   BCBHS-<batch>-<seq>, so batch first, then the sequence number.
+   Members without an ID (none among approved) sort last. */
+function byMemberId(a: { memberId?: string }, b: { memberId?: string }) {
+  const aId = a.memberId ?? "";
+  const bId = b.memberId ?? "";
+  if (!aId && !bId) return 0;
+  if (!aId) return 1;
+  if (!bId) return -1;
+  const pa = aId.split("-");
+  const pb = bId.split("-");
+  const batchDiff = Number(pa[1] ?? 0) - Number(pb[1] ?? 0);
+  if (batchDiff !== 0) return batchDiff;
+  const seqDiff = Number(pa[2] ?? 0) - Number(pb[2] ?? 0);
+  if (seqDiff !== 0) return seqDiff;
+  return aId.localeCompare(bId);
+}
+
 export default function MembersPage() {
   const { user, loading, isAdmin, isSuperAdmin } = useAuth();
   const { openAuthModal } = useAuthModal();
@@ -44,7 +62,7 @@ export default function MembersPage() {
       if (blood && m.bloodGroup !== blood) return false;
       if (runningOnly && !m.eduRunning) return false;
       return true;
-    });
+    }).sort(byMemberId);
   }, [approvedMembers, q, batch, district, profession, blood, runningOnly]);
 
   const clear = () => { setQ(""); setBatch(""); setDistrict(""); setProfession(""); setBlood(""); setRunningOnly(false); };
