@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Avatar } from "@/components/MemberCard";
 import { useAuth } from "@/lib/auth-context";
+import { byMemberId } from "@/lib/data";
 import type { UserProfile } from "@/lib/types";
 
 /**
@@ -34,8 +35,12 @@ export default function BatchModeration() {
         (isEditor || m.batch === user.batch),
     );
   }, [members, user, isEditor]);
-  const approved = useMemo(() => moderatable.filter((m) => m.status === "approved"), [moderatable]);
-  const banned = useMemo(() => moderatable.filter((m) => m.status === "banned"), [moderatable]);
+  /* Alumni ID serial order (owner, 2026-11-11): same as the super
+     admin's lists - Alumni-0001, 0002, ... The editor view already
+     covers every batch's plain members; batch reps see only their
+     own batch (owner's rule, server-enforced). */
+  const approved = useMemo(() => moderatable.filter((m) => m.status === "approved").sort(byMemberId), [moderatable]);
+  const banned = useMemo(() => moderatable.filter((m) => m.status === "banned").sort(byMemberId), [moderatable]);
 
   if (!user || !canModerate) {
     if (user?.role === "admin" || isEditor) {
