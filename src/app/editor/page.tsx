@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import RequireRole from "@/components/RequireRole";
-import Reveal from "@/components/Reveal";
 import DashboardShell, { type DashSection } from "@/components/DashboardShell";
 import { useAuth } from "@/lib/auth-context";
 import ContentManager from "@/components/content/ContentManager";
 import V2Manager, { V2_SECTIONS } from "@/components/content/V2Manager";
 import BatchModeration from "@/components/BatchModeration";
 import PendingApprovals from "@/components/PendingApprovals";
+import OverviewPanel from "@/components/content/OverviewPanel";
 import type { ContentKind } from "@/components/content/ContentManager";
 
 /**
@@ -18,14 +18,24 @@ import type { ContentKind } from "@/components/content/ContentManager";
  * content only; member approvals and roles live in the admin panels.
  */
 export default function EditorPage() {
-  const { user, members, loading, approveMember, rejectMember, hasPermission } = useAuth();
+  const { members, loading, approveMember, rejectMember, hasPermission } = useAuth();
 
   /* Pending registrations for the Approvals sector (editors with the
      approve_members grant see them — the auth context fetches the
      full member list for grant-holding editors). */
   const pending = useMemo(() => members.filter((m) => m.status === "pending"), [members]);
+  const approved = useMemo(() => members.filter((m) => m.status === "approved"), [members]);
+  const banned = useMemo(() => members.filter((m) => m.status === "banned"), [members]);
+  const batchReps = useMemo(() => members.filter((m) => m.status === "approved" && m.role === "admin"), [members]);
+  const editors = useMemo(() => members.filter((m) => m.role === "editor"), [members]);
   const canApprove = hasPermission("approve_members");
   const canSeeData = hasPermission("view_member_data");
+  const canModerate = hasPermission("moderate_members");
+
+  /* Controlled dashboard key so the Overview's cards and Quick
+     Actions can jump into sectors, like the super admin's overview. */
+  const [dashKey, setDashKey] = useState("overview");
+  const handleJump = useCallback((key: string) => setDashKey(key), []);
 
   const kinds: { kind: ContentKind; perm: string; label: string }[] = (
     [
@@ -37,38 +47,39 @@ export default function EditorPage() {
   ).filter((s) => hasPermission(s.perm));
   const kindsMemo = useMemo(() => kinds, [kinds]);
 
+  /* Quick Actions for the editor overview (owner, 2026-11-11): only
+     the sectors this editor actually has, in sidebar order. */
+  const editorActions = useMemo(
+    () => [
+      ...(canApprove ? [{ label: "Approvals", key: "approvals" }] : []),
+      ...(canModerate ? [{ label: "Moderation", key: "moderation" }] : []),
+      ...kindsMemo.map((s) => ({ label: s.label, key: s.kind })),
+      ...V2_SECTIONS.filter((v) => !v.needsContentPerm || hasPermission("post_announcements")).map((v) => ({
+        label: v.label,
+        key: `v2-${v.key}`,
+      })),
+    ],
+    [canApprove, canModerate, kindsMemo, hasPermission],
+  );
+
   const sections: DashSection[] = useMemo<DashSection[]>(() => [
     {
       key: "overview",
       label: "Overview",
       content: (
-        <Reveal className="rounded-3xl border border-ivory/10 bg-ink-2 p-7">
-          <p className="font-display text-xl font-bold text-ivory">
-            Welcome, {user?.name} <span className="ml-1 rounded-full bg-gold/15 px-3 py-1 align-middle text-[10px] font-bold uppercase tracking-widest text-gold-2">Editor</span>
-          </p>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-            This is your own workspace. Use the sidebar to jump between sectors, each one opens
-            its own work area where you can add, edit or remove content, and everything updates
-            on the public site right away. Official positions and roles are handled from the
-            Batch Rep and Super Admin panels. If the super admin grants you the Approve Members
-            permission, the Approvals sector lets you approve or reject registrations; the
-            Moderate Members permission adds the Moderation sector to ban, unban and delete
-            any member, as the super admin&apos;s alternative.
-          </p>
-          {kindsMemo.length > 0 ? (
-            <div className="mt-5 flex flex-wrap gap-2">
-              {kindsMemo.map((s) => (
-                <span key={s.kind} className="rounded-full border border-gold/30 bg-gold/5 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest text-gold-2">
-                  {s.label}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-5 text-sm text-muted">
-              No content sections are assigned to your account yet. Ask the super admin to check your editor access.
-            </p>
-          )}
-        </Reveal>
+        <OverviewPanel
+          variant="editor"
+          approved={approved.length}
+          pending={pending.length}
+          banned={banned.length}
+          batchReps={batchReps.length}
+          editors={editors.length}
+          members={members}
+          onJump={handleJump}
+          canApprove={canApprove}
+          canModerate={canModerate}
+          actions={editorActions}
+        />
       ),
     },
     ...(hasPermission("approve_members")
@@ -117,11 +128,11 @@ export default function EditorPage() {
         </div>
       ),
     })),
-  ], [user, kindsMemo, hasPermission, pending, loading, canApprove, canSeeData, approveMember, rejectMember]);
+  ], [kindsMemo, hasPermission, pending, approved, banned, batchReps, editors, members, loading, canApprove, canSeeData, canModerate, approveMember, rejectMember, handleJump, editorActions]);
 
   return (
     <RequireRole role="editor" eyebrow="Content team" title={<>Editor <span className="text-gold-gradient">Dashboard</span></>}>
-      <DashboardShell sections={sections} />
+      <DashboardShell sections={sections} activeKey={dashKey} onActiveChange={setDashKey} />
     </RequireRole>
   );
 }

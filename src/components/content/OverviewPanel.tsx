@@ -417,6 +417,18 @@ export default function OverviewPanel({
   editors,
   members,
   onJump,
+  /* Editor variant (owner, 2026-11-11): editors get the same overview
+     as the super admin, but only what they can actually do or see.
+     Role cards are super-admin-only; Pending shows only with the
+     approve_members grant, Banned only with moderate_members, and
+     `actions` replaces the Quick Actions with the editor's own
+     sections. Counts themselves stay honest: without a grant the
+     editor's list cannot see pending/banned, so those cards hide
+     instead of showing a false zero. */
+  variant = "super_admin",
+  canApprove = true,
+  canModerate = true,
+  actions,
 }: {
   approved: number;
   pending: number;
@@ -429,7 +441,12 @@ export default function OverviewPanel({
      every role holder instead of the Batch Reps). Other jumps carry
      no filter. */
   onJump: (key: string, roleFilter?: "admin" | "editor") => void;
+  variant?: "super_admin" | "editor";
+  canApprove?: boolean;
+  canModerate?: boolean;
+  actions?: { label: string; key: string }[];
 }) {
+  const isEditor = variant === "editor";
   const { visits, loaded } = useVisits();
   const content = useContent();
   const [dateLine, setDateLine] = useState("");
@@ -545,7 +562,9 @@ export default function OverviewPanel({
     value: number;
     label: string;
     sub: string;
-    jump: string;
+    /* No jump (editor's Approved card): the editor has no member-list
+       section, so the card renders as a plain panel, not a button. */
+    jump?: string;
     accent: boolean;
     roleFilter?: "admin" | "editor";
   }[] = [
@@ -554,45 +573,78 @@ export default function OverviewPanel({
       value: approved,
       label: "Approved members",
       sub: `${members.length} accounts in total`,
-      jump: "all-members",
+      jump: isEditor ? undefined : "all-members",
       accent: false,
     },
-    {
-      icon: <ClockIcon />,
-      value: pending,
-      label: "Pending approvals",
-      sub: pending > 0 ? "Waiting for your review" : "All caught up",
-      jump: "approvals",
-      accent: pending > 0,
-    },
-    {
-      icon: <ShieldIcon />,
-      value: batchReps,
-      label: "Batch Reps",
-      sub: "Assigned by super admin",
-      jump: "roles",
-      accent: false,
-      roleFilter: "admin",
-    },
-    {
-      icon: <PenIcon />,
-      value: editors,
-      label: "Editors",
-      sub: "Content team",
-      jump: "roles",
-      accent: false,
-      roleFilter: "editor",
-    },
+    ...(!isEditor || canApprove
+      ? [
+          {
+            icon: <ClockIcon />,
+            value: pending,
+            label: "Pending approvals",
+            sub: pending > 0 ? "Waiting for your review" : "All caught up",
+            jump: "approvals",
+            accent: pending > 0,
+          },
+        ]
+      : []),
+    ...(isEditor
+      ? canModerate
+        ? [
+            {
+              icon: <ShieldIcon />,
+              value: banned,
+              label: "Banned members",
+              sub: "In moderation",
+              jump: "moderation",
+              accent: false,
+            },
+          ]
+        : []
+      : [
+          {
+            icon: <ShieldIcon />,
+            value: batchReps,
+            label: "Batch Reps",
+            sub: "Assigned by super admin",
+            jump: "roles",
+            accent: false,
+            roleFilter: "admin" as const,
+          },
+          {
+            icon: <PenIcon />,
+            value: editors,
+            label: "Editors",
+            sub: "Content team",
+            jump: "roles",
+            accent: false,
+            roleFilter: "editor" as const,
+          },
+        ]),
   ];
 
-  const quickActions: { label: string; key: string; icon: ReactNode }[] = [
-    { label: "Approvals", key: "approvals", icon: <CheckCircleIcon /> },
-    { label: "All Members", key: "all-members", icon: <UsersIcon /> },
-    { label: "Events", key: "events", icon: <CalendarIcon /> },
-    { label: "Announcements", key: "announcements", icon: <MegaphoneIcon /> },
-    { label: "Batch Groups", key: "batches", icon: <ChatIcon /> },
-    { label: "Site Settings", key: "settings", icon: <GearIcon /> },
-  ];
+  const actionIcons: Record<string, ReactNode> = {
+    approvals: <CheckCircleIcon />,
+    moderation: <ShieldIcon />,
+    events: <CalendarIcon />,
+    announcements: <MegaphoneIcon />,
+    gallery: <EyeIcon />,
+    committee: <UsersIcon />,
+    "v2-blood": <ZapIcon />,
+    "v2-mentors": <PersonIcon />,
+    "v2-fund": <BarChartIcon />,
+    "v2-batches": <ChatIcon />,
+  };
+  const quickActions: { label: string; key: string; icon: ReactNode }[] = actions
+    ? actions.map((a) => ({ ...a, icon: actionIcons[a.key] ?? <ZapIcon /> }))
+    : [
+        { label: "Approvals", key: "approvals", icon: <CheckCircleIcon /> },
+        { label: "All Members", key: "all-members", icon: <UsersIcon /> },
+        { label: "Events", key: "events", icon: <CalendarIcon /> },
+        { label: "Announcements", key: "announcements", icon: <MegaphoneIcon /> },
+        { label: "Batch Groups", key: "batches", icon: <ChatIcon /> },
+        { label: "Site Settings", key: "settings", icon: <GearIcon /> },
+      ];
 
   return (
     <div className="grid grid-cols-1 gap-6">
@@ -610,12 +662,12 @@ export default function OverviewPanel({
                 <>
                   , with <span className="font-semibold text-gold-2">{pending} registration{pending === 1 ? "" : "s"} waiting</span> for review
                 </>
-              ) : (
+              ) : (!isEditor || canApprove) ? (
                 ", and no registrations waiting"
-              )}
+              ) : null}
               . {traffic.today} site visit{traffic.today === 1 ? "" : "s"} so far today.
             </p>
-            {pending > 0 && (
+            {pending > 0 && (!isEditor || canApprove) && (
               <button
                 type="button"
                 onClick={() => onJump("approvals")}
@@ -630,17 +682,14 @@ export default function OverviewPanel({
 
       {/* stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((s, i) => (
-          <Reveal key={s.label} delay={i * 0.06}>
-            <button
-              type="button"
-              onClick={() => onJump(s.jump, s.roleFilter)}
-              className={`card-lift relative w-full overflow-hidden rounded-3xl border p-5 pb-9 text-left sm:p-6 sm:pb-8 ${
-                s.accent
-                  ? "border-gold/50 bg-gold/[0.07] shadow-[0_0_28px_rgba(212,169,78,0.15)]"
-                  : "border-ivory/10 bg-ink-2"
-              }`}
-            >
+        {stats.map((s, i) => {
+          const statCardCls = `card-lift relative w-full overflow-hidden rounded-3xl border p-5 pb-9 text-left sm:p-6 sm:pb-8 ${
+            s.accent
+              ? "border-gold/50 bg-gold/[0.07] shadow-[0_0_28px_rgba(212,169,78,0.15)]"
+              : "border-ivory/10 bg-ink-2"
+          }`;
+          const body = (
+            <>
               <span className="flex items-start justify-between">
                 <span
                   className={`flex h-11 w-11 items-center justify-center rounded-full border ${
@@ -649,9 +698,11 @@ export default function OverviewPanel({
                 >
                   {s.icon}
                 </span>
-                <span className="flex h-6 w-6 items-center justify-center rounded-full border border-ivory/15 text-sm leading-none text-muted">
-                  ›
-                </span>
+                {s.jump && (
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full border border-ivory/15 text-sm leading-none text-muted">
+                    ›
+                  </span>
+                )}
               </span>
               <span className="font-display text-gold-gradient mt-4 block text-4xl font-extrabold sm:text-5xl">
                 {s.value}
@@ -665,9 +716,20 @@ export default function OverviewPanel({
               <svg viewBox="0 0 96 28" aria-hidden="true" className="pointer-events-none absolute bottom-1 right-3 h-6 w-20 opacity-40 sm:h-7 sm:w-24" fill="none" stroke="#e9c766" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="2,20 16,13 30,16 46,7 62,11 78,5 94,9" />
               </svg>
-            </button>
-          </Reveal>
-        ))}
+            </>
+          );
+          return (
+            <Reveal key={s.label} delay={i * 0.06}>
+              {s.jump ? (
+                <button type="button" onClick={() => onJump(s.jump!, s.roleFilter)} className={statCardCls}>
+                  {body}
+                </button>
+              ) : (
+                <div className={statCardCls}>{body}</div>
+              )}
+            </Reveal>
+          );
+        })}
       </div>
 
       {/* visitors */}
@@ -815,13 +877,16 @@ export default function OverviewPanel({
                 </span>
                 <span className="font-display text-lg font-bold text-ivory">Members by Batch</span>
               </p>
-              <button
-                type="button"
-                onClick={() => onJump("all-members")}
-                className="shrink-0 text-[11px] font-extrabold uppercase tracking-[0.14em] text-gold-2 transition-colors hover:text-gold"
-              >
-                View Details →
-              </button>
+              {/* Editors have no member-list section to jump to. */}
+              {!isEditor && (
+                <button
+                  type="button"
+                  onClick={() => onJump("all-members")}
+                  className="shrink-0 text-[11px] font-extrabold uppercase tracking-[0.14em] text-gold-2 transition-colors hover:text-gold"
+                >
+                  View Details →
+                </button>
+              )}
             </div>
             <div className="mt-5 grid grid-cols-1 gap-4">
               {batches.map((b) => (
@@ -843,8 +908,8 @@ export default function OverviewPanel({
               ))}
               {batches.length === 0 && <p className="text-sm text-muted">No approved members yet.</p>}
             </div>
-            {banned > 0 && (
-              <button type="button" onClick={() => onJump("banned")} className="mt-6 text-xs font-bold uppercase tracking-widest text-red-300 hover:underline">
+            {banned > 0 && (!isEditor || canModerate) && (
+              <button type="button" onClick={() => onJump(isEditor ? "moderation" : "banned")} className="mt-6 text-xs font-bold uppercase tracking-widest text-red-300 hover:underline">
                 {banned} banned account{banned === 1 ? "" : "s"} →
               </button>
             )}
@@ -861,13 +926,16 @@ export default function OverviewPanel({
                   </span>
                   <span className="font-display text-lg font-bold text-ivory">Latest Members</span>
                 </p>
-                <button
-                  type="button"
-                  onClick={() => onJump("all-members")}
-                  className="shrink-0 text-[11px] font-extrabold uppercase tracking-[0.14em] text-gold-2 transition-colors hover:text-gold"
-                >
-                  View all →
-                </button>
+                {/* Editors have no member-list section to jump to. */}
+                {!isEditor && (
+                  <button
+                    type="button"
+                    onClick={() => onJump("all-members")}
+                    className="shrink-0 text-[11px] font-extrabold uppercase tracking-[0.14em] text-gold-2 transition-colors hover:text-gold"
+                  >
+                    View all →
+                  </button>
+                )}
               </div>
               <div className="mt-4 grid gap-1">
                 {latest.map((m) => (
