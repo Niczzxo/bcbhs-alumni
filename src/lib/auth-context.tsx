@@ -677,7 +677,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const approveMember = useCallback(
     async (id: string) => {
       const target = members.find((m) => m.id === id);
-      const memberId = target?.memberId ?? nextMemberId(target?.batch ?? "0000", members);
+      /* Fresh number (owner, 2026-11-11): the list on screen can be
+         stale - cache-first paint, or another approver just issued a
+         number from their own phone - so re-read the collection from
+         the server before minting the next Alumni serial. One extra
+         read per approval; approvals are rare and manual. Offline,
+         fall back to the list on screen. */
+      let freshMembers = members;
+      if (isFirebaseConfigured && db) {
+        try {
+          const { collection, getDocs } = await import("firebase/firestore");
+          const snap = await getDocs(collection(db, "users"));
+          freshMembers = snap.docs.map(
+            (d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) }) as UserProfile,
+          );
+        } catch {
+          /* keep the list on screen */
+        }
+      }
+      const memberId = target?.memberId ?? nextMemberId(target?.batch ?? "0000", freshMembers);
       setMembers((prev) =>
         prev.map((m) => (m.id === id ? { ...m, status: "approved", memberId } : m)),
       );
