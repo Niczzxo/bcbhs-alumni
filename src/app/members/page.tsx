@@ -21,22 +21,21 @@ const inputCls =
  * accounts never see it, so member data cannot leak to outsiders.
  * The public /directory instead shows position holders only.
  */
-/* Members show in Member ID serial order (owner, 2026-11-11):
-   BCBHS-<batch>-<seq>, so batch first, then the sequence number.
-   Members without an ID (none among approved) sort last. */
-function byMemberId(a: { memberId?: string }, b: { memberId?: string }) {
-  const aId = a.memberId ?? "";
-  const bId = b.memberId ?? "";
-  if (!aId && !bId) return 0;
-  if (!aId) return 1;
-  if (!bId) return -1;
-  const pa = aId.split("-");
-  const pb = bId.split("-");
-  const batchDiff = Number(pa[1] ?? 0) - Number(pb[1] ?? 0);
-  if (batchDiff !== 0) return batchDiff;
-  const seqDiff = Number(pa[2] ?? 0) - Number(pb[2] ?? 0);
-  if (seqDiff !== 0) return seqDiff;
-  return aId.localeCompare(bId);
+/* Members show in Alumni ID serial order (owner, 2026-11-11):
+   the card prints "Alumni-NNNN" - the trailing number of the stored
+   memberId, a global running serial - so the list reads Alumni-0001,
+   Alumni-0002, ... in join order, regardless of batch. Ties (two
+   members sharing one number) fall back to the full ID, then name. */
+function byMemberId(a: { memberId?: string; name: string }, b: { memberId?: string; name: string }) {
+  const num = (id?: string) => {
+    const m = id?.match(/(\d+)\s*$/);
+    return m ? Number(m[1]) : Number.POSITIVE_INFINITY; // no ID goes last
+  };
+  const diff = num(a.memberId) - num(b.memberId);
+  if (diff !== 0) return diff;
+  const idDiff = (a.memberId ?? "").localeCompare(b.memberId ?? "");
+  if (idDiff !== 0) return idDiff;
+  return a.name.localeCompare(b.name);
 }
 
 export default function MembersPage() {
