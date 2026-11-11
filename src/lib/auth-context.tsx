@@ -165,8 +165,17 @@ function readCachedProfile(): UserProfile | null {
   }
 }
 
+/* The Alumni suffix is a global running serial: take max+1, never
+ * count+1. Count reuses a freed number after a deletion, and two
+ * approvals computed from one stale list collide - that is how two
+ * members ended up sharing Alumni-0016 and Alumni-0027 (fixed
+ * 2026-11-11; gaps left by deleted members stay retired). */
 function nextMemberId(batch: string, members: UserProfile[]): string {
-  const seq = members.filter((m) => m.memberId).length + 1;
+  const seq =
+    members.reduce((max, m) => {
+      const n = Number(m.memberId?.match(/(\d+)\s*$/)?.[1] ?? 0);
+      return Math.max(max, Number.isFinite(n) ? n : 0);
+    }, 0) + 1;
   return `BCBHS-${batch}-${String(seq).padStart(4, "0")}`;
 }
 
