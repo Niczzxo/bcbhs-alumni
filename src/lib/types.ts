@@ -229,17 +229,21 @@ export const BD_DISTRICTS = [
   "Tangail", "Thakurgaon",
 ];
 
+/** First batch year: the school was founded in 1977 (owner,
+    2026-11-11) - a 1978 or 1980 alumnus must be able to register. */
+export const BATCH_START_YEAR = 1977;
+
 /** Batch years offered on the registration form. Static fallback for
     the first render (see useBatchYears); the live list always runs
     up to the current calendar year. */
-export const BATCH_YEARS: string[] = Array.from({ length: 32 }, (_, i) =>
+export const BATCH_YEARS: string[] = Array.from({ length: 2026 - BATCH_START_YEAR + 1 }, (_, i) =>
   String(2026 - i),
 );
 
-/** Batch years from 1995 up to the given year, newest first. */
+/** Batch years from the founding year up to the given year, newest first. */
 export function batchYearsUpTo(year: number): string[] {
-  const top = Math.max(year, 1995);
-  return Array.from({ length: top - 1995 + 1 }, (_, i) =>
+  const top = Math.max(year, BATCH_START_YEAR);
+  return Array.from({ length: top - BATCH_START_YEAR + 1 }, (_, i) =>
     String(top - i),
   );
 }
