@@ -59,9 +59,13 @@ export default function V2Manager({ section }: { section: V2SectionKey }) {
   /* Batch link self-service (owner's rule, 2026-10-23): the super
      admin sees every batch; a Batch Rep sees only their OWN batch,
      so they can post their batch's WhatsApp link without waiting
-     for the super admin. Enforced in firestore.rules too. */
+     for the super admin. Enforced in firestore.rules too. Editors
+     see every batch read-only (owner, 2026-11-11): the links are
+     staff-visible, but only the super admin and the batch's own
+     Batch Rep may change one, so editors get no Save button. */
   const isBatchRep = user?.role === "admin";
-  const visibleBatches = isSuperAdmin
+  const isEditor = user?.role === "editor";
+  const visibleBatches = isSuperAdmin || isEditor
     ? batchesWithMembers
     : isBatchRep && user?.batch
       ? [user.batch]
@@ -117,7 +121,12 @@ export default function V2Manager({ section }: { section: V2SectionKey }) {
           {mentors.map((m) => (
             <div key={m.id} className="flex items-center justify-between gap-3 rounded-2xl border border-ivory/10 bg-ink px-4 py-3">
               <p className="text-sm text-ivory">{m.name} <span className="text-xs text-muted">· {m.expertise}</span></p>
-              <button className={btnDanger} onClick={() => removeMentor(m.id)}>Remove</button>
+              {/* Remove follows firestore.rules (owner, 2026-11-11):
+                  the super admin and Batch Reps may remove any
+                  listing; an editor may remove only their own. */}
+              {(isSuperAdmin || isBatchRep || m.memberId === user?.id) && (
+                <button className={btnDanger} onClick={() => removeMentor(m.id)}>Remove</button>
+              )}
             </div>
           ))}
         </div>
@@ -205,14 +214,19 @@ export default function V2Manager({ section }: { section: V2SectionKey }) {
 {section === "batches" && (
         <>
       {/* --------------------------- batch links --------------------------- */}
-      {(isSuperAdmin || isBatchRep) && (
+      {(isSuperAdmin || isBatchRep || isEditor) && (
         <div className={card}>
           <SectionTitle blurb="WhatsApp group invite link per batch, shown on the Batch Groups page.">
             Batch WhatsApp Links
           </SectionTitle>
-          {!isSuperAdmin && (
+          {!isSuperAdmin && !isEditor && (
             <p className="mt-3 rounded-xl border border-gold/25 bg-gold/5 px-4 py-2.5 text-xs text-gold-2">
               As a Batch Rep you manage your own batch only: Batch {user?.batch}. Other batches stay with the super admin.
+            </p>
+          )}
+          {isEditor && (
+            <p className="mt-3 rounded-xl border border-gold/25 bg-gold/5 px-4 py-2.5 text-xs text-gold-2">
+              You can view every batch link here. Only the super admin and the batch&apos;s own Batch Rep can change a link.
             </p>
           )}
           <div className="mt-4 space-y-3">
@@ -225,11 +239,12 @@ export default function V2Manager({ section }: { section: V2SectionKey }) {
                   <span className="w-14 shrink-0 text-sm font-bold text-gold-2">{batch}</span>
                   <input
                     className={inputCls}
-                    placeholder="https://chat.whatsapp.com/…"
+                    placeholder={isEditor ? "No link set yet." : "https://chat.whatsapp.com/…"}
                     value={draft}
+                    readOnly={isEditor}
                     onChange={(e) => setLinkDrafts({ ...linkDrafts, [batch]: e.target.value })}
                   />
-                  <button className={btnGhost} onClick={() => setBatchLink(batch, draft.trim())}>Save</button>
+                  {!isEditor && <button className={btnGhost} onClick={() => setBatchLink(batch, draft.trim())}>Save</button>}
                 </div>
               );
             })}
