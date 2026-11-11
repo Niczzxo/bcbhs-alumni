@@ -81,7 +81,7 @@ export default function AdminPage() {
             {approved.map((m) => (
               <div key={m.id} className="rounded-2xl border border-ivory/10 bg-ink-2 px-4 py-3">
                 <div className="flex flex-wrap items-center gap-3">
-                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" zoomable />
                   <div className="min-w-0 flex-1 basis-48">
                     <p className="text-sm font-semibold leading-snug text-ivory">{m.name}</p>
                     <p className="text-xs text-muted">
@@ -156,7 +156,7 @@ export default function AdminPage() {
               <div className="mt-6 space-y-3">
                 {banned.map((m) => (
                   <div key={m.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-red-400/20 bg-ink-2 px-4 py-3">
-                    <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+                    <Avatar name={m.name} photoURL={m.photoURL} size="sm" zoomable />
                     <div className="min-w-0 flex-1 basis-48">
                       <p className="text-sm font-semibold leading-snug text-ivory">{m.name}</p>
                       <p className="text-xs leading-relaxed text-muted">

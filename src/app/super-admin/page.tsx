@@ -141,7 +141,7 @@ export default function SuperAdminPage() {
           plus the collapse chevron (down = tap to expand downward,
           up = tap to collapse back up). */}
       <div className="flex items-start gap-4">
-        <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+        <Avatar name={m.name} photoURL={m.photoURL} size="sm" zoomable />
         <div className="min-w-0 flex-1">
           <p className="font-semibold leading-snug text-ivory">{m.name}</p>
           <p className="mt-0.5 text-xs text-muted">Batch {m.batch}</p>
@@ -337,7 +337,7 @@ export default function SuperAdminPage() {
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {pending.map((m) => (
                 <div key={m.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-ivory/10 bg-ink-2 p-5">
-                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" zoomable />
                   <div className="min-w-0 flex-1 basis-40">
                     <p className="font-semibold leading-snug text-ivory">{m.name}</p>
                     <p className="text-xs text-muted">Batch {m.batch} · {m.district} · {m.email}</p>
@@ -522,7 +522,7 @@ export default function SuperAdminPage() {
             ) : (
               banned.map((m) => (
                 <div key={m.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-red-400/20 bg-ink-2 px-4 py-3">
-                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+                  <Avatar name={m.name} photoURL={m.photoURL} size="sm" zoomable />
                   <div className="min-w-0 flex-1 basis-48">
                     <p className="text-sm font-semibold leading-snug text-ivory">{m.name}</p>
                     <p className="text-xs leading-relaxed text-muted">

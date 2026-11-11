@@ -49,7 +49,7 @@ export default function PendingApprovals({
         {pending.map((m, i) => (
           <Reveal key={m.id} delay={Math.min(i, 4) * 0.05} className="rounded-2xl border border-ivory/10 bg-ink-2 p-5">
             <div className="flex items-center gap-4">
-              <Avatar name={m.name} photoURL={m.photoURL} size="sm" />
+              <Avatar name={m.name} photoURL={m.photoURL} size="sm" zoomable />
               <div className="min-w-0 flex-1">
                 <p className="font-semibold leading-snug text-ivory">{m.name}</p>
                 <p className="break-all text-xs text-muted">

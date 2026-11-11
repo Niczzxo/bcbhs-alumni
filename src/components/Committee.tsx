@@ -51,7 +51,7 @@ export default function Committee() {
               <Reveal key={seat.id} delay={Math.min(i, 5) * 0.12}>
                 <article className="card-lift group h-full rounded-3xl border border-gold/15 bg-ink p-8 text-center transition-all duration-500 hover:border-gold/50 hover:shadow-[0_20px_60px_rgba(212,169,78,0.15)]">
                   <div className="flex justify-center">
-                    <Avatar name={seat.name} photoURL={seat.photoURL} size="md" />
+                    <Avatar name={seat.name} photoURL={seat.photoURL} size="md" zoomable />
                   </div>
                   <p className="mt-5 text-xs font-bold uppercase tracking-[0.25em] text-gold">
                     {seat.role}

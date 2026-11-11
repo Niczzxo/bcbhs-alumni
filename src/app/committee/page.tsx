@@ -37,7 +37,7 @@ export default function CommitteePage() {
               <Reveal key={seat.id} delay={i * 0.08}>
                 <article className="h-full rounded-3xl border border-ivory/10 bg-ink-2 p-8 text-center transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/40 hover:shadow-[0_18px_50px_rgba(212,169,78,0.12)]">
                   <div className="flex justify-center">
-                    <Avatar name={seat.name} photoURL={seat.photoURL} size="md" />
+                    <Avatar name={seat.name} photoURL={seat.photoURL} size="md" zoomable />
                   </div>
                   <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.3em] text-gold">{seat.role}</p>
                   <h3 className="font-display mt-2 text-xl font-bold text-ivory">{seat.name}</h3>

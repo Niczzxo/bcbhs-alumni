@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import type { UserProfile } from "@/lib/types";
 import { useAuth } from "@/lib/auth-context";
@@ -10,7 +11,10 @@ import PhotoLightbox from "./PhotoLightbox";
 
 /** Photo avatar, falls back to initials when a member has no photo.
  *  With `zoomable`, clicking the photo opens the fullscreen viewer
- *  (owner, 2026-10-31) - used on profile headers, not in lists. */
+ *  (owner, 2026-10-31) - profile headers, member cards, committee
+ *  and staff lists. The viewer is portaled to document.body so it
+ *  escapes the card Link and any scroll-reveal transform, and the
+ *  button stops the click so the card never navigates. */
 export function Avatar({
   name,
   size = "md",
@@ -46,7 +50,13 @@ export function Avatar({
         {zoomable ? (
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={(e) => {
+              /* Inside a member card this button sits in the card
+               * Link: stop the click or it navigates to the profile. */
+              e.preventDefault();
+              e.stopPropagation();
+              setOpen(true);
+            }}
             aria-label={`View ${name}'s profile picture`}
             title="View larger"
             className="cursor-zoom-in rounded-full transition-transform hover:scale-105"
@@ -56,9 +66,11 @@ export function Avatar({
         ) : (
           ring
         )}
-        {open && (
-          <PhotoLightbox photoURL={photoURL} name={name} onClose={() => setOpen(false)} />
-        )}
+        {open &&
+          createPortal(
+            <PhotoLightbox photoURL={photoURL} name={name} onClose={() => setOpen(false)} />,
+            document.body,
+          )}
       </>
     );
   }
@@ -87,7 +99,7 @@ export default function MemberCard({ member, delay = 0 }: { member: UserProfile;
           className="card-lift-sm group flex h-full flex-col rounded-3xl border border-ivory/10 bg-ink-2 p-6 transition-all duration-300 hover:border-gold/40 hover:shadow-[0_18px_50px_rgba(212,169,78,0.12)]"
         >
         <div className="flex items-center gap-4">
-          <Avatar name={member.name} photoURL={member.photoURL} />
+          <Avatar name={member.name} photoURL={member.photoURL} zoomable />
           <div className="min-w-0">
             <p className="font-display truncate text-lg font-bold text-ivory group-hover:text-gold-2">
               {member.name}
