@@ -423,3 +423,12 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+/* Long member lists: skip layout, paint and image decode for
+ * off-screen cards (perf, 2026-11-11). The Members page mounts 75
+ * cards at once and phones jank on the menu switch. `auto` keeps the
+ * last measured height so the scrollbar does not jump. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}

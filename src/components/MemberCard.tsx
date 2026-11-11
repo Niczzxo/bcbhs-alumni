@@ -42,7 +42,7 @@ export function Avatar({
        * parents, giant inside the plain mobile avatar button). */
       <span className={`seal-ring relative block ${dims} shrink-0 overflow-hidden rounded-full`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={photoURL} alt={name} className="h-full w-full object-cover" />
+        <img src={photoURL} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" />
       </span>
     );
     return (
@@ -92,7 +92,7 @@ export default function MemberCard({ member, delay = 0 }: { member: UserProfile;
   const href = `/member/${member.memberId ?? member.id}`;
   const showDonor = member.isDonor && member.bloodGroup;
   return (
-    <Reveal delay={delay} className="h-full min-w-0">
+    <Reveal delay={delay} className="cv-auto h-full min-w-0">
       <div className="relative h-full">
         <Link
           href={href}

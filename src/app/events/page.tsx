@@ -33,7 +33,7 @@ function EventCard({ e, i, onSelect }: { e: PortalEvent; i: number; onSelect: (e
               className="relative block w-full cursor-pointer"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={shown} alt={e.title} className="h-52 w-full object-cover" />
+              <img src={shown} alt={e.title} loading="lazy" decoding="async" className="h-52 w-full object-cover" />
               {/* Title overlay, always visible (owner, 2026-10-30): on phones
                   there is no hover, so the event name must read on the card
                   itself, like the gallery's album titles. */}
@@ -61,7 +61,7 @@ function EventCard({ e, i, onSelect }: { e: PortalEvent; i: number; onSelect: (e
                     className={`h-12 w-16 overflow-hidden rounded-lg ring-2 transition-all ${j === active ? "ring-gold" : "opacity-60 ring-transparent hover:opacity-100"}`}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" className="h-full w-full object-cover" />
+                    <img src={src} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>

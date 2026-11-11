@@ -131,23 +131,6 @@ const DEMO_USER_KEY = "bcbhs-demo-user-id";
  * session in the background. Display-only, Firestore rules still
  * guard every read and write server-side. */
 const AUTH_CACHE_KEY = "bcbhs-auth-cache-v1";
-/* The last verified member list for the cached profile's account, so
- * member-driven pages paint instantly on reload instead of waiting
- * for the full users fetch (perf, 2026-10-23). Keyed by uid: a
- * different account never sees another account's cached list. */
-const MEMBERS_CACHE_KEY = "bcbhs-members-cache-v1";
-
-function readCachedMembers(uid: string): UserProfile[] | null {
-  try {
-    const raw = window.localStorage.getItem(MEMBERS_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { uid?: string; members?: UserProfile[] };
-    if (!parsed || parsed.uid !== uid || !Array.isArray(parsed.members)) return null;
-    return parsed.members;
-  } catch {
-    return null;
-  }
-}
 
 /* Layout effects run before the browser paints, used for the cache
  * hydration below so the very first visible frame is already correct.
@@ -269,8 +252,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (cached) {
       setUser(cached);
       setLoading(false);
-      const cachedMembers = readCachedMembers(cached.id);
-      if (cachedMembers) setMembers(cachedMembers);
     }
   }, []);
 
@@ -288,25 +269,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user) window.localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(user));
       else {
         window.localStorage.removeItem(AUTH_CACHE_KEY);
-        window.localStorage.removeItem(MEMBERS_CACHE_KEY);
       }
     } catch {
       /* storage unavailable, reloads simply fall back to the network */
     }
   }, [user]);
-
-  /* Keep the member-list cache in step for the signed-in account. */
-  useEffect(() => {
-    if (!isFirebaseConfigured || !user || members.length === 0) return;
-    try {
-      window.localStorage.setItem(
-        MEMBERS_CACHE_KEY,
-        JSON.stringify({ uid: user.id, members }),
-      );
-    } catch {
-      /* storage full / unavailable, the list simply refetches next time */
-    }
-  }, [user, members]);
 
   /* Live-mode auth subscription. */
   useEffect(() => {
@@ -316,7 +283,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     const load = async () => {
       const { onAuthStateChanged } = await import("firebase/auth");
-      const { doc, getDoc, updateDoc, collection, getDocs, query, where } = await import("firebase/firestore");
+      const { doc, getDoc, updateDoc, collection, getDocs, getDocsFromCache, query, where } = await import("firebase/firestore");
       return onAuthStateChanged(liveAuth, async (fbUser) => {
         if (cancelled) return;
         try {
@@ -367,6 +334,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               (own?.role === "editor" &&
                 (own.permissions.includes("approve_members") ||
                   own.permissions.includes("moderate_members")));
+            /* Cache-first list (perf, 2026-11-11): the member list is
+             * ~7 MB of photo data URLs, and a plain getDocs
+             * re-downloads all of it on every app start, so the menu
+             * switch feels dead while it parses. Paint from the
+             * on-device Firestore cache first (repeat visits), then
+             * refresh from the server in the background. */
+            const listQuery = isStaff
+              ? collection(liveDb, "users")
+              : query(collection(liveDb, "users"), where("status", "==", "approved"));
+            const cachedSnap = await getDocsFromCache(listQuery).catch(() => null);
+            if (!cancelled && cachedSnap && !cachedSnap.empty) {
+              const list = cachedSnap.docs.map(
+                (d) => ({ id: d.id, ...(d.data() as Omit<UserProfile, "id">) }) as UserProfile,
+              );
+              if (own && !list.some((m) => m.id === own.id)) list.push(own);
+              setMembers(list);
+            }
             const snapList = isStaff
               ? await getDocs(collection(liveDb, "users"))
               : await approvedPromise;
