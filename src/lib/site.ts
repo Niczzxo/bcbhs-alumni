@@ -80,4 +80,10 @@ export const SITE_FACEBOOK = "https://www.facebook.com/share/1DYzEdVYQV/";
 export const SITE_INSTAGRAM = "https://instagram.com/bcbhsalumni";
 export const SITE_WHATSAPP = "https://chat.whatsapp.com/LOb86Kx4UL04AV3dQSnTCo?s=cl&p=a&mlu=4&ilr=4";
 export const SITE_EMAIL = "bcbhs.alumni2023@gmail.com";
+/** Email printed on the ID card (owner, 2026-11-12): the on-domain
+    info@ address, not the Gmail - it forwards to the alumni Gmail,
+    and it keeps the card on-brand next to bcbhsalumni.org. The
+    Gmail stays SITE_EMAIL for the footer, contact page and anywhere
+    the site setting falls back to it. */
+export const SITE_CARD_EMAIL = "info@bcbhsalumni.org";
 export const SITE_SCHOOL = "https://bcbhs.edu.bd/";

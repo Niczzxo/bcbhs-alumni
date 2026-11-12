@@ -6,8 +6,7 @@ import Image from "next/image";
 import { toPng } from "html-to-image";
 import DottedQr from "./DottedQr";
 import type { UserProfile } from "@/lib/types";
-import { SITE_EMAIL } from "@/lib/site";
-import { useContent } from "@/lib/content-context";
+import { SITE_CARD_EMAIL } from "@/lib/site";
 
 /**
  * Official BCBHS Alumni ID card, portrait CR80 (53.98 × 85.6 mm).
@@ -256,8 +255,10 @@ function ContactRow({ icon, text }: { icon: React.ReactNode; text: string }) {
 }
 
 function CardBack({ verifyUrl, memberName }: { verifyUrl: string; memberName: string }) {
-  const { siteContent } = useContent();
-  const email = siteContent.contactEmail?.trim() || SITE_EMAIL;
+  /* Card-only address (owner, 2026-11-12): the on-domain info@, not
+     the site contact-email setting - the card stays on-brand next
+     to bcbhsalumni.org. */
+  const email = SITE_CARD_EMAIL;
   return (
     <CardShell>
       <div className="relative h-full w-full">
