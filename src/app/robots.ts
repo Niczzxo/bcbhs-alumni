@@ -19,6 +19,6 @@ export default function robots(): MetadataRoute.Robots {
         "/super-admin",
       ],
     },
-    sitemap: "https://bcbhsalumni.org/sitemap.xml",
+    sitemap: "https://www.bcbhsalumni.org/sitemap.xml",
   };
 }

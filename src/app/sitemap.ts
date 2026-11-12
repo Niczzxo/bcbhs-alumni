@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 
-const BASE = "https://bcbhsalumni.org";
+/* Canonical host is www (owner, 2026-11-12): the apex 308-redirects
+   to www, so the sitemap must list the final URLs or Google reports
+   "Page with redirect" for every entry. */
+const BASE = "https://www.bcbhsalumni.org";
 
 // Public, guest-visible pages only. Member-only and staff pages are
 // excluded (and disallowed in robots.txt) so search engines never

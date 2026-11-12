@@ -27,7 +27,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://bcbhsalumni.org"),
+  /* Canonical host is www (owner, 2026-11-12): the apex 308-redirects
+     to www, so sitemap + canonical + OG + JSON-LD must list the final
+     www URLs - apex entries made Google report "Page with redirect"
+     and skip those URLs from the index. */
+  metadataBase: new URL("https://www.bcbhsalumni.org"),
   title: {
     default: "BCBHS Alumni | Bogura Cantonment Board High School",
     template: "%s | BCBHS Alumni",
@@ -67,7 +71,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "BCBHS Alumni",
     locale: "en_US",
-    url: "https://bcbhsalumni.org",
+    url: "https://www.bcbhsalumni.org",
     title: "BCBHS Alumni | Bogura Cantonment Board High School",
     description:
       "The official alumni portal of Bogura Cantonment Board High School, Bogura. Find alumni by batch, get your digital ID card, join events, blood donors, jobs, mentorship and the scholarship fund.",
@@ -98,8 +102,8 @@ const orgJsonLd = {
   "@type": "Organization",
   name: "BCBHS Alumni",
   alternateName: "Bogura Cantonment Board High School Alumni",
-  url: "https://bcbhsalumni.org",
-  logo: "https://bcbhsalumni.org/images/logo.jpg",
+  url: "https://www.bcbhsalumni.org",
+  logo: "https://www.bcbhsalumni.org/images/logo.jpg",
   description:
     "The official alumni portal of Bogura Cantonment Board High School, Bogura — connecting alumni across batches with a searchable directory, digital ID cards, events, blood donors, jobs, mentorship and a scholarship fund.",
   email: "bcbhs.alumni2023@gmail.com",
