@@ -69,7 +69,14 @@ export default function SuperAdminPage() {
     const batchOk = !memberBatch || m.batch === memberBatch;
     return nameOk && batchOk;
   }), [approved, memberQuery, memberBatch]);
-  const pending = useMemo(() => members.filter((m) => m.status === "pending"), [members]);
+  /* Unverified registrations stay out of the queue (owner, 2026-11-13):
+     the member has not clicked the inbox link yet, so there is nothing
+     to approve. Members from before verification have no flag and
+     still show. */
+  const pending = useMemo(
+    () => members.filter((m) => m.status === "pending" && m.emailVerified !== false),
+    [members],
+  );
   const banned = useMemo(() => members.filter((m) => m.status === "banned"), [members]);
   const staff = useMemo(
     () => members.filter((m) => (m.status === "approved" || m.status === "banned") && m.role !== "member").sort(byMemberId),

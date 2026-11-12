@@ -549,9 +549,14 @@ export default function OverviewPanel({
   }, [members]);
   const maxBatch = Math.max(1, ...batches.map((b) => b.count));
 
+  /* Latest members (owner, 2026-11-13): unverified registrations
+     stay out, the same as the approval queue - the registration is
+     not complete until the member clicks the inbox link. Members
+     from before verification have no flag and still show. */
   const latest = useMemo(
     () =>
       [...members]
+        .filter((m) => m.emailVerified !== false)
         .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
         .slice(0, 5),
     [members],

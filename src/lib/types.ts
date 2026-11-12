@@ -56,6 +56,14 @@ export interface UserProfile {
   position?: string; // e.g. "President", set ONLY by admins after manual verification
   dob?: string; // Date of birth, ISO YYYY-MM-DD, shown on the ID card
   status: MemberStatus;
+  /** True once the member clicked the email-verification link.
+      Absent on members who registered before verification existed
+      (owner, 2026-11-13) - they count as verified. False means the
+      registration is not complete yet and stays out of the admin
+      approval queue. Only the server may set this flag (see
+      /api/auth/sync-verification); no client rule allows writing it,
+      so a member cannot flip their own. */
+  emailVerified?: boolean;
   role: MemberRole;
   permissions: string[]; // granular permissions, granted per person by the super admin
   permissionsCustom?: boolean; // editors: true once the super admin has configured this editor's granted permissions

@@ -75,3 +75,29 @@ export async function deleteAuthUser(
   if (resp.status === 404 || text.includes("USER_NOT_FOUND")) return "not_found";
   return "error";
 }
+
+/** Look up a Firebase Auth user by uid (Identity Toolkit). Returns
+    the authoritative email-verified state, or null when the login
+    does not exist or the lookup fails. Used by the email-verification
+    sync: the flag in Firestore is only ever set from this answer,
+    never from a client's claim about itself. */
+export async function lookupAuthUser(
+  projectId: string,
+  token: string,
+  uid: string,
+): Promise<{ emailVerified: boolean } | null> {
+  const resp = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/projects/${projectId}/accounts:lookup`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ localId: [uid] }),
+    },
+  );
+  if (!resp.ok) return null;
+  const data = (await resp.json().catch(() => null)) as {
+    users?: { localId?: string; emailVerified?: boolean }[];
+  } | null;
+  const found = data?.users?.find((u) => u.localId === uid);
+  return found ? { emailVerified: found.emailVerified === true } : null;
+}

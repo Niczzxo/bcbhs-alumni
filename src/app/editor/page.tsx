@@ -23,7 +23,14 @@ export default function EditorPage() {
   /* Pending registrations for the Approvals sector (editors with the
      approve_members grant see them — the auth context fetches the
      full member list for grant-holding editors). */
-  const pending = useMemo(() => members.filter((m) => m.status === "pending"), [members]);
+  /* Unverified registrations stay out of the queue (owner, 2026-11-13):
+     the member has not clicked the inbox link yet, so there is nothing
+     to approve. Members from before verification have no flag and
+     still show. */
+  const pending = useMemo(
+    () => members.filter((m) => m.status === "pending" && m.emailVerified !== false),
+    [members],
+  );
   const approved = useMemo(() => members.filter((m) => m.status === "approved"), [members]);
   const banned = useMemo(() => members.filter((m) => m.status === "banned"), [members]);
   const batchReps = useMemo(() => members.filter((m) => m.status === "approved" && m.role === "admin"), [members]);

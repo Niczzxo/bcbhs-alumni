@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
 import type { MultiFactorResolver } from "firebase/auth";
 import type { AuthErrorField } from "@/lib/security";
+import VerifyEmailBox from "./VerifyEmailBox";
 import { inputCls, labelCls } from "./ui";
 
 /** inputCls with the border recoloured for a field-level error. */
@@ -33,6 +34,9 @@ export default function LoginForm({
      challenge instead of success or a password error. */
   const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
   const [mfaCode, setMfaCode] = useState("");
+  /* Email verification (owner, 2026-11-13): set when login finds a
+     pending account whose inbox is not verified yet. */
+  const [needsVerifyEmail, setNeedsVerifyEmail] = useState<string | null>(null);
 
   /** Editing the marked field clears its error. */
   function clearFieldError(field: AuthErrorField) {
@@ -51,7 +55,10 @@ export default function LoginForm({
     const res = await login(em, pw);
     setBusy(false);
     if (res.ok) onSuccess?.();
-    else if (res.mfaResolver) {
+    else if (res.needsVerification) {
+      setNeedsVerifyEmail(res.email ?? em);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (res.mfaResolver) {
       setMfaResolver(res.mfaResolver);
       setMfaCode("");
     } else {
@@ -93,6 +100,16 @@ export default function LoginForm({
     } else {
       setError(res.error ?? "Could not send the reset email.");
     }
+  }
+
+  if (needsVerifyEmail) {
+    return (
+      <VerifyEmailBox
+        email={needsVerifyEmail}
+        onVerified={() => onSuccess?.()}
+        onCancel={() => setNeedsVerifyEmail(null)}
+      />
+    );
   }
 
   return (

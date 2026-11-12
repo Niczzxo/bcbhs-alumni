@@ -34,7 +34,14 @@ export default function AdminPage() {
   const canBan = canApprove;
   const canSeeData = hasPermission("view_member_data");
 
-  const pending = useMemo(() => members.filter((m) => m.status === "pending"), [members]);
+  /* Unverified registrations stay out of the queue (owner, 2026-11-13):
+     the member has not clicked the inbox link yet, so there is nothing
+     to approve. Members from before verification have no flag and
+     still show. */
+  const pending = useMemo(
+    () => members.filter((m) => m.status === "pending" && m.emailVerified !== false),
+    [members],
+  );
   /* Alumni ID serial order (owner, 2026-11-11): same as /members. */
   const approved = useMemo(() => members.filter((m) => m.status === "approved").sort(byMemberId), [members]);
   const banned = useMemo(() => members.filter((m) => m.status === "banned"), [members]);

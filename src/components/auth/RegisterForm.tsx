@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { compressImageToDataURL } from "@/lib/image";
+import { isDisposableEmail } from "@/lib/disposable-email-domains";
 import { BLOOD_GROUPS, BD_DISTRICTS, DEPARTMENTS } from "@/lib/types";
 import { useBatchYears } from "@/lib/useBatchYears";
+import VerifyEmailBox from "./VerifyEmailBox";
 import { inputCls, labelCls } from "./ui";
 
 /** Shared registration form, used by the /register page and the auth modal. */
@@ -17,9 +19,15 @@ export default function RegisterForm({
   onSuccess?: (firstName: string) => void;
   onSwitchToLogin?: () => void;
 }) {
-  const { register, isDemo } = useAuth();
+  const { register, logout, isDemo } = useAuth();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  /* Email verification (owner, 2026-11-13): after submitting, the
+     member must click the link in their inbox before the registration
+     is complete. The form state is kept so the success screen still
+     knows their first name. */
+  const [step, setStep] = useState<"form" | "verify">("form");
+  const [verifyEmail, setVerifyEmail] = useState("");
   const [photoURL, setPhotoURL] = useState("");
   const [photoBusy, setPhotoBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -96,11 +104,38 @@ export default function RegisterForm({
       setError(`Please fill in: ${missing.join(", ")}.`);
       return;
     }
+    /* Disposable / temporary inboxes are refused outright (owner,
+       2026-11-13): a throwaway address can never become a member. */
+    if (isDisposableEmail(form.email.trim())) {
+      setError("Temporary or disposable email addresses can't be used. Please register with your real email address.");
+      return;
+    }
     setBusy(true);
     const res = await register({ ...form, photoURL: photoURL || undefined });
     setBusy(false);
-    if (res.ok) onSuccess?.(form.name.trim().split(" ")[0] || "friend");
+    if (res.ok && res.needsVerification) {
+      setVerifyEmail(res.email ?? form.email.trim().toLowerCase());
+      setStep("verify");
+      /* The form is long; bring the verify screen into view. */
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (res.ok) onSuccess?.(form.name.trim().split(" ")[0] || "friend");
     else setError(res.error ?? "Registration failed.");
+  }
+
+  if (step === "verify") {
+    return (
+      <VerifyEmailBox
+        email={verifyEmail}
+        onVerified={() => onSuccess?.(form.name.trim().split(" ")[0] || "friend")}
+        onCancel={async () => {
+          /* Start over with a different email: sign out of the
+             just-created account (it stays unverified and invisible
+             to admins) and show the form again. */
+          await logout();
+          setStep("form");
+        }}
+      />
+    );
   }
 
   return (

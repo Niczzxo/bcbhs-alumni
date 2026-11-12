@@ -23,6 +23,8 @@ import {
 import { isFirebaseConfigured, auth, db } from "./firebase";
 import type { MultiFactorError, MultiFactorResolver, TotpSecret } from "firebase/auth";
 import { logSecurityEvent, loginThrottle, authErrorInfo, type AuthErrorField } from "@/lib/security";
+import { isDisposableEmail } from "./disposable-email-domains";
+import { SITE_URL } from "./site";
 import { DEMO_USERS } from "./demo-data";
 import type { UserProfile } from "./types";
 import { withBatchRepDefaults } from "./types";
@@ -54,7 +56,7 @@ interface AuthContextValue {
   login: (
     email: string,
     password: string,
-  ) => Promise<{ ok: boolean; error?: string; field?: AuthErrorField; mfaResolver?: MultiFactorResolver }>;
+  ) => Promise<{ ok: boolean; error?: string; field?: AuthErrorField; mfaResolver?: MultiFactorResolver; needsVerification?: boolean; email?: string }>;
   /** Second login step for TOTP-enrolled accounts. */
   completeMfaLogin: (
     resolver: MultiFactorResolver,
@@ -76,7 +78,17 @@ interface AuthContextValue {
   disableTotp: () => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
-  register: (input: RegisterInput) => Promise<{ ok: boolean; error?: string }>;
+  /** The email of a signed-in account whose inbox is not verified yet.
+      Registration is not complete - and the profile never reaches the
+      admin approval queue - until this clears. */
+  pendingVerification: string | null;
+  /** Send (or re-send) the verification link to the signed-in account. */
+  resendVerificationEmail: () => Promise<{ ok: boolean; error?: string }>;
+  /** Re-check the inbox state after the member clicked the link:
+      reloads the Auth user, asks the server to confirm + flag the
+      profile, and signs the member in when it is verified. */
+  checkEmailVerification: () => Promise<{ ok: boolean; verified?: boolean; error?: string }>;
+  register: (input: RegisterInput) => Promise<{ ok: boolean; error?: string; needsVerification?: boolean; email?: string }>;
   approveMember: (id: string) => Promise<void>;
   rejectMember: (id: string) => Promise<void>;
   banMember: (id: string) => Promise<void>;
@@ -184,6 +196,28 @@ function settingsError(e: unknown): string {
   }
 }
 
+/** Ask the server to confirm the caller's inbox is verified and flag
+ *  the profile. The server reads the Auth record itself, so the
+ *  answer is trustworthy; the browser's own token claim is never
+ *  enough to flip the flag. Returns true only when the server
+ *  confirmed the verification and wrote the flag. */
+async function syncVerifiedFlag(): Promise<boolean> {
+  if (!isFirebaseConfigured || !auth?.currentUser) return false;
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const resp = await fetch("/api/auth/sync-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({}),
+    });
+    if (!resp.ok) return false;
+    const data = (await resp.json().catch(() => null)) as { verified?: boolean } | null;
+    return data?.verified === true;
+  } catch {
+    return false;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   /* Live mode starts EMPTY, seeding demo members here would flash
@@ -196,6 +230,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     membersRef.current = members;
   }, [members]);
   const [loading, setLoading] = useState(true);
+  /* Email verification (owner, 2026-11-13): the email of a signed-in
+     account whose inbox is not verified yet. Registration is not
+     complete - and the profile never reaches the admin queue - until
+     this clears. */
+  const [pendingVerification, setPendingVerification] = useState<string | null>(null);
   /* Skips the persist effect's first run per mount: the rehydrate effect
      above calls setMembers asynchronously, so persisting on the very first
      run would overwrite localStorage with the seed list before the stored
@@ -220,7 +259,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const uid = window.localStorage.getItem(DEMO_USER_KEY);
       if (uid) {
         const found = list.find((m) => m.id === uid);
-        if (found) setUser(found);
+        if (found && found.status === "pending" && found.emailVerified === false) {
+          /* Demo: an unverified registration restores to the verify
+             screen, not to a signed-in session. */
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time client hydration
+          setPendingVerification(found.email);
+        } else if (found) setUser(found);
       }
     } catch {
       /* corrupted storage, fall back to seed data */
@@ -316,7 +360,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 () => undefined,
               );
             }
-            if (own) setUser(own);
+            /* Email verification (owner, 2026-11-13): a pending member
+               whose inbox is not verified yet is not a member yet -
+               no signed-in session, no approval queue. A member who
+               clicked the link since the last visit is synced here
+               (server-confirmed) so they land straight in. */
+            if (own && own.status === "pending" && own.emailVerified === false) {
+              let verifiedNow = false;
+              try {
+                await fbUser.reload();
+                if (fbUser.emailVerified) verifiedNow = await syncVerifiedFlag();
+              } catch {
+                /* verification check failed: stay unverified */
+              }
+              if (verifiedNow) {
+                own = { ...own, emailVerified: true };
+                setUser(own);
+                setPendingVerification(null);
+              } else {
+                setPendingVerification(fbUser.email ?? own.email);
+              }
+            } else {
+              if (own) setUser(own);
+              setPendingVerification(null);
+            }
             setLoading(false);
             /* Role-aware list fetch. Firestore denies a query whose
              * results it cannot prove readable: the full collection is
@@ -382,7 +449,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (
       email: string,
       _password: string,
-    ): Promise<{ ok: boolean; error?: string; field?: AuthErrorField; mfaResolver?: MultiFactorResolver }> => {
+    ): Promise<{ ok: boolean; error?: string; field?: AuthErrorField; mfaResolver?: MultiFactorResolver; needsVerification?: boolean; email?: string }> => {
       const clean = email.trim().toLowerCase();
       if (!isFirebaseConfigured || !auth || !db) {
         /* Demo mode: match by email; any password is accepted. */
@@ -393,7 +460,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         if (found.status === "rejected")
           return { ok: false, error: "This registration was rejected. Please contact the admin." };
+        if (found.status === "pending" && found.emailVerified === false) {
+          /* Demo: the inbox is not verified yet - back to the verify
+             screen instead of signing in. */
+          setPendingVerification(found.email);
+          return { ok: false, needsVerification: true, email: clean };
+        }
         setUser(found);
+        setPendingVerification(null);
         try {
           window.localStorage.setItem(DEMO_USER_KEY, found.id);
         } catch {
@@ -450,7 +524,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profile = { id: snap.id, ...(snap.data() as Omit<UserProfile, "id">) };
         if (profile.status === "rejected")
           return { ok: false, error: "This registration was rejected. Please contact the admin." };
+        if (profile.status === "pending" && profile.emailVerified === false) {
+          /* Signed in, but the inbox is not verified yet: give the
+             member one chance to sync (they may have clicked the
+             link since registering), otherwise send them to the
+             verify screen instead of signing them in. */
+          let verifiedNow = false;
+          try {
+            await cred.user.reload();
+            if (cred.user.emailVerified) verifiedNow = await syncVerifiedFlag();
+          } catch {
+            /* verification check failed: stay unverified */
+          }
+          if (verifiedNow) {
+            const verifiedProfile = { ...profile, emailVerified: true };
+            setUser(verifiedProfile);
+            setPendingVerification(null);
+            void logSecurityEvent("login_success", {});
+            return { ok: true };
+          }
+          setPendingVerification(clean);
+          return { ok: false, needsVerification: true, email: clean };
+        }
         setUser(profile);
+        setPendingVerification(null);
         void logSecurityEvent("login_success", {});
         return { ok: true };
       } catch {
@@ -582,6 +679,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     void logSecurityEvent("logout", {});
+    setPendingVerification(null);
     if (isFirebaseConfigured && auth) {
       const { signOut } = await import("firebase/auth");
       await signOut(auth).catch(() => undefined);
@@ -595,8 +693,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(
-    async (input: RegisterInput): Promise<{ ok: boolean; error?: string }> => {
+    async (input: RegisterInput): Promise<{ ok: boolean; error?: string; needsVerification?: boolean; email?: string }> => {
       const clean = input.email.trim().toLowerCase();
+      /* Disposable / temporary inboxes are refused outright (owner,
+         2026-11-13): a throwaway address can never become a member. */
+      if (isDisposableEmail(clean))
+        return {
+          ok: false,
+          error: "Temporary or disposable email addresses can't be used. Please register with your real email address.",
+        };
       if (members.some((m) => m.email.toLowerCase() === clean))
         return { ok: false, error: "This email is already registered." };
 
@@ -622,17 +727,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           status: "pending",
           role: "member",
           permissions: [],
+          emailVerified: false,
           createdAt: new Date().toISOString(),
         };
         setMembers((prev) => [...prev, profile]);
-        return { ok: true };
+        setPendingVerification(clean);
+        return { ok: true, needsVerification: true, email: clean };
       }
 
       try {
-        const { createUserWithEmailAndPassword } = await import("firebase/auth");
+        const { createUserWithEmailAndPassword, sendEmailVerification } = await import("firebase/auth");
         const { doc, setDoc } = await import("firebase/firestore");
         // NOTE: in live mode the password comes from the registration form.
         const cred = await createUserWithEmailAndPassword(auth, clean, input.password ?? "");
+        /* Verification first (owner, 2026-11-13): the link proves the
+           inbox is real and theirs. The profile is created pending
+           but stays invisible to admins (emailVerified: false) until
+           the member clicks it; the flag itself can only be set by
+           the server (see /api/auth/sync-verification). A failed
+           send is not fatal - the verify screen can re-send. */
+        await sendEmailVerification(cred.user, { url: `${SITE_URL}/login?verified=1` }).catch(
+          () => undefined,
+        );
         await setDoc(doc(db, "users", cred.user.uid), {
           name: input.name.trim(),
           batch: input.batch,
@@ -653,6 +769,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: "member",
           permissions: [],
           memberId: null,
+          emailVerified: false,
           createdAt: new Date().toISOString(),
         });
         /* Phone numbers live in the private store, never in the public profile. */
@@ -660,13 +777,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (phone) {
           await setDoc(doc(db, "users_private", cred.user.uid), { phone });
         }
-        return { ok: true };
+        setPendingVerification(clean);
+        return { ok: true, needsVerification: true, email: clean };
       } catch (e) {
-        return { ok: false, error: e instanceof Error ? e.message : "Registration failed." };
+        const code = (e as { code?: string })?.code ?? "";
+        if (code === "auth/email-already-in-use")
+          return {
+            ok: false,
+            error: "This email is already registered. If you started a registration, check your inbox for the verification link, or log in to continue.",
+          };
+        return { ok: false, error: authErrorInfo(e).message };
       }
     },
     [members],
   );
+
+  /* Re-send the verification link to the signed-in account. The
+     button itself enforces a 60-second cooldown; Firebase throttles
+     server-side as well. In demo mode there is no inbox, the mail is
+     simulated - the verify screen's "I've verified" step completes it. */
+  const resendVerificationEmail = useCallback(async (): Promise<{ ok: boolean; error?: string }> => {
+    if (!isFirebaseConfigured || !auth?.currentUser) return { ok: true };
+    try {
+      const { sendEmailVerification } = await import("firebase/auth");
+      await sendEmailVerification(auth.currentUser, { url: `${SITE_URL}/login?verified=1` });
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Could not send the verification email. Please try again." };
+    }
+  }, []);
+
+  /* Re-check the inbox state after the member clicked the link.
+     Live: reload the Auth user, then ask the server to confirm +
+     flag the profile; only a server-confirmed verification signs
+     the member in. Demo: verification is simulated, the profile
+     flips verified immediately. */
+  const checkEmailVerification = useCallback(async (): Promise<{
+    ok: boolean;
+    verified?: boolean;
+    error?: string;
+  }> => {
+    if (!isFirebaseConfigured || !auth || !db) {
+      const email = pendingVerification;
+      if (!email) return { ok: false, error: "No registration to verify." };
+      const target = membersRef.current.find((m) => m.email.toLowerCase() === email.toLowerCase());
+      if (!target) return { ok: false, error: "No registration to verify." };
+      const verifiedProfile = { ...target, emailVerified: true };
+      setMembers((prev) => prev.map((m) => (m.id === target.id ? verifiedProfile : m)));
+      setUser(verifiedProfile);
+      setPendingVerification(null);
+      try {
+        window.localStorage.setItem(DEMO_USER_KEY, target.id);
+      } catch {
+        /* session persistence unavailable, in-memory only */
+      }
+      return { ok: true, verified: true };
+    }
+    const current = auth.currentUser;
+    if (!current) return { ok: false, error: "Session expired. Please log in again." };
+    try {
+      await current.reload();
+    } catch {
+      return { ok: false, error: "Could not check right now. Please try again." };
+    }
+    if (!current.emailVerified) return { ok: true, verified: false };
+    const confirmed = await syncVerifiedFlag();
+    if (!confirmed)
+      return { ok: false, error: "Could not confirm verification right now. Please try again." };
+    const own = membersRef.current.find((m) => m.id === current.uid);
+    if (own) {
+      const verifiedProfile = { ...own, emailVerified: true };
+      setMembers((prev) => prev.map((m) => (m.id === own.id ? verifiedProfile : m)));
+      setUser(verifiedProfile);
+    }
+    setPendingVerification(null);
+    return { ok: true, verified: true };
+  }, [pendingVerification]);
 
   /* Admin mutations update local state FIRST in both modes, then write
    * to Firestore in live mode. The member list is loaded once per login
@@ -677,6 +863,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const approveMember = useCallback(
     async (id: string) => {
       const target = members.find((m) => m.id === id);
+      /* Unverified registrations never reach approval (owner,
+         2026-11-13): the queue hides them, and a stale screen
+         cannot approve one either. */
+      if (target && target.emailVerified === false) return;
       /* Fresh number (owner, 2026-11-11): the list on screen can be
          stale - cache-first paint, or another approver just issued a
          number from their own phone - so re-read the collection from
@@ -1084,6 +1274,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       disableTotp,
       logout,
       resetPassword,
+      pendingVerification,
+      resendVerificationEmail,
+      checkEmailVerification,
       register,
       approveMember,
       rejectMember,
@@ -1101,7 +1294,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: !!user && (user.role === "admin" || user.role === "editor" || user.role === "super_admin"),
       isSuperAdmin: !!user && user.role === "super_admin",
     }),
-    [user, members, loading, login, completeMfaLogin, getTotpEnrolled, beginTotpEnrollment, confirmTotpEnrollment, disableTotp, logout, resetPassword, register, approveMember, rejectMember, banMember, unbanMember, deleteMember, setPermissions, setRole, setPosition, updateProfile, updatePhone, changeEmail, changePassword, hasPermission],
+    [user, members, loading, login, completeMfaLogin, getTotpEnrolled, beginTotpEnrollment, confirmTotpEnrollment, disableTotp, logout, resetPassword, pendingVerification, resendVerificationEmail, checkEmailVerification, register, approveMember, rejectMember, banMember, unbanMember, deleteMember, setPermissions, setRole, setPosition, updateProfile, updatePhone, changeEmail, changePassword, hasPermission],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
